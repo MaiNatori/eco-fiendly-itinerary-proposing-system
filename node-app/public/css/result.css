@@ -1,0 +1,223 @@
+@charset "UTF-8";
+
+body {
+    background-color:#fbf9f0;
+    width: 1250px;
+    margin: 0 0 0 0;
+}
+
+h1 {
+    color: #575757;
+    font-size: 40px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h2 {
+    color: #575757;
+    font-size: 30px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h3 {
+    color: #575757;
+    font-size: 20px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    text-decoration: underline;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+p {
+    color: #575757;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+
+/* ヘッダー */
+
+header {
+    text-align: center;
+    background-color: #fdbf64;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+nav li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 30px;
+}
+
+main {
+    margin: 0 auto 6% 150px;
+    max-width: 960px;
+}
+
+/* ルート結果表示 */
+
+.route-tab {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10px;
+    width: 980px;
+}
+
+.route-tab > label {
+    order: -1;
+    opacity: 0.5;
+    width: 100px;
+    padding: .6em 1em;
+    border-radius: 5px 5px 0 0;
+    background-color: #fdbf64;
+    color: #fbf9f0;
+    font-size: 0.9em;
+    text-align: center;
+    cursor: pointer;
+}
+
+.route-tab > label:hover {
+    opacity: 0.8;
+}
+
+.route-tab > label input {
+    display: none;
+}
+
+.route-tab > div {
+    display: none;
+    width: 100%;
+    padding: 1.5em 1em;
+    background-color: #fdbf64;
+}
+
+.route-tab label:has(:checked) {
+    opacity: 1;
+}
+
+.route-tab label:has(:checked) + div {
+    display: block;
+}
+
+.tab-contents {
+    height: 580px;
+}
+
+.route-map {
+    background-color: #fbf9f0;
+    width: 600px;
+    height: 565px;
+    padding: 10px 10px 5px 10px;
+}
+
+.search-option {
+    position: absolute;
+    background-color: #fbf9f0;
+    width: 300px;
+    height: 320px;
+    top: 330px;
+    left: 800px;
+    padding-left: 10px;
+    padding-top: 10px;
+}
+
+.search-option h3 {
+    margin-bottom: 5px;
+}
+
+.search-option table {
+    border-spacing: 10px 5px;
+}
+
+.search-option th {
+    vertical-align: top;
+}
+
+.search-option td {
+    display: flex;
+}
+
+.search-option td input {
+    width: 200px;
+}
+
+.search-option .button {
+    position: relative;
+    top: 5px;
+    left: 210px;
+}
+
+.transportation {
+    position: absolute;
+    background-color: #fbf9f0;
+    width: 310px;
+    height: 240px;
+    top: 670px;
+    left: 800px;
+}
+
+.transportation h3 {
+    margin-bottom: 5px;
+}
+
+.transportation .public{
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 5px;
+    gap: 0 10px;
+    margin-right: 2px;
+    margin-left: 2px;
+    padding-left: 5px;
+}
+
+.transportation p {
+    margin: 0 0 0 0;
+}
+
+.transportation .walk {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 7px;
+    margin-top: 5px;
+}
+
+.transportation .rental .cycle {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 7px;
+    margin-top: 5px;
+}
+
+.transportation .rental .car {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 7px;
+    margin-top: 5px;
+}
+
+.transportation dd {
+    margin-left: 10px;
+}
+
+.transportation dd input {
+    width: 150px;
+}
+
+.transportation .button {
+    position: relative;
+    top: 5px;
+    left: 220px;
+}
+
+/* フッター */
+
+footer {
+    clear: both;
+    background-color: #fdbf64;
+    height: 30px;
+    text-align: center;
+    padding-bottom: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 1250px;
+}

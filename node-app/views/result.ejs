@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>環境に優しい観光ルート作成</title>
+        <link rel="stylesheet" href="public/css/result.css">
+    </head>
+
+    <body>
+    <header>
+        <div class="logo">
+            <h1>ロゴ</h1>
+            <nav>
+                <ul>
+                    <li><a href="destination.html">旅行先の選択</a></li>
+                    <li><a href="spot.html">行きたい場所の選択</a></li>
+                    <li><a href="hotel.html">宿泊場所の選択</a></li>
+                    <li><a href="place.html">出発場所・到着場所の入力</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>ルート結果</h2>
+        <div class="route-tab">
+            <label>
+                <input type="radio" name="route-tab" checked>
+                1日目
+            </label>
+            <div class="tab-contents">
+                <div class="route-map">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1706.2568118046481!2d138.7846435489732!3d35.02443730959961!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6019892443552dfb%3A0x928027c754f7bf7a!2z44Gv44GU44KN44KC44Oe44Oq44Oz44K144O844OT44K5IOWkp-eArOW0jg!5e0!3m2!1sja!2sjp!4v1696555273912!5m2!1sja!2sjp" width="600" height="560" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="search-option">
+                    <h3>検索条件</h3>
+                        <table>
+                            <tr>
+                                <th><label for="departure">出発地</label></th>
+                                <td><input  type="search" method="get" placeholder="出発地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="arrival">到着地</label></th>
+                                <td><input  type="search" method="get" placeholder="到着地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="spot">スポット</label></th>
+                                <td><input  type="search" method="get" placeholder="スポット①"></td>
+                                <td><input  type="search" method="get" placeholder="スポット②"></td>
+                                <td><input  type="search" method="get" placeholder="スポット③"></td>
+                                <td><input  type="search" method="get" placeholder="スポット④"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑤"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑥"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="hotel">宿泊場所</label></th>
+                                <td><input  type="search" method="get" placeholder="宿泊場所"></td>
+                            </tr>
+                        </table>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+                <div class="transportation">
+                    <h3>移動手段</h3>
+                        <div class="public">
+                            <p><input type="checkbox" name="public" value="電車" id="train">
+                            <label for="train">電車</label></p>
+                            <p><input type="checkbox" name="public" value="特急電車" id="express-train">
+                            <label for="express-train">特急電車</label></p>
+                            <p><input type="checkbox" name="public" value="新幹線" id="bullet-train">
+                            <label for="bullet-train">新幹線</label></p>
+                            <p><input type="checkbox" name="public" value="バス" id="bus">
+                            <label for="bus">バス</label></p>
+                            <p><input type="checkbox" name="public" value="高速バス" id="express-bus">
+                            <label for="express-bus">高速バス</label></p>
+                            <p><input type="checkbox" name="public" value="船" id="ship">
+                            <label for="ship">船</label></p>
+                            <p><input type="checkbox" name="public" value="飛行機" id="airplane">
+                            <label for="airplane">飛行機</label></p>
+                            <p><input type="checkbox" name="public" value="自家用車" id="private-car">
+                            <label for="private-car">自家用車</label></p>
+                        </div>
+                        <div class="walk">
+                            <dt>
+                                <label for="walk">
+                                    <p><input type="checkbox" name="walk" value="徒歩" id="walk">徒歩</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <p>
+                                <select name="minutes" id="minutes">
+                                    <option selected value="0">0</option>
+                                    <option value ="5">5</option>
+                                    <option value ="10">10</option>
+                                    <option value ="15">15</option>
+                                    <option value ="20">20</option>
+                                    <option value ="25">25</option>
+                                    <option value ="30">30</option>
+                                    <option value ="35">35</option>
+                                    <option value ="40">40</option>
+                                    <option value ="45">45</option>
+                                    <option value ="50">50</option>
+                                    <option value ="55">55</option>
+                                    <option value ="60">60~</option>
+                                </select>
+                                分間まで可能</p>
+                            </dd>
+                        </div>
+                        <div class="rental">
+                            <div class="cycle">
+                                <dt>
+                                    <label for="cycle">
+                                        <p><input type="checkbox" name="cycle" value="レンタサイクル" id="cycle">レンタサイクル</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタサイクル">
+                                </dd>
+                            </div>
+                            <div class="car">
+                                <dt>
+                                    <label for="car">
+                                        <p><input type="checkbox" name="car" value="レンタカー" id="car">レンタカー</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタカー">
+                                </dd>
+                            </div>
+                        </div>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+            </div>
+        
+            <label>
+                <input type="radio" name="route-tab">
+                2日目
+            </label>
+            <div class="tab-contents">
+                <div class="route-map">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d104873.35087915132!2d138.67976189892784!3d34.773418253304534!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6019f8594af4ce49%3A0x63666fa74c822090!2z44OA44Kk44OT44Oz44Kw44K144O844OT44K544Gv44G-44KG!5e0!3m2!1sja!2sjp!4v1696555365672!5m2!1sja!2sjp" width="600" height="560" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="search-option">
+                    <h3>検索条件</h3>
+                        <table>
+                            <tr>
+                                <th><label for="departure">出発地</label></th>
+                                <td><input  type="search" method="get" placeholder="出発地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="arrival">到着地</label></th>
+                                <td><input  type="search" method="get" placeholder="到着地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="spot">スポット</label></th>
+                                <td><input  type="search" method="get" placeholder="スポット①"></td>
+                                <td><input  type="search" method="get" placeholder="スポット②"></td>
+                                <td><input  type="search" method="get" placeholder="スポット③"></td>
+                                <td><input  type="search" method="get" placeholder="スポット④"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑤"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑥"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="hotel">宿泊場所</label></th>
+                                <td><input  type="search" method="get" placeholder="宿泊場所"></td>
+                            </tr>
+                        </table>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+                <div class="transportation">
+                    <h3>移動手段</h3>
+                        <div class="public">
+                            <p><input type="checkbox" name="public" value="電車" id="train">
+                            <label for="train">電車</label></p>
+                            <p><input type="checkbox" name="public" value="特急電車" id="express-train">
+                            <label for="express-train">特急電車</label></p>
+                            <p><input type="checkbox" name="public" value="新幹線" id="bullet-train">
+                            <label for="bullet-train">新幹線</label></p>
+                            <p><input type="checkbox" name="public" value="バス" id="bus">
+                            <label for="bus">バス</label></p>
+                            <p><input type="checkbox" name="public" value="高速バス" id="express-bus">
+                            <label for="express-bus">高速バス</label></p>
+                            <p><input type="checkbox" name="public" value="船" id="ship">
+                            <label for="ship">船</label></p>
+                            <p><input type="checkbox" name="public" value="飛行機" id="airplane">
+                            <label for="airplane">飛行機</label></p>
+                            <p><input type="checkbox" name="public" value="自家用車" id="private-car">
+                            <label for="private-car">自家用車</label></p>
+                        </div>
+                        <div class="walk">
+                            <dt>
+                                <label for="walk">
+                                    <p><input type="checkbox" name="walk" value="徒歩" id="walk">徒歩</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <p>
+                                <select name="minutes" id="minutes">
+                                    <option selected value="0">0</option>
+                                    <option value ="5">5</option>
+                                    <option value ="10">10</option>
+                                    <option value ="15">15</option>
+                                    <option value ="20">20</option>
+                                    <option value ="25">25</option>
+                                    <option value ="30">30</option>
+                                    <option value ="35">35</option>
+                                    <option value ="40">40</option>
+                                    <option value ="45">45</option>
+                                    <option value ="50">50</option>
+                                    <option value ="55">55</option>
+                                    <option value ="60">60~</option>
+                                </select>
+                                分間まで可能</p>
+                            </dd>
+                        </div>
+                        <div class="rental">
+                            <div class="cycle">
+                                <dt>
+                                    <label for="cycle">
+                                        <p><input type="checkbox" name="cycle" value="レンタサイクル" id="cycle">レンタサイクル</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタサイクル">
+                                </dd>
+                            </div>
+                            <div class="car">
+                                <dt>
+                                    <label for="car">
+                                        <p><input type="checkbox" name="car" value="レンタカー" id="car">レンタカー</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタカー">
+                                </dd>
+                            </div>
+                        </div>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+            </div>
+        
+            <label>
+                <input type="radio" name="route-tab">
+                3日目
+            </label>
+            <div class="tab-contents">
+                <div class="route-map">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3276.1916189568583!2d138.75471492695314!3d34.801120699999984!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6019f6557b0328bf%3A0xad4620ce958084a5!2z55Sw5a2Q44OA44Kk44OT44Oz44Kw44K744Oz44K_44O8!5e0!3m2!1sja!2sjp!4v1696555447903!5m2!1sja!2sjp" width="600" height="560" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="search-option">
+                    <h3>検索条件</h3>
+                        <table>
+                            <tr>
+                                <th><label for="departure">出発地</label></th>
+                                <td><input  type="search" method="get" placeholder="出発地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="arrival">到着地</label></th>
+                                <td><input  type="search" method="get" placeholder="到着地"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="spot">スポット</label></th>
+                                <td><input  type="search" method="get" placeholder="スポット①"></td>
+                                <td><input  type="search" method="get" placeholder="スポット②"></td>
+                                <td><input  type="search" method="get" placeholder="スポット③"></td>
+                                <td><input  type="search" method="get" placeholder="スポット④"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑤"></td>
+                                <td><input  type="search" method="get" placeholder="スポット⑥"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="hotel">宿泊場所</label></th>
+                                <td><input  type="search" method="get" placeholder="宿泊場所"></td>
+                            </tr>
+                        </table>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+                <div class="transportation">
+                    <h3>移動手段</h3>
+                        <div class="public">
+                            <p><input type="checkbox" name="public" value="電車" id="train">
+                            <label for="train">電車</label></p>
+                            <p><input type="checkbox" name="public" value="特急電車" id="express-train">
+                            <label for="express-train">特急電車</label></p>
+                            <p><input type="checkbox" name="public" value="新幹線" id="bullet-train">
+                            <label for="bullet-train">新幹線</label></p>
+                            <p><input type="checkbox" name="public" value="バス" id="bus">
+                            <label for="bus">バス</label></p>
+                            <p><input type="checkbox" name="public" value="高速バス" id="express-bus">
+                            <label for="express-bus">高速バス</label></p>
+                            <p><input type="checkbox" name="public" value="船" id="ship">
+                            <label for="ship">船</label></p>
+                            <p><input type="checkbox" name="public" value="飛行機" id="airplane">
+                            <label for="airplane">飛行機</label></p>
+                            <p><input type="checkbox" name="public" value="自家用車" id="private-car">
+                            <label for="private-car">自家用車</label></p>
+                        </div>
+                        <div class="walk">
+                            <dt>
+                                <label for="walk">
+                                    <p><input type="checkbox" name="walk" value="徒歩" id="walk">徒歩</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <p>
+                                <select name="minutes" id="minutes">
+                                    <option selected value="0">0</option>
+                                    <option value ="5">5</option>
+                                    <option value ="10">10</option>
+                                    <option value ="15">15</option>
+                                    <option value ="20">20</option>
+                                    <option value ="25">25</option>
+                                    <option value ="30">30</option>
+                                    <option value ="35">35</option>
+                                    <option value ="40">40</option>
+                                    <option value ="45">45</option>
+                                    <option value ="50">50</option>
+                                    <option value ="55">55</option>
+                                    <option value ="60">60~</option>
+                                </select>
+                                分間まで可能</p>
+                            </dd>
+                        </div>
+                        <div class="rental">
+                            <div class="cycle">
+                                <dt>
+                                    <label for="cycle">
+                                        <p><input type="checkbox" name="cycle" value="レンタサイクル" id="cycle">レンタサイクル</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタサイクル">
+                                </dd>
+                            </div>
+                            <div class="car">
+                                <dt>
+                                    <label for="car">
+                                        <p><input type="checkbox" name="car" value="レンタカー" id="car">レンタカー</p>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input  type="search" method="get" placeholder="レンタカー">
+                                </dd>
+                            </div>
+                        </div>
+                    <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright 2023 Mai</p>
+    </footer>
+    
+    <script src="public/js/result.js"></script>
+        
+    </body>
+</html>

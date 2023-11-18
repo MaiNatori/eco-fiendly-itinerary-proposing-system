@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>環境に優しい観光ルート作成</title>
+        <link rel="stylesheet" href="public/css/hotel.css">
+    </head>
+
+    <body>
+    <header>
+        <div class="logo">
+            <h1>ロゴ</h1>
+            <nav>
+                <ul>
+                    <li><a href="destination.html">旅行先の選択</a></li>
+                    <li><a href="spot.html">行きたい場所の選択</a></li>
+                    <li><a href="hotel.html">宿泊場所の選択</a></li>
+                    <li><a href="place.html">出発場所・到着場所の入力</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>③宿泊先の選択</h2>
+        <div class="input-area">
+            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='place.html'" class="button">
+        </div>
+        <div class="search-option">
+            <div class="filter">
+                <summary>絞り込み条件</summary>
+                    <dl>
+                        <div class="budget-select">
+                            <dt>
+                                <label for="budget">
+                                    <p><input type="checkbox" name="budget" value="予算" id="budget">1泊あたりの予算</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <select name="range-min" id="range-min">
+                                    <option value="0">下限なし</option>
+                                    <option value="1000">1,000円</option>
+                                    <option value="2000">2,000円</option>
+                                    <option value="3000">3,000円</option>
+                                    <option value="4000">4,000円</option>
+                                    <option value="5000">5,000円</option>
+                                    <option value="6000">6,000円</option>
+                                    <option value="7000">7,000円</option>
+                                    <option value="8000">8,000円</option>
+                                    <option value="9000">9,000円</option>
+                                    <option value="10000">10,000円</option>
+                                    <option value="12000">12,000円</option>
+                                    <option value="14000">14,000円</option>
+                                    <option value="16000">16,000円</option>
+                                    <option value="18000">18,000円</option>
+                                    <option value="20000">20,000円</option>
+                                    <option value="30000">30,000円</option>
+                                    <option value="40000">40,000円</option>
+                                    <option value="50000">50,000円</option>
+                                    <option value="100000">100,000円</option>
+                                    <option value="150000">150,000円</option>
+                                    <option value="200000">200,000円</option>
+                                </select>
+                                <p>～</p>
+                                <select name="range-max" id="range-max">
+                                    <option value="1000">1,000円</option>
+                                    <option value="2000">2,000円</option>
+                                    <option value="3000">3,000円</option>
+                                    <option value="4000">4,000円</option>
+                                    <option value="5000">5,000円</option>
+                                    <option value="6000">6,000円</option>
+                                    <option value="7000">7,000円</option>
+                                    <option value="8000">8,000円</option>
+                                    <option value="9000">9,000円</option>
+                                    <option value="10000">10,000円</option>
+                                    <option value="12000">12,000円</option>
+                                    <option value="14000">14,000円</option>
+                                    <option value="16000">16,000円</option>
+                                    <option value="18000">18,000円</option>
+                                    <option value="20000">20,000円</option>
+                                    <option value="30000">30,000円</option>
+                                    <option value="40000">40,000円</option>
+                                    <option value="50000">50,000円</option>
+                                    <option value="100000">100,000円</option>
+                                    <option value="150000">150,000円</option>
+                                    <option value="200000">200,000円</option>
+                                    <option value selected>上限なし</option>
+                                </select>
+                            </dd>
+                        </div>
+                        <div class="distance-select">
+                            <dt>
+                                <label for="distance">
+                                    <p><input type="checkbox" name="distance" value="駅からの距離" id="distance">駅からの距離</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <p>徒歩約
+                                <select name="minutes" id="minutes">
+                                    <option selected value="0">0</option>
+                                    <option value ="5">5</option>
+                                    <option value ="10">10</option>
+                                    <option value ="15">15</option>
+                                    <option value ="20">20</option>
+                                    <option value ="25">25</option>
+                                    <option value ="30">30</option>
+                                    <option value ="35">30～</option>
+                                </select>
+                                分</p>
+                            </dd>
+                        </div>
+                        <div class="facility-select">
+                            <dt>
+                                <label for="distance">
+                                    <p><input type="checkbox" name="facility-type" value="施設タイプ" id="facility-type">施設タイプ</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <p><input type="checkbox" name="facility" value="ホテル" id="hotel">
+                                <label for="hotel">ホテル</label></p>
+                                <p><input type="checkbox" name="facility" value="民宿" id="guest-house">
+                                <label for="guest-house">民宿</label></p>
+                                <p><input type="checkbox" name="facility" value="ペンション" id="pension">
+                                <label for="pension">ペンション</label></p>
+                                <p><input type="checkbox" name="facility" value="旅館" id="ryokan">
+                                <label for="ryokan">旅館</label></p>
+                                <p><input type="checkbox" name="facility" value="貸別荘" id="rental-villa">
+                                <label for="rental-villa">貸別荘</label></p>
+                            </dd>
+                        </div>
+                    </dl>
+            </div>
+
+            <div class="sorting">
+                <summary>並び替え条件</summary>
+                    <p><input type="checkbox" name="sorting" value="料金が安い順" id="cheap">
+                    <label for="cheap">料金が安い順</label></p>
+                    <p><input type="checkbox" name="sorting" value="料金が高い順" id="expensive">
+                    <label for="expensive">料金が高い順</label></p>
+                    <p><input type="checkbox" name="sorting" value="駅から近い順" id="near">
+                    <label for="near">駅から近い順</label></p>
+                    <p><input type="checkbox" name="sorting" value="人気順" id="popular">
+                    <label for="popular">人気順</label></p>
+            </div>
+
+            <input type="submit" method="post" name="application" value="適用" onclick="location.href='hotel.html'" class="button">
+
+        </div>
+
+        <div class="search-result">
+            <div class="option-result">
+                <p>絞り込み条件：</p>
+                <p>並び替え条件：</p>
+            </div>
+            <div class="search-candidate">
+                <div class="candidate-contents">
+                    <img src="images/example_hotel.jpg" alt="表示例">
+                    <h2>ホテル名</h2>
+                    <p>金額帯：○○円～<br>
+                    アクセス：○○駅から徒歩●分<br>
+                    HP：<a href="https://hotels.his-j.com/HotelDetail/LGK00005.aspx">https://hotels.his-j.com/HotelDetail/LGK00005.aspx</a></p>
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+                <div class="candidate-contents">
+
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright 2023 Mai</p>
+    </footer>
+    
+    <script src="public/js/hotel.js"></script>
+        
+    </body>
+</html>

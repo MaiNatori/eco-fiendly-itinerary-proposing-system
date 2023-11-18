@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>環境に優しい観光ルート作成</title>
+        <link rel="stylesheet" href="public/css/destination.css">
+    </head>
+
+    <body>
+    <header>
+        <div class="logo">
+        <h1>ロゴ</h1>
+        <nav>
+            <ul>
+                <li><a href="destination.html">旅行先の選択</a></li>
+                <li><a href="spot.html">行きたい場所の選択</a></li>
+                <li><a href="hotel.html">宿泊場所の選択</a></li>
+                <li><a href="place.html">出発場所・到着場所の入力</a></li>
+            </ul>
+        </nav>
+        </div>
+    </header>
+
+    <main>
+    <div class="main">
+        <div class="select-area">
+        <h2>①旅行先の選択</h2>
+        <div class="input-block">
+            <div class="select-block">
+            <table>
+                <tr>
+                    <th class="label"><label><h3>都道府県</h3></label></th>
+                    <td><select name="prefecture" id="prefecture-select">
+                        <option>選択してください</option>
+                    </select></td>
+                </tr>
+            </table>
+            </div>
+
+            <div class="select-block">
+            <table>
+                <tr>
+                    <th class="label"><label><h3>地名</h3></label></th>
+                    <td><select name="place" id="place-select" disabled>
+                        <option>選択してください</option>
+                    </select></td>
+                </tr>
+            </table>
+            </div>
+
+            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot.html'" class="button">
+    
+        </div>
+                
+        <div class="maps">
+        <h3>地図から選ぶ</h3>
+        
+        <img src="images/maps.png" alt="日本地図">
+
+        <details class="accordion-hokkaido">
+        <summary>北海道</summary>
+                <div class="layer js-modal">
+                        <div class="modal">
+                                <div class="modal_inner">
+                                        <div class="modal_button-wrap js-modal-button">
+                                                <button class="close-button js-close-button">
+                                                        <span></span>
+                                                        <span></span>
+                                                </button>
+                                        </div>
+                                        <div class="modal_contents">
+                                                <div class="modal_content">
+                                                        <p><input type="radio" name="hokkaido" value="札幌" id="sapporo">
+                                                        <label for="sapporo">札幌</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="稚内・留萌・利尻・礼文" id="wakkanai">
+                                                        <label for="wakkanai">稚内・留萌・利尻・礼文</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="釧路・阿寒・川湯・根室" id="kushiro">
+                                                        <label for="kushiro">釧路・阿寒・川湯・根室</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="日高・えりも" id="hidaka">
+                                                        <label for="hidaka">日高・えりも</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="旭川・層雲峡・旭岳" id="asahikawa">
+                                                        <label for="asahikawa">旭川・層雲峡・旭岳</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="小樽・キロロ・積丹・余市" id="otaru">
+                                                        <label for="otaru">小樽・キロロ・積丹・余市</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="函館・湯の川・大沼・奥尻" id="hakodate">
+                                                        <label for="hakodate">函館・湯の川・大沼・奥尻</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="定山渓" id="jouzankei">
+                                                        <label for="jouzankei">定山渓</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="網走・紋別・北見・知床" id="abashiri">
+                                                        <label for="abashiri">網走・紋別・北見・知床</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="帯広・十勝" id="obihiro">
+                                                        <label for="obihiro">帯広・十勝</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="富良野・美瑛・トマム" id="hurano">
+                                                        <label for="hurano">富良野・美瑛・トマム</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="千歳・支笏・苫小牧・滝川・夕張・空知" id="chitose">
+                                                        <label for="chitose">千歳・支笏・苫小牧・滝川・夕張・空知</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="ルスツ・ニセコ・俱知安" id="rusutu">
+                                                        <label for="rusutu">ルスツ・ニセコ・俱知安</label></p>
+                                                        <p><input type="radio" name="hokkaido" value="洞爺・室蘭・登別" id="touya">
+                                                        <label for="touya">洞爺・室蘭・登別</label></p>
+                                                </div>
+                                        </div>
+                                </div>
+                        </div>
+                </div>     
+        </details>
+
+        <details class="accordion-tohoku">
+        <summary>東北</summary>
+            <details class="accordion-prefecture">
+            <summary>青森県</summary>
+                    <p><input type="radio" name="aomori" value="青森・浅虫温泉" id="asamushi">
+                    <label for="asamushi">青森・浅虫温泉</label></p>
+                    <p><input type="radio" name="aomori" value="白神山地・西津軽" id="shirakami">
+                    <label for="shirakami">白神山地・西津軽</label></p>
+                    <p><input type="radio" name="aomori" value="八甲田・十和田湖・奥入瀬" id="hakkouda">
+                    <label for="hakkouda">八甲田・十和田湖・奥入瀬</label></p>
+                    <p><input type="radio" name="aomori" value="下北・大間・むつ" id="shimokita">
+                    <label for="shimokita">下北・大間・むつ</label></p>
+                    <p><input type="radio" name="aomori" value="津軽半島・五所川原" id="tsugaru">
+                    <label for="tsugaru">津軽半島・五所川原</label></p>
+                    <p><input type="radio" name="aomori" value="弘前・黒石" id="hirosaki">
+                    <label for="hirosaki">弘前・黒石</label></p>
+                    <p><input type="radio" name="aomori" value="八戸・三沢・七戸十和田" id="hachinohe">
+                    <label for="hachinohe">八戸・三沢・七戸十和田</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>岩手県</summary>
+                    <p><input type="radio" name="iwate" value="盛岡" id="morioka">
+                    <label for="morioka">盛岡</label></p>
+                    <p><input type="radio" name="iwate" value="安比高原・八幡平・二戸" id="appikogen">
+                    <label for="appikogen">安比高原・八幡平・二戸</label></p>
+                    <p><input type="radio" name="iwate" value="釜石・大船渡・陸前高田" id="kamaishi">
+                    <label for="kamaishi">釜石・大船渡・陸前高田</label></p>
+                    <p><input type="radio" name="iwate" value="奥州・平泉・一関" id="oshu">
+                    <label for="oshu">奥州・平泉・一関</label></p>
+                    <p><input type="radio" name="iwate" value="雫石" id="shizukuishi">
+                    <label for="shizukuishi">雫石</label></p>
+                    <p><input type="radio" name="iwate" value="宮古・久慈・岩泉" id="miyako">
+                    <label for="miyako">宮古・久慈・岩泉</label></p>
+                    <p><input type="radio" name="iwate" value="北上・花巻・遠野" id="kitakami">
+                    <label for="kitakami">北上・花巻・遠野</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>宮城県</summary>
+                    <p><input type="radio" name="miyagi" value="仙台・多賀城・名取" id="sendai">
+                    <label for="sendai">仙台・多賀城・名取</label></p>
+                    <p><input type="radio" name="miyagi" value="鳴子・古川・くりこま高原" id="naruko">
+                    <label for="naruko">鳴子・古川・くりこま高原</label></p>
+                    <p><input type="radio" name="miyagi" value="白石・宮城蔵王" id="shiraishi">
+                    <label for="shiraishi">白石・宮城蔵王</label></p>
+                    <p><input type="radio" name="miyagi" value="秋保・作並" id="akiho">
+                    <label for="akiho">秋保・作並</label></p>
+                    <p><input type="radio" name="miyagi" value="松島・塩釜・石巻・南三陸・気仙沼" id="matsushima">
+                    <label for="matsushima">松島・塩釜・石巻・南三陸・気仙沼</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>秋田県</summary>
+                    <p><input type="radio" name="akita" value="秋田" id="akita">
+                    <label for="akita">秋田</label></p>
+                    <p><input type="radio" name="akita" value="能代・男鹿・白神" id="noshiro">
+                    <label for="noshiro">能代・男鹿・白神</label></p>
+                    <p><input type="radio" name="akita" value="大館・鹿角・十和田大湯・八幡平" id="odate">
+                    <label for="odate">大館・鹿角・十和田大湯・八幡平</label></p>
+                    <p><input type="radio" name="akita" value="角館・大曲・田沢湖" id="kakunodate">
+                    <label for="kakunodate">角館・大曲・田沢湖</label></p>
+                    <p><input type="radio" name="akita" value="湯沢・横手" id="yuzawa">
+                    <label for="yuzawa">湯沢・横手</label></p>
+                    <p><input type="radio" name="akita" value="由利本荘・鳥海山" id="yurihonjo">
+                    <label for="yurihonjo">由利本荘・鳥海山</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>山形県</summary>
+                    <p><input type="radio" name="yamagata" value="山形・蔵王・天童・上山" id="yamagata">
+                    <label for="yamagata">山形・蔵王・天童・上山</label></p>
+                    <p><input type="radio" name="yamagata" value="米沢・赤湯・高畠・長井" id="yonezawa">
+                    <label for="yonezawa">米沢・赤湯・高畠・長井</label></p>
+                    <p><input type="radio" name="yamagata" value="寒河江・月山" id="sagae">
+                    <label for="sagae">寒河江・月山</label></p>
+                    <p><input type="radio" name="yamagata" value="尾花沢・新庄・村山" id="obanazawa">
+                    <label for="obanazawa">尾花沢・新庄・村山</label></p>
+                    <p><input type="radio" name="yamagata" value="酒田・鶴岡・湯野浜・温海" id="sakata">
+                    <label for="sakata">酒田・鶴岡・湯野浜・温海</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>福島県</summary>
+                    <p><input type="radio" name="fukushima" value="福島・二本松" id="fukushima">
+                    <label for="fukushima">福島・二本松</label></p>
+                    <p><input type="radio" name="fukushima" value="会津若松・喜多方" id="aiduwakamatsu">
+                    <label for="aiduwakamatsu">会津若松・喜多方</label></p>
+                    <p><input type="radio" name="fukushima" value="猪苗代・表磐梯" id="inawashiro">
+                    <label for="inawashiro">猪苗代・表磐梯</label></p>
+                    <p><input type="radio" name="fukushima" value="磐梯高原・裏磐梯" id="bandaikougen">
+                    <label for="bandaikougen">磐梯高原・裏磐梯</label></p>
+                    <p><input type="radio" name="fukushima" value="郡山・磐梯熱海" id="koriyama">
+                    <label for="koriyama">郡山・磐梯熱海</label></p>
+                    <p><input type="radio" name="fukushima" value="南会津・下郷・只見・檜枝岐" id="minamiaidu">
+                    <label for="minamiaidu">南会津・下郷・只見・檜枝岐</label></p>
+                    <p><input type="radio" name="fukushima" value="白河・須賀川" id="hakuga">
+                    <label for="hakuga">白河・須賀川</label></p>
+                    <p><input type="radio" name="fukushima" value="いわき・南相馬・相馬" id="iwaki">
+                    <label for="iwaki">いわき・南相馬・相馬</label></p>
+            </details>
+        </details>
+
+        <details class="accordion-kanto">
+        <summary>関東</summary>
+            <details class="accordion-prefecture">
+            <summary>茨城県</summary>
+                    <p><input type="radio" name="ibaraki" value="水戸・笠間" id="mito">
+                    <label for="mito">水戸・笠間</label></p>
+                    <p><input type="radio" name="ibaraki" value="大洗・ひたちなか" id="oarai">
+                    <label for="oarai">大洗・ひたちなか</label></p>
+                    <p><input type="radio" name="ibaraki" value="日立・北茨城・奥久慈" id="hitachi">
+                    <label for="hitachi">日立・北茨城・奥久慈</label></p>
+                    <p><input type="radio" name="ibaraki" value="つくば・土浦・取手" id="tsukuba">
+                    <label for="tsukuba">つくば・土浦・取手</label></p>
+                    <p><input type="radio" name="ibaraki" value="古河・結城・筑西・常総" id="koga">
+                    <label for="koga">古河・結城・筑西・常総</label></p>
+                    <p><input type="radio" name="ibaraki" value="鹿嶋・神栖・潮来・北浦" id="kashima">
+                    <label for="kashima">鹿嶋・神栖・潮来・北浦</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>栃木県</summary>
+                    <p><input type="radio" name="tochigi" value="宇都宮・さくら" id="utsunomiya">
+                    <label for="utsunomiya">宇都宮・さくら</label></p>
+                    <p><input type="radio" name="tochigi" value="日光・中禅寺湖・奥日光・今市" id="nikko">
+                    <label for="nikko">日光・中禅寺湖・奥日光・今市</label></p>
+                    <p><input type="radio" name="tochigi" value="鬼怒川・川治・湯西川・川俣" id="kinugawa">
+                    <label for="kinugawa">鬼怒川・川治・湯西川・川俣</label></p>
+                    <p><input type="radio" name="tochigi" value="那須・板室・黒磯" id="nasu">
+                    <label for="nasu">那須・板室・黒磯</label></p>
+                    <p><input type="radio" name="tochigi" value="塩原・矢板・大田原・西那須野" id="shiobara">
+                    <label for="shiobara">塩原・矢板・大田原・西那須野</label></p>
+                    <p><input type="radio" name="tochigi" value="真岡・益子・茂木" id="mooka">
+                    <label for="mooka">真岡・益子・茂木</label></p>
+                    <p><input type="radio" name="tochigi" value="小山・足利・佐野・栃木" id="oyama">
+                    <label for="oyama">小山・足利・佐野・栃木</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>群馬県</summary>
+                    <p><input type="radio" name="gunma" value="前橋・赤城" id="maebashi">
+                    <label for="maebashi">前橋・赤城</label></p>
+                    <p><input type="radio" name="gunma" value="伊香保温泉・渋川" id="ikaho">
+                    <label for="ikaho">伊香保温泉・渋川</label></p>
+                    <p><input type="radio" name="gunma" value="万座･嬬恋･北軽井沢" id="manza">
+                    <label for="manza">万座･嬬恋･北軽井沢</label></p>
+                    <p><input type="radio" name="gunma" value="草津温泉・白根" id="kusatsu">
+                    <label for="kusatsu">草津温泉・白根</label></p>
+                    <p><input type="radio" name="gunma" value="四万温泉" id="shima">
+                    <label for="shima">四万温泉</label></p>
+                    <p><input type="radio" name="gunma" value="水上・猿ヶ京・沼田" id="minakami">
+                    <label for="minakami">水上・猿ヶ京・沼田</label></p>
+                    <p><input type="radio" name="gunma" value="尾瀬・丸沼" id="oze">
+                    <label for="oze">尾瀬・丸沼</label></p>
+                    <p><input type="radio" name="gunma" value="伊勢崎・太田・館林・桐生" id="isesaki">
+                    <label for="isesaki">伊勢崎・太田・館林・桐生</label></p>
+                    <p><input type="radio" name="gunma" value="高崎" id="takasaki">
+                    <label for="takasaki">高崎</label></p>
+                    <p><input type="radio" name="gunma" value="富岡・藤岡・安中・磯部温泉" id="tomioka">
+                    <label for="tomioka">富岡・藤岡・安中・磯部温泉</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>埼玉県</summary>
+                    <p><input type="radio" name="saitama" value="大宮・浦和・川口・上尾" id="omiya">
+                    <label for="omiya">大宮・浦和・川口・上尾</label></p>
+                    <p><input type="radio" name="saitama" value="草加・越谷・春日部・羽生" id="soka">
+                    <label for="soka">草加・越谷・春日部・羽生</label></p>
+                    <p><input type="radio" name="saitama" value="熊谷・深谷・本庄" id="kumagaya">
+                    <label for="kumagaya">熊谷・深谷・本庄</label></p>
+                    <p><input type="radio" name="saitama" value="川越・東松山・志木・和光" id="kawagoe">
+                    <label for="kawagoe">川越・東松山・志木・和光</label></p>
+                    <p><input type="radio" name="saitama" value="所沢・狭山・飯能" id="tokorozawa">
+                    <label for="tokorozawa">所沢・狭山・飯能</label></p>
+                    <p><input type="radio" name="saitama" value="秩父・長瀞" id="chichibu">
+                    <label for="chichibu">秩父・長瀞</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>千葉県</summary>
+                    <p><input type="radio" name="chiba" value="千葉" id="chiba">
+                    <label for="chiba">千葉</label></p>
+                    <p><input type="radio" name="chiba" value="舞浜・浦安・船橋・幕張" id="maihama">
+                    <label for="maihama">舞浜・浦安・船橋・幕張</label></p>
+                    <p><input type="radio" name="chiba" value="松戸・柏" id="matsudo">
+                    <label for="matsudo">松戸・柏</label></p>
+                    <p><input type="radio" name="chiba" value="成田空港・佐倉" id="narita">
+                    <label for="narita">成田空港・佐倉</label></p>
+                    <p><input type="radio" name="chiba" value="銚子・旭・九十九里・東金・茂原" id="choshi">
+                    <label for="choshi">銚子・旭・九十九里・東金・茂原</label></p>
+                    <p><input type="radio" name="chiba" value="鴨川・勝浦・御宿・養老渓谷" id="kamogawa">
+                    <label for="kamogawa">鴨川・勝浦・御宿・養老渓谷</label></p>
+                    <p><input type="radio" name="chiba" value="南房総・館山・白浜・千倉" id="minamiboso">
+                    <label for="minamiboso">南房総・館山・白浜・千倉</label></p>
+                    <p><input type="radio" name="chiba" value="市原・木更津・君津・富津・鋸南" id="ichihara">
+                    <label for="ichihara">市原・木更津・君津・富津・鋸南</label></p>    
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>東京都</summary>
+                    <p><input type="radio" name="tokyo" value="東京23区内" id="tokyo">
+                    <label for="tokyo">東京23区内</label></p>
+                    <p><input type="radio" name="tokyo" value="立川・八王子・町田・府中・吉祥寺" id="tachikawa">
+                    <label for="tachikawa">立川・八王子・町田・府中・吉祥寺</label></p>  
+                    <p><input type="radio" name="tokyo" value="奥多摩・青梅・羽村" id="okutama">
+                    <label for="okutama">奥多摩・青梅・羽村</label></p>
+                    <p><input type="radio" name="tokyo" value="八丈島" id="hachijo">
+                    <label for="hachijo">八丈島</label></p>  
+                    <p><input type="radio" name="tokyo" value="大島" id="oshima">
+                    <label for="oshima">大島</label></p> 
+                    <p><input type="radio" name="tokyo" value="神津島・新島・式根島" id="kodu">
+                    <label for="kodu">神津島・新島・式根島</label></p>   
+                    <p><input type="radio" name="tokyo" value="三宅島" id="miyake">
+                    <label for="miyake">三宅島</label></p>  
+                    <p><input type="radio" name="tokyo" value="小笠原諸島" id="ogasawara">
+                    <label for="ogasawara">小笠原諸島</label></p>              
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>神奈川県</summary>
+                    <p><input type="radio" name="kanagawa" value="横浜" id="yokohama">
+                    <label for="yokohama">横浜</label></p>
+                    <p><input type="radio" name="kanagawa" value="川崎" id="kawasaki">
+                    <label for="kawasaki">川崎</label></p>
+                    <p><input type="radio" name="kanagawa" value="箱根" id="hakone">
+                    <label for="hakone">箱根</label></p>
+                    <p><input type="radio" name="kanagawa" value="小田原" id="odawara">
+                    <label for="odawara">小田原</label></p>
+                    <p><input type="radio" name="kanagawa" value="湯河原・真鶴" id="yugawara">
+                    <label for="yugawara">湯河原・真鶴</label></p>
+                    <p><input type="radio" name="kanagawa" value="相模湖・丹沢" id="sagamiko">
+                    <label for="sagamiko">相模湖・丹沢</label></p>
+                    <p><input type="radio" name="kanagawa" value="大和・相模原・町田西部" id="yamato">
+                    <label for="yamato">大和・相模原・町田西部</label></p>
+                    <p><input type="radio" name="kanagawa" value="厚木・海老名・伊勢原" id="atsugi">
+                    <label for="atsugi">厚木・海老名・伊勢原</label></p>  
+                    <p><input type="radio" name="kanagawa" value="湘南・鎌倉・江ノ島・藤沢・平塚" id="shonan">
+                    <label for="shonan">湘南・鎌倉・江ノ島・藤沢・平塚</label></p>  
+                    <p><input type="radio" name="kanagawa" value="横須賀・三浦" id="yokosuka">
+                    <label for="yokosuka">横須賀・三浦</label></p>    
+            </details>     
+        </details>
+
+        <details class="accordion-chubu">
+        <summary>中部</summary>
+            <details class="accordion-prefecture">
+            <summary>新潟県</summary>
+                    <p><input type="radio" name="niigata" value="新潟" id="niigata">
+                    <label for="niigata">新潟</label></p>
+                    <p><input type="radio" name="niigata" value="月岡・瀬波・咲花" id="tsukioka">
+                    <label for="tsukioka">月岡・瀬波・咲花</label></p>
+                    <p><input type="radio" name="niigata" value="長岡・燕三条・柏崎・弥彦・岩室・寺泊" id="nagaoka">
+                    <label for="nagaoka">長岡・燕三条・柏崎・弥彦・岩室・寺泊</label></p>
+                    <p><input type="radio" name="niigata" value="魚沼・十日町・津南・六日町・大湯" id="uonuma">
+                    <label for="unonuma">魚沼・十日町・津南・六日町・大湯</label></p>
+                    <p><input type="radio" name="niigata" value="越後湯沢・苗場" id="echigoyuzawa">
+                    <label for="echigoyuzawa">越後湯沢・苗場</label></p>
+                    <p><input type="radio" name="niigata" value="上越・糸魚川・妙高" id="joetsu">
+                    <label for="joetsu">上越・糸魚川・妙高</label></p>
+                    <p><input type="radio" name="niigata" value="佐渡" id="sado">
+                    <label for="sado">佐渡</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>富山県</summary>
+                    <p><input type="radio" name="toyama" value="富山・八尾・立山" id="toyama">
+                    <label for="toyama">富山・八尾・立山</label></p>
+                    <p><input type="radio" name="toyama" value="滑川・魚津・朝日・黒部・宇奈月" id="namerikawa">
+                    <label for="namerikawa">滑川・魚津・朝日・黒部・宇奈月</label></p>
+                    <p><input type="radio" name="toyama" value="高岡・氷見・砺波" id="takaoka">
+                    <label for="takaoka">高岡・氷見・砺波</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>石川県</summary>
+                    <p><input type="radio" name="ishikawa" value="金沢" id="kanazawa">
+                    <label for="kanazawa">金沢</label></p>
+                    <p><input type="radio" name="ishikawa" value="加賀・小松・辰口" id="kaga">
+                    <label for="kaga">加賀・小松・辰口</label></p>
+                    <p><input type="radio" name="ishikawa" value="能登・輪島・珠洲" id="noto">
+                    <label for="noto">能登・輪島・珠洲</label></p>
+                    <p><input type="radio" name="ishikawa" value="七尾・和倉・羽咋" id="nanao">
+                    <label for="nanao">七尾・和倉・羽咋</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>福井県</summary>
+                    <p><input type="radio" name="fukui" value="福井" id="fukui">
+                    <label for="fukui">福井</label></p>
+                    <p><input type="radio" name="fukui" value="あわら・三国" id="awara">
+                    <label for="awara">あわら・三国</label></p>
+                    <p><input type="radio" name="fukui" value="永平寺・ 勝山・大野" id="eiheiji">
+                    <label for="eiheiji">永平寺・ 勝山・大野</label></p>
+                    <p><input type="radio" name="fukui" value="越前・鯖江・武生" id="echizen">
+                    <label for="echizen">越前・鯖江・武生</label></p>
+                    <p><input type="radio" name="fukui" value="敦賀・美浜" id="tsuruga">
+                    <label for="tsuruga">敦賀・美浜</label></p>
+                    <p><input type="radio" name="fukui" value="若狭・小浜・高浜" id="wakasa">
+                    <label for="wakasa">若狭・小浜・高浜</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>山梨県</summary>
+                    <p><input type="radio" name="yamanashi" value="甲府・湯村・昇仙峡" id="kofu">
+                    <label for="kofu">甲府・湯村・昇仙峡</label></p>
+                    <p><input type="radio" name="yamanashi" value="山梨・石和・勝沼・塩山" id="yamanashi">
+                    <label for="yamanashi">山梨・石和・勝沼・塩山</label></p>
+                    <p><input type="radio" name="yamanashi" value="大月・都留・道志渓谷" id="otsuki">
+                    <label for="otsuki">大月・都留・道志渓谷</label></p>
+                    <p><input type="radio" name="yamanashi" value="山中湖・忍野" id="yamanakako">
+                    <label for="yamanakako">山中湖・忍野</label></p>
+                    <p><input type="radio" name="yamanashi" value="河口湖・富士吉田・本栖湖・西湖・精進湖" id="kawaguchiko">
+                    <label for="kawaguchiko">河口湖・富士吉田・本栖湖・西湖・精進湖</label></p>
+                    <p><input type="radio" name="yamanashi" value="下部・身延・早川" id="shimobe">
+                    <label for="shimobe">下部・身延・早川</label></p>
+                    <p><input type="radio" name="yamanashi" value="韮崎・南アルプス" id="nirasaki">
+                    <label for="nirasaki">韮崎・南アルプス</label></p>
+                    <p><input type="radio" name="yamanashi" value="八ヶ岳・小淵沢・清里・大泉" id="yatsugatake">
+                    <label for="yatsugatake">八ヶ岳・小淵沢・清里・大泉</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>長野県</summary>
+                    <p><input type="radio" name="nagano" value="長野・小布施・信州高山・戸隠・飯綱" id="nagano">
+                    <label for="nagano">長野・小布施・信州高山・戸隠・飯綱</label></p>
+                    <p><input type="radio" name="nagano" value="斑尾・飯山・信濃町・野尻湖・黒姫" id="madarao">
+                    <label for="madarao">斑尾・飯山・信濃町・野尻湖・黒姫</label></p>
+                    <p><input type="radio" name="nagano" value="野沢温泉・木島平・秋山郷" id="nozawa">
+                    <label for="nozawa">野沢温泉・木島平・秋山郷</label></p>
+                    <p><input type="radio" name="nagano" value="志賀高原･湯田中･渋" id="shigakogen">
+                    <label for="shigakogen">志賀高原･湯田中･渋</label></p>
+                    <p><input type="radio" name="nagano" value="上田・別所・鹿教湯" id="ueda">
+                    <label for="ueda">上田・別所・鹿教湯</label></p>
+                    <p><input type="radio" name="nagano" value="戸倉上山田・千曲" id="togura">
+                    <label for="togura">戸倉上山田・千曲</label></p>
+                    <p><input type="radio" name="nagano" value="菅平・峰の原" id="sugadaira">
+                    <label for="sugadaira">菅平・峰の原</label></p>
+                    <p><input type="radio" name="nagano" value="軽井沢・佐久･小諸" id="karuizawa">
+                    <label for="karuizawa">軽井沢・佐久･小諸</label></p>
+                    <p><input type="radio" name="nagano" value="八ヶ岳・野辺山・富士見・原村" id="yatsugatake">
+                    <label for="yatsugatake">八ヶ岳・野辺山・富士見・原村</label></p>
+                    <p><input type="radio" name="nagano" value="蓼科・白樺湖・霧ヶ峰・車山" id="tateshina">
+                    <label for="tateshina">蓼科・白樺湖・霧ヶ峰・車山</label></p>
+                    <p><input type="radio" name="nagano" value="諏訪湖" id="suwako">
+                    <label for="yatsugatake">諏訪湖</label></p>
+                    <p><input type="radio" name="nagano" value="伊那・駒ヶ根・飯田・昼神" id="ina">
+                    <label for="yatsugatake">伊那・駒ヶ根・飯田・昼神</label></p>
+                    <p><input type="radio" name="nagano" value="木曽" id="kiso">
+                    <label for="yatsugatake">木曽</label></p>
+                    <p><input type="radio" name="nagano" value="松本・塩尻・浅間温泉・美ヶ原温泉" id="matsumoto">
+                    <label for="yatsugatake">松本・塩尻・浅間温泉・美ヶ原温泉</label></p>
+                    <p><input type="radio" name="nagano" value="上高地・乗鞍・白骨" id="kamikochi">
+                    <label for="yatsugatake">上高地・乗鞍・白骨</label></p>
+                    <p><input type="radio" name="nagano" value="安曇野・穂高・大町・豊科" id="adumino">
+                    <label for="adumino">安曇野・穂高・大町・豊科</label></p>
+                    <p><input type="radio" name="nagano" value="白馬・八方尾根・栂池高原・小谷" id="hakuba">
+                    <label for="hakuba">白馬・八方尾根・栂池高原・小谷</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>岐阜県</summary>
+                    <p><input type="radio" name="gihu" value="岐阜・各務原" id="gifu">
+                    <label for="gifu">岐阜・各務原</label></p>
+                    <p><input type="radio" name="gihu" value="奥飛騨・新穂高" id="okuhida">
+                    <label for="okuhida">奥飛騨・新穂高</label></p>
+                    <p><input type="radio" name="gihu" value="高山・飛騨" id="takayama">
+                    <label for="takayama">高山・飛騨</label></p>
+                    <p><input type="radio" name="gihu" value="下呂温泉・濁河温泉" id="gero">
+                    <label for="gero">下呂温泉・濁河温泉</label></p>
+                    <p><input type="radio" name="gihu" value="中津川・多治見・恵那・美濃加茂" id="nakatsugawa">
+                    <label for="nakatsugawa">中津川・多治見・恵那・美濃加茂</label></p>
+                    <p><input type="radio" name="gihu" value="郡上八幡・関・美濃" id="gunjo">
+                    <label for="gunjo">郡上八幡・関・美濃</label></p>
+                    <p><input type="radio" name="gihu" value="白川郷" id="shirakawago">
+                    <label for="shirakawago">白川郷</label></p>
+                    <p><input type="radio" name="gihu" value="大垣・岐阜羽島" id="ogaki">
+                    <label for="ogaki">大垣・岐阜羽島</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>静岡県</summary>
+                    <p><input type="radio" name="shizuoka" value="静岡・清水" id="shizuoka">	
+                    <label for="shizuoka">静岡・清水</label></p>
+                    <p><input type="radio" name="shizuoka" value="熱海" id="atami">
+                	<label for="atami">熱海</label></p>
+                    <p><input type="radio" name="shizuoka" value="伊東" id="ito">
+                    <label for="ito">伊東</label></p>
+                    <p><input type="radio" name="shizuoka" value="伊豆高原" id="izu">
+                    <label for="izu">伊豆高原</label></p>
+                    <p><input type="radio" name="shizuoka" value="東伊豆・河津" id="higashiizu">
+                    <label for="higashiizu">東伊豆・河津</label></p>
+                    <p><input type="radio" name="shizuoka" value="下田・南伊豆" id="shimoda">
+                    <label for="shimoda">下田・南伊豆</label></p>
+                    <p><input type="radio" name="shizuoka" value="西伊豆・戸田・土肥・堂ヶ島" id="nishiizu">
+                    <label for="nishiizu">西伊豆・戸田・土肥・堂ヶ島	</label></p>
+                    <p><input type="radio" name="shizuoka" value="伊豆長岡・修善寺・天城湯ヶ島" id="izunagaoka">
+                    <label for="izunagaoka">伊豆長岡・修善寺・天城湯ヶ島	</label></p>
+                    <p><input type="radio" name="shizuoka" value="富士・富士宮" id="fuji">
+                    <label for="fuji">富士・富士宮</label></p>
+                    <p><input type="radio" name="shizuoka" value="御殿場・沼津・三島" id="gotemba">
+                    <label for="gotemba">御殿場・沼津・三島</label></p>
+                    <p><input type="radio" name="shizuoka" value="焼津・藤枝・御前崎・寸又峡" id="yaizu">
+                    <label for="yaizu">焼津・藤枝・御前崎・寸又峡</label></p>
+                    <p><input type="radio" name="shizuoka" value="浜松・浜名湖・天竜" id="hamamatsu">
+                    <label for="hamamatsu">浜松・浜名湖・天竜</label></p>
+                    <p><input type="radio" name="shizuoka" value="掛川・袋井・磐田" id="kakegawa">
+                    <label for="kakegawa">掛川・袋井・磐田</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>愛知県</summary>
+                    <p><input type="radio" name="aichi" value="名古屋" id="nagoya">
+                    <label for="nagoya">名古屋</label></p>
+                    <p><input type="radio" name="aichi" value="豊橋・豊川・蒲郡・伊良湖" id="toyohashi">
+                    <label for="toyohashi">豊橋・豊川・蒲郡・伊良湖</label></p>
+                    <p><input type="radio" name="aichi" value="奥三河・新城・湯谷温泉" id="okumikawa">
+                    <label for="okumikawa">奥三河・新城・湯谷温泉</label></p>
+                    <p><input type="radio" name="aichi" value="豊田・刈谷・知立・安城・岡崎" id="toyota">
+                    <label for="toyota">豊田・刈谷・知立・安城・岡崎</label></p>
+                    <p><input type="radio" name="aichi" value="一宮・犬山・小牧・瀬戸・春日井" id="ichinomiya">
+                    <label for="ichinomiya">一宮・犬山・小牧・瀬戸・春日井</label></p>
+                    <p><input type="radio" name="aichi" value="セントレア・東海・半田・知多" id="centrair">
+                    <label for="centrair">セントレア・東海・半田・知多</label></p>
+                    <p><input type="radio" name="aichi" value="南知多・日間賀島・篠島" id="minamichita">
+                    <label for="minamichita">南知多・日間賀島・篠島</label></p>
+            </details>
+        </details>
+
+        <details class="accordion-kinki">
+        <summary>近畿</summary>
+            <details class="accordion-prefecture">
+            <summary>三重県</summary>
+                    <p><input type="radio" name="mie" value="津･鈴鹿･亀山" id="tsu">
+                    <label for="tsu">津･鈴鹿･亀山</label></p>
+                    <p><input type="radio" name="mie" value="四日市・桑名・湯の山・長島温泉" id="yokkaichi">
+                    <label for="yokkaichi">四日市・桑名・湯の山・長島温泉</label></p>
+                    <p><input type="radio" name="mie" value="伊賀・名張" id="iga">
+                    <label for="iga">伊賀・名張</label></p>
+                    <p><input type="radio" name="mie" value="松阪" id="matsusaka">
+                    <label for="matsusaka">松阪</label></p>
+                    <p><input type="radio" name="mie" value="伊勢・二見" id="ise">
+                    <label for="ise">伊勢・二見</label></p>
+                    <p><input type="radio" name="mie" value="鳥羽" id="toba">
+                    <label for="toba">鳥羽</label></p>
+                    <p><input type="radio" name="mie" value="志摩・賢島" id="shima">
+                    <label for="shima">志摩・賢島</label></p>
+                    <p><input type="radio" name="mie" value="熊野・尾鷲・紀北" id="kumano">
+                    <label for="kumano">熊野・尾鷲・紀北</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>滋賀県</summary>
+                    <p><input type="radio" name="shiga" value="大津・雄琴・草津・栗東" id="otsu">
+                    <label for="otsu">大津・雄琴・草津・栗東</label></p>
+                    <p><input type="radio" name="shiga" value="湖西・高島・マキノ" id="kosei">
+                    <label for="kosei">湖西・高島・マキノ</label></p>
+                    <p><input type="radio" name="shiga" value="長浜・米原" id="nagahama">
+                    <label for="nagahama">長浜・米原</label></p>
+                    <p><input type="radio" name="shiga" value="彦根・近江八幡・守山・東近江" id="hikone">
+                    <label for="hikone">彦根・近江八幡・守山・東近江</label></p>
+                    <p><input type="radio" name="shiga" value="信楽・甲賀" id="shigaraki">
+                    <label for="shigaraki">信楽・甲賀</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>京都府</summary>
+                    <p><input type="radio" name="kyoto" value="京都" id="kyoto">
+                    <label for="kyoto">京都</label></p>
+                    <p><input type="radio" name="kyoto" value="宇治・長岡京" id="uji">
+                    <label for="uji">宇治・長岡京</label></p>
+                    <p><input type="radio" name="kyoto" value="亀岡・湯の花・美山・京丹波" id="kameoka">
+                    <label for="kameoka">亀岡・湯の花・美山・京丹波</label></p>
+                    <p><input type="radio" name="kyoto" value="福知山・綾部" id="fukushiyama">
+                    <label for="fukushiyama">福知山・綾部</label></p>
+                    <p><input type="radio" name="kyoto" value="丹後・久美浜" id="tango">
+                    <label for="tango">丹後・久美浜</label></p>
+                    <p><input type="radio" name="kyoto" value="天橋立・宮津・舞鶴" id="amanohashidate">
+                    <label for="amanohashidate">天橋立・宮津・舞鶴</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>大阪府</summary>
+                    <p><input type="radio" name="osaka" value="大阪" id="osaka">
+                    <label for="osaka">大阪</label></p>
+                    <p><input type="radio" name="osaka" value="高槻・茨木・箕面・伊丹空港" id="takatsuki">
+                    <label for="takatsuki">高槻・茨木・箕面・伊丹空港</label></p>
+                    <p><input type="radio" name="osaka" value="枚方・守口・東大阪" id="hirakata">
+                    <label for="hirakata">枚方・守口・東大阪</label></p>
+                    <p><input type="radio" name="osaka" value="八尾・藤井寺・河内長野" id="yao">
+                    <label for="yao">八尾・藤井寺・河内長野</label></p>
+                    <p><input type="radio" name="osaka" value="堺・岸和田・関空・泉佐野" id="sakai">
+                    <label for="sakai">堺・岸和田・関空・泉佐野</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>兵庫県</summary>
+                    <p><input type="radio" name="hyogo" value="神戸・有馬温泉・六甲山" id="kobe">
+                    <label for="kobe">神戸・有馬温泉・六甲山</label></p>
+                    <p><input type="radio" name="hyogo" value="宝塚・西宮・甲子園・三田・篠山" id="takarazuka">
+                    <label for="takarazuka">宝塚・西宮・甲子園・三田・篠山</label></p>
+                    <p><input type="radio" name="hyogo" value="明石・加古川・三木" id="akashi">
+                    <label for="akashi">明石・加古川・三木/label></p>
+                    <p><input type="radio" name="hyogo" value="姫路・相生・赤穂" id="himeji">
+                    <label for="himeji">姫路・相生・赤穂</label></p>
+                    <p><input type="radio" name="hyogo" value="和田山・竹田城・ハチ高原" id="wadayama">
+                    <label for="wadayama">和田山・竹田城・ハチ高原</label></p>
+                    <p><input type="radio" name="hyogo" value="城崎温泉・豊岡・出石・神鍋" id="kinosaki">
+                    <label for="kinosaki">城崎温泉・豊岡・出石・神鍋</label></p>
+                    <p><input type="radio" name="hyogo" value="香住・浜坂・湯村" id="kasumi">
+                    <label for="kasumi">香住・浜坂・湯村</label></p>
+                    <p><input type="radio" name="hyogo" value="淡路島" id="awaji">
+                    <label for="awaji">淡路島</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>奈良県</summary>
+                    <p><input type="radio" name="nara" value="奈良・大和高原" id="nara">
+                    <label for="nara">奈良・大和高原</label></p>
+                    <p><input type="radio" name="nara" value="橿原・大和郡山・天理・生駒" id="kashihara">
+                    <label for="kashihara">橿原・大和郡山・天理・生駒</label></p>
+                    <p><input type="radio" name="nara" value="吉野・十津川・天川・五條" id="yoshino">
+                    <label for="yoshino">吉野・十津川・天川・五條</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>和歌山県</summary>
+                    <p><input type="radio" name="wakayama" value="和歌山・加太・和歌浦" id="wakayama">
+                    <label for="wakayama">和歌山・加太・和歌浦</label></p>
+                    <p><input type="radio" name="wakayama" value="高野山・橋本" id="koyasan">
+                    <label for="koyasan">高野山・橋本</label></p>
+                    <p><input type="radio" name="wakayama" value="御坊・有田・海南・日高" id="gobo">
+                    <label for="gobo">御坊・有田・海南・日高</label></p>
+                    <p><input type="radio" name="wakayama" value="南紀白浜・紀伊田辺・龍神" id="nankishirahama">
+                    <label for="nankishirahama">南紀白浜・紀伊田辺・龍神</label></p>
+                    <p><input type="radio" name="wakayama" value="勝浦・串本・すさみ" id="katsuura">
+                    <label for="katsuura">勝浦・串本・すさみ</label></p>
+                    <p><input type="radio" name="wakayama" value="熊野古道・新宮・本宮・中辺路" id="kumanokodo">
+                    <label for="kumanokodo">熊野古道・新宮・本宮・中辺路</label></p>            
+            </details>
+        </details>
+    
+        <details class="accordion-chushikoku">
+        <summary>中四国</summary>
+            <details class="accordion-prefecture">
+            <summary>鳥取県</summary>
+                    <p><input type="radio" name="tottori" value="鳥取・岩美・浜村" id="tottori">
+                    <label for="tottori">鳥取・岩美・浜村</label></p>
+                    <p><input type="radio" name="tottori" value="倉吉・三朝温泉" id="kurayoshi">
+                    <label for="kurayoshi">倉吉・三朝温泉</label></p>
+                    <p><input type="radio" name="tottori" value="米子・皆生温泉・大山" id="yonago">
+                    <label for="yonago">米子・皆生温泉・大山</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>島根県</summary>
+                    <p><input type="radio" name="shimane" value="松江・玉造・安来・奥出雲" id="matsue">
+                    <label for="matsue">松江・玉造・安来・奥出雲</label></p>
+                    <p><input type="radio" name="shimane" value="出雲・大田・石見銀山" id="izumo">
+                    <label for="izumo">出雲・大田・石見銀山</label></p>
+                    <p><input type="radio" name="shimane" value="津和野・益田・浜田・江津" id="tsuwano">
+                    <label for="tsuwano">津和野・益田・浜田・江津</label></p>
+                    <p><input type="radio" name="shimane" value="隠岐諸島" id="oki">
+                    <label for="oki">隠岐諸島</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>岡山県</summary>
+                    <p><input type="radio" name="okayama" value="岡山" id="okayama">
+                    <label for="okayama">岡山</label></p>
+                    <p><input type="radio" name="okayama" value="牛窓・瀬戸内・備前" id="ushimado">
+                    <label for="ushimado">牛窓・瀬戸内・備前</label></p>
+                    <p><input type="radio" name="okayama" value="津山・湯郷・美作・奥津" id="tsuyama">
+                    <label for="tsuyama">津山・湯郷・美作・奥津</label></p>
+                    <p><input type="radio" name="okayama" value="湯原・蒜山・新見・高梁" id="yubara">
+                    <label for="yubara">湯原・蒜山・新見・高梁</label></p>
+                    <p><input type="radio" name="okayama" value="倉敷・総社・玉野・笠岡" id="kurashiki">
+                    <label for="kurashiki">倉敷・総社・玉野・笠岡</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>広島県</summary>
+                    <p><input type="radio" name="hiroshima" value="広島" id="hiroshima">
+                    <label for="hiroshima">広島</label></p>
+                    <p><input type="radio" name="hiroshima" value="東広島・竹原・三原・広島空港" id="higashihiroshima">
+                    <label for="higashihiroshima">東広島・竹原・三原・広島空港</label></p>
+                    <p><input type="radio" name="hiroshima" value="福山・尾道・しまなみ海道" id="fukuyama">
+                    <label for="fukuyama">福山・尾道・しまなみ海道</label></p>
+                    <p><input type="radio" name="hiroshima" value="呉・江田島" id="kure">
+                    <label for="kure">呉・江田島</label></p>
+                    <p><input type="radio" name="hiroshima" value="三次・庄原・帝釈峡" id="miyoshi">
+                    <label for="miyoshi">三次・庄原・帝釈峡</label></p>
+                    <p><input type="radio" name="hiroshima" value="三段峡・芸北・北広島" id="sandankyo">
+                    <label for="sandankyo">三段峡・芸北・北広島</label></p>
+                    <p><input type="radio" name="hiroshima" value="宮島・宮浜温泉・廿日市" id="miyajima">
+                    <label for="miyajima">宮島・宮浜温泉・廿日市</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>山口県</summary>
+                    <p><input type="radio" name="yamaguchi" value="山口・湯田温泉・防府" id="yamaguchi">
+                    <label for="yamaguchi">山口・湯田温泉・防府</label></p>
+                    <p><input type="radio" name="yamaguchi" value="下関・宇部" id="shimonoseki">
+                    <label for="shimonoseki">下関・宇部</label></p>
+                    <p><input type="radio" name="yamaguchi" value="岩国・周南・柳井" id="iwakuni">
+                    <label for="iwakuni">岩国・周南・柳井</label></p>
+                    <p><input type="radio" name="yamaguchi" value="萩・長門・秋吉台" id="hagi">
+                    <label for="hagi">萩・長門・秋吉台</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>徳島県</summary>
+                    <p><input type="radio" name="tokushima" value="徳島・鳴門" id="tokushima">
+                    <label for="tokushima">徳島・鳴門</label></p>
+                    <p><input type="radio" name="tokushima" value="大歩危・祖谷・剣山・吉野川" id="oboke">
+                    <label for="oboke">大歩危・祖谷・剣山・吉野川</label></p>
+                    <p><input type="radio" name="tokushima" value="阿南・日和佐・宍喰" id="anan">
+                    <label for="anan">阿南・日和佐・宍喰</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>香川県</summary>
+                    <p><input type="radio" name="kagawa" value="高松・さぬき・東かがわ" id="takamatsu">
+                    <label for="takamatsu">高松・さぬき・東かがわ</label></p>
+                    <p><input type="radio" name="kagawa" value="坂出・宇多津・丸亀" id="sakaide">
+                    <label for="sakaide">坂出・宇多津・丸亀</label></p>
+                    <p><input type="radio" name="kagawa" value="琴平・観音寺" id="kotohira">
+                    <label for="kotohira">琴平・観音寺</label></p>
+                    <p><input type="radio" name="kagawa" value="小豆島・直島" id="shodoshima">
+                    <label for="shodoshima">小豆島・直島</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>愛媛県</summary>
+                    <p><input type="radio" name="ehime" value="松山・道後" id="matsuyama">
+                    <label for="matsuyama">松山・道後</label></p>
+                    <p><input type="radio" name="ehime" value="今治・しまなみ海道" id="imabari">
+                    <label for="imabari">今治・しまなみ海道</label></p>
+                    <p><input type="radio" name="ehime" value="西条・新居浜・四国中央" id="saijo">
+                    <label for="saijo">西条・新居浜・四国中央</label></p>
+                    <p><input type="radio" name="ehime" value="宇和島・八幡浜" id="uwajima">
+                    <label for="uwajima">宇和島・八幡浜</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>高知県</summary>
+                    <p><input type="radio" name="kochi" value="高知・南国・香南・伊野" id="kochi">
+                    <label for="kochi">高知・南国・香南・伊野</label></p>
+                    <p><input type="radio" name="kochi" value="安芸・室戸" id="aki">
+                    <label for="aki">安芸・室戸</label></p>
+                    <p><input type="radio" name="kochi" value="足摺・四万十・宿毛・須崎" id="ashizuri">
+                    <label for="ashizuri">足摺・四万十・宿毛・須崎</label></p>            
+            </details>
+        </details>
+    
+        <details class="accordion-kyushu">
+        <summary>九州</summary>
+            <details class="accordion-prefecture">
+            <summary>福岡県</summary>
+                    <p><input type="radio" name="fukuoka" value="博多・キャナルシティ・海の中道・太宰府・二日市" id="hakata">
+                    <label for="hakata">博多・キャナルシティ・海の中道・太宰府・二日市</label></p>
+                    <p><input type="radio" name="fukuoka" value="天神・中洲・薬院・福岡ドーム・糸島" id="tenjin">
+                    <label for="tenjin">天神・中洲・薬院・福岡ドーム・糸島</label></p>
+                    <p><input type="radio" name="fukuoka" value="北九州" id="kitakyushu">
+                    <label for="kitakyushu">北九州</label></p>
+                    <p><input type="radio" name="fukuoka" value="宗像・宮若・飯塚" id="munakata">
+                    <label for="munakata">宗像・宮若・飯塚</label></p>
+                    <p><input type="radio" name="fukuoka" value="久留米・甘木・原鶴温泉・筑後川温泉" id="kurume">
+                    <label for="kurume">久留米・甘木・原鶴温泉・筑後川温泉</label></p>
+                    <p><input type="radio" name="fukuoka" value="北九州空港・苅田・行橋・豊前" id="kitakyushu">
+                    <label for="kitakyushu">北九州空港・苅田・行橋・豊前</label></p>
+                    <p><input type="radio" name="fukuoka" value="大牟田・柳川・八女・筑後" id="omuta">
+                    <label for="omuta">大牟田・柳川・八女・筑後</label></p>
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>佐賀県</summary>
+                    <p><input type="radio" name="saga" value="佐賀・古湯温泉" id="saga">
+                    <label for="saga">佐賀・古湯温泉</label></p>
+                    <p><input type="radio" name="saga" value="鳥栖" id="	tosu">
+                    <label for="tosu">鳥栖</label></p>
+                    <p><input type="radio" name="saga" value="嬉野・武雄・伊万里・有田・太良" id="ureshino">
+                    <label for="ureshino">嬉野・武雄・伊万里・有田・太良</label></p>
+                    <p><input type="radio" name="saga" value="唐津・呼子" id="karatsu">
+                    <label for="karatsu">唐津・呼子</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>長崎県</summary>
+                    <p><input type="radio" name="nagasaki" value="長崎" id="nagasaki">
+                    <label for="nagasaki">長崎</label></p>
+                    <p><input type="radio" name="nagasaki" value="雲仙・島原・小浜" id="unzen">
+                    <label for="unzen">雲仙・島原・小浜</label></p>
+                    <p><input type="radio" name="nagasaki" value="諫早・大村・長崎空港" id="isahaya">
+                    <label for="isahaya">諫早・大村・長崎空港</label></p>
+                    <p><input type="radio" name="nagasaki" value="ハウステンボス・佐世保・平戸" id="huistenbosch">
+                    <label for="huistenbosch">ハウステンボス・佐世保・平戸</label></p>
+                    <p><input type="radio" name="nagasaki" value="五島列島" id="goto">
+                    <label for="goto">五島列島</label></p>
+                    <p><input type="radio" name="nagasaki" value="対馬" id="tsushima">
+                    <label for="tsushima">対馬</label></p>
+                    <p><input type="radio" name="nagasaki" value="壱岐島" id="iki">
+                    <label for="iki">壱岐島</label></p>            
+            </details>
+
+            <details class="accordion-prefecture">
+            <summary>熊本県</summary>
+                    <p><input type="radio" name="kumamoto" value="熊本" id="kumamoto">
+                    <label for="kumamoto">熊本</label></p>
+                    <p><input type="radio" name="kumamoto" value="大津・玉名・山鹿・荒尾・菊池" id="otsu">
+                    <label for="otsu">大津・玉名・山鹿・荒尾・菊池</label></p>
+                    <p><input type="radio" name="kumamoto" value="阿蘇" id="aso">
+                    <label for="aso">阿蘇</label></p>
+                    <p><input type="radio" name="kumamoto" value="宇土・八代・水俣" id="uto">
+                    <label for="uto">宇土・八代・水俣</label></p>
+                    <p><input type="radio" name="kumamoto" value="人吉・球磨" id="hitoyoshi">
+                    <label for="hitoyoshi">人吉・球磨</label></p>
+                    <p><input type="radio" name="kumamoto" value="天草･本渡" id="amakusa">
+                    <label for="amakusa">天草･本渡</label></p>
+                    <p><input type="radio" name="kumamoto" value="黒川温泉・杖立" id="kurokawa">
+                    <label for="kurokawa">黒川温泉・杖立</label></p>
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>大分県</summary>
+                    <p><input type="radio" name="oita" value="大分" id="oita">
+                    <label for="oita">大分</label></p>
+                    <p><input type="radio" name="oita" value="別府・日出" id="beppu">
+                    <label for="beppu">別府・日出</label></p>
+                    <p><input type="radio" name="oita" value="佐伯・臼杵・豊後大野" id="saiki">
+                    <label for="saiki">佐伯・臼杵・豊後大野</label></p>
+                    <p><input type="radio" name="oita" value="湯布院・湯平" id="yufuin">
+                    <label for="yufuin">湯布院・湯平</label></p>
+                    <p><input type="radio" name="oita" value="久住・竹田" id="kuju">
+                    <label for="kuju">久住・竹田</label></p>
+                    <p><input type="radio" name="oita" value="九重・日田・天瀬" id="kokonoe">
+                    <label for="kokonoe">九重・日田・天瀬</label></p>
+                    <p><input type="radio" name="oita" value="国東・中津・宇佐・耶馬渓" id="kunisaki">
+                    <label for="kunisaki">国東・中津・宇佐・耶馬渓</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>宮崎県</summary>
+                    <p><input type="radio" name="miyazaki" value="宮崎" id="miyazaki">
+                    <label for="miyazaki">宮崎</label></p>
+                    <p><input type="radio" name="miyazaki" value="高千穂・延岡・日向・高鍋" id="takachiho">
+                    <label for="takachiho">高千穂・延岡・日向・高鍋</label></p>
+                    <p><input type="radio" name="miyazaki" value="都城・えびの・日南・綾" id="miyakonojo">
+                    <label for="miyakonojo">都城・えびの・日南・綾</label></p>            
+            </details>
+    
+            <details class="accordion-prefecture">
+            <summary>鹿児島県</summary>
+                    <p><input type="radio" name="kagoshima" value="鹿児島・桜島" id="kagoshima">
+                    <label for="kagoshima">鹿児島・桜島</label></p>
+                    <p><input type="radio" name="kagoshima" value="霧島・国分・鹿児島空港" id="kirishima">
+                    <label for="kirishima">霧島・国分・鹿児島空港</label></p>
+                    <p><input type="radio" name="kagoshima" value="鹿屋・垂水・志布志" id="kanoya">
+                    <label for="kanoya">鹿屋・垂水・志布志</label></p>
+                    <p><input type="radio" name="kagoshima" value="川内・出水" id="kawachi">
+                    <label for="kawachi">川内・出水</label></p>
+                    <p><input type="radio" name="kagoshima" value="指宿・枕崎・南さつま" id="ibusuki">
+                    <label for="ibusuki">指宿・枕崎・南さつま</label></p>
+                    <p><input type="radio" name="kagoshima" value="屋久島" id="yakushima">
+                    <label for="yakushima">屋久島</label></p>
+                    <p><input type="radio" name="kagoshima" value="種子島" id="tanegashima">
+                    <label for="tanegashima">種子島</label></p>
+                    <p><input type="radio" name="kagoshima" value="奄美大島･喜界島・徳之島" id="amamioshima">
+                    <label for="amamioshima">奄美大島･喜界島・徳之島</label></p>
+                    <p><input type="radio" name="kagoshima" value="沖永良部島・与論島" id="okinoerabujima">
+                    <label for="okinoerabujima">沖永良部島・与論島</label></p>
+            </details>
+        </details>
+
+        <details class="accordion-okinawa">
+        <summary>沖縄</summary>
+                <p><input type="radio" name="okinawa" value="那覇" id="naha">
+                <label for="naha">那覇</label></p>
+                <p><input type="radio" name="okinawa" value="恩納・名護・本部・今帰仁" id="onna">
+                <label for="onna">恩納・名護・本部・今帰仁</label></p>
+                <p><input type="radio" name="okinawa" value="宜野湾・北谷・読谷・沖縄市・うるま" id="ginowan">
+                <label for="ginowan">宜野湾・北谷・読谷・沖縄市・うるま</label></p>
+                <p><input type="radio" name="okinawa" value="糸満・豊見城・南城" id="itoman">
+                <label for="itoman">糸満・豊見城・南城</label></p>
+                <p><input type="radio" name="okinawa" value="慶良間・渡嘉敷・座間味・阿嘉" id="kerama">
+                <label for="kerama">慶良間・渡嘉敷・座間味・阿嘉</label></p>
+                <p><input type="radio" name="okinawa" value="久米島" id="kume">
+                <label for="kume">久米島</label></p>
+                <p><input type="radio" name="okinawa" value="宮古島・伊良部島" id="miyakojima">
+                <label for="miyakojima">宮古島・伊良部島</label></p>
+                <p><input type="radio" name="okinawa" value="石垣・西表・小浜島" id="ishigaki">
+                <label for="ishigaki">石垣・西表・小浜島</label></p>
+                <p><input type="radio" name="okinawa" value="与那国島" id="yonaguni">
+                <label for="yonaguni">与那国島</label></p>
+                <p><input type="radio" name="okinawa" value="大東島" id="daitojima">
+                <label for="daitojima">大東島</label></p>
+        </details>
+
+        <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot.html'" class="button">
+
+        </div>
+        </div>
+    </main>
+
+    <section>
+    <div class="search-area">
+        <h2>　旅行先を探す　</h2>
+        <h3>目的から探す</h3>
+        <details class="accordion">
+        <summary class="title">グルメ</summary>
+        <div class="contents">
+            <p><input type="radio" name="gourmet" value="食べ歩き" id="walkandeat">
+            <label for="walkandeat">食べ歩き</label></p>
+            
+            <p><input type="radio" name="gourmet" value="和食" id="japanese">
+            <label for="japanese">和食</label></p>
+            
+            <p><input type="radio" name="gourmet" value="洋食" id="western">
+            <label for="western">洋食</label></p>
+            
+            <p><input type="radio" name="gourmet" value="中華" id="chinese">
+            <label for="chinese">中華</label></p>
+            
+            <p><input type="radio" name="gourmet" value="スイーツ" id="sweets">
+            <label for="sweets">スイーツ</label></p>
+
+            <p><input type="radio" name="gourmet" value="海鮮" id="seafood">
+            <label for="seafood">海鮮</label></p>
+
+            <p><input type="radio" name="gourmet" value="お肉" id="meat">
+            <label for="meat">お肉</label></p>
+
+            <p><input type="radio" name="gourmet" value="ラーメン" id="ramen">
+            <label for="ramen">ラーメン</label></p>
+
+            <p><input type="radio" name="gourmet" value="果物狩り・野菜狩り" id="picking">
+            <label for="picking">果物狩り・野菜狩り</label></p>
+
+            <p><input type="radio" name="gourmet" value="ご当地酒" id="sake">
+            <label for="sake">ご当地酒</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>海・プール</summary>
+        <div class="contents">
+            <p><input type="radio" name="water" value="海水浴" id="sea">
+            <label for="sea">海水浴</label></p>
+            
+            <p><input type="radio" name="water" value="プール" id="pool">
+            <label for="pool">プール</label></p>
+            
+            <p><input type="radio" name="water" value="ダイビング" id="diving">
+            <label for="diving">ダイビング</label></p>
+            
+            <p><input type="radio" name="water" value="シュノーケリング" id="snorkeling">
+            <label for="snorkeling">シュノーケリング</label></p>
+            
+            <p><input type="radio" name="water" value="サップ" id="sup">
+            <label for="sup">サップ</label></p>
+            
+            <p><input type="radio" name="water" value="サーフィン・ボディーボード" id="surfing">
+            <label for="suefing">サーフィン・ボディーボード</label></p>
+            
+            <p><input type="radio" name="water" value="水上バイク" id="bike">
+            <label for="bike">水上バイク</label></p>
+            
+            <p><input type="radio" name="water" value="ドルフィンスイム" id="dolphin">
+            <label for="dolphin">ドルフィンスイム</label></p>
+            
+            <p><input type="radio" name="water" value="バナナボート" id="boat">
+            <label for="boat">バナナボート</label></p>
+            
+            <p><input type="radio" name="water" value="パラセーリング" id="sail">
+            <label for="sail">パラセーリング</label></p>
+            
+            <p><input type="radio" name="water" value="マリンアクティビティ" id="activity">
+            <label for="activity">マリンアクティビティ</label></p>
+            
+            <p><input type="radio" name="water" value="カヌー・カヤック" id="canoe">
+            <label for="canoe">カヌー・カヤック</label></p>
+            
+            <p><input type="radio" name="water" value="ラフティング" id="raft">
+            <label for="raft">ラフティング</label></p>
+            
+            <p><input type="radio" name="water" value="沢下り(キャニオニング)" id="canion">
+            <label for="canion">沢下り(キャニオニング)</label></p>
+            
+            <p><input type="radio" name="water" value="沢登り(シャワークライミング)" id="shower">
+            <label for="shower">沢登り(シャワークライミング)</label></p>
+            
+            <p><input type="radio" name="water" value="川下り・ライン下り" id="river">
+            <label for="river">川下り・ライン下り</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>雪</summary>
+        <div class="contents">
+            <p><input type="radio" name="snow" value="スキー・スノーボード" id="ski">
+            <label for="ski">スキー・スノーボード</label></p>
+
+            <p><input type="radio" name="snow" value="ワカサギ釣り" id="fish">
+            <label for="fish">ワカサギ釣り</label></p>
+
+            <p><input type="radio" name="snow" value="スノーシュー・スノートレッキング" id="shoe">
+            <label for="shoe">スノーシュー・スノートレッキング</label></p>
+
+            <p><input type="radio" name="snow" value="犬ぞり" id="dog">
+            <label for="dog">犬ぞり</label></p>
+
+            <p><input type="radio" name="snow" value="スノーモービル" id="mobile">
+            <label for="mobile">スノーモービル</label></p>
+
+            <p><input type="radio" name="snow" value="アイススケート" id="skating">
+            <label for="skating">アイススケート</label></p>
+
+            <p><input type="radio" name="snow" value="エアボード" id="airboard">
+            <label for="airboard">エアボード</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>テーマパーク・レジャースポット</summary>
+        <div class="contents">
+            <p><input type="radio" name="park" value="子供向け" id="child">
+            <label for="child">子供向け</label></p>
+
+            <p><input type="radio" name="park" value="遊園地" id="amusementpark">
+            <label for="amusementpark">遊園地</label></p>
+
+            <p><input type="radio" name="park" value="子供向け" id="zoo">
+            <label for="zoo">動物園</label></p>
+
+            <p><input type="radio" name="park" value="水族館" id="aquarium">
+            <label for="aquarium">水族館</label></p>
+
+            <p><input type="radio" name="park" value="体験" id="experience">
+            <label for="experience">体験</label></p>
+
+            <p><input type="radio" name="park" value="屋内" id="indoor">
+            <label for="indoor">屋内</label></p>
+
+            <p><input type="radio" name="park" value="イルミネーション" id="illumination">
+            <label for="illumination">イルミネーション</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>体験</summary>
+        <div class="contents">
+            <p><input type="radio" name="experience" value="イルカ・ホエールウォッチング" id="watching">
+            <label for="watching">イルカ・ホエールウォッチング</label></p>
+
+            <p><input type="radio" name="experience" value="自然体験" id="nature">
+            <label for="nature">自然体験</label></p>
+
+            <p><input type="radio" name="experience" value="着物" id="kimono">
+            <label for="kimono">着物</label></p>
+
+            <p><input type="radio" name="experience" value="伝統工芸体験" id="traditional">
+            <label for="traditional">伝統工芸体験</label></p>
+
+            <p><input type="radio" name="experience" value="クラフト体験" id="craft">
+            <label for="craft">クラフト体験</label></p>
+
+            <p><input type="radio" name="experience" value="農業・漁業・酪農体験" id="livestock">
+            <label for="livestock">農業・漁業・酪農体験</label></p>
+
+            <p><input type="radio" name="experience" value="工場見学" id="factory">
+            <label for="factory">工場見学</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>温泉</summary>
+        <div class="contents">
+            <p><input type="radio" name="hotspring" value="温泉テーマパーク" id="themepark">
+            <label for="themepark">温泉テーマパーク</label></p>
+
+            <p><input type="radio" name="hotspring" value="温泉地" id="area">
+            <label for="area">温泉地</label></p>
+
+            <p><input type="radio" name="hotspring" value="岩盤浴" id="bedrock">
+            <label for="bedrock">岩盤浴</label></p>
+
+            <p><input type="radio" name="hotspring" value="サウナ" id="sauna">
+            <label for="sauna">サウナ</label></p>
+
+            <p><input type="radio" name="hotspring" value="銭湯" id="public">
+            <label for="public">銭湯</label></p>
+
+            <p><input type="radio" name="hotspring" value="貸切・カップル" id="reserved">
+            <label for="reserved">貸切・カップル</label></p>
+        </div>
+        </details>
+
+        <details class="accordion">
+        <summary>名所巡り</summary>
+        <div class="contents">
+            <p><input type="radio" name="tour" value="お城巡り" id="castle">
+            <label for="castle">お城巡り</label></p>
+
+            <p><input type="radio" name="tour" value="神社巡り" id="shrine">
+            <label for="shrine">神社巡り</label></p>   
+            
+            <p><input type="radio" name="tour" value="お寺巡り" id="temple">
+            <label for="temple">お寺巡り</label></p>
+
+            <p><input type="radio" name="tour" value="酒造巡り" id="brewery">
+            <label for="brewery">酒造巡り</label></p>
+
+            <p><input type="radio" name="tour" value="史跡巡り" id="historic">
+            <label for="historic">史跡巡り</label></p>
+        </div>
+        </details>
+
+        <h4>その他<input  type="search" method="get" placeholder="その他"></h4>
+
+        <input type="submit" method="post" name="search" value="検索" onclick="location.href='destination-search.html'" class="button">
+    
+    </div>
+
+    </section>
+
+    <footer>
+        <p>Copyright 2023 Mai</p>
+    </footer>
+
+    <script src="public/js/destination.js"></script>
+    
+    </body>
+</html>

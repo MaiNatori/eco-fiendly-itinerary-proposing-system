@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>環境に優しい観光ルート作成</title>
+        <link rel="stylesheet" href="public/css/place.css">
+    </head>
+
+    <body>
+    <header>
+        <div class="logo">
+            <h1>ロゴ</h1>
+            <nav>
+                <ul>
+                    <li><a href="destination.html">旅行先の選択</a></li>
+                    <li><a href="spot.html">行きたい場所の選択</a></li>
+                    <li><a href="hotel.html">宿泊場所の選択</a></li>
+                    <li><a href="place.html">出発場所・到着場所の入力</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>④出発地と到着地の入力</h2>
+        <div class="input-place">
+            <div class="first-day">
+                <h3>1日目</h3>
+                <label>出発地</label>
+                <label>到着地</label>
+                <input type="submit" method="post" name="confirm" value="確定" onclick="location.href='place.html'" class="button">
+            </div>
+            <div class="last-day">
+                <h3>最終日</h3>
+                <label>出発地</label>
+                <label>到着地</label>
+            </div>
+            <div class="add-days">
+                <input type="submit" method="post" name="add" value="追加" onclick="location.href='place.html'" class="button">
+            </div>
+        </div>
+
+        <div class="confim-area">
+            <h2>⑤確認</h2>
+                <div class="inputcheck-area">
+                    <h3>行きたい場所</h3>
+                    <h3>宿泊地</h3>
+                    <input type="submit" method="post" name="create" value="作成" onclick="location.href='result.html'" class="button">
+                </div>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright 2023 Mai</p>
+    </footer>
+    
+    <script src="public/js/place.js"></script>
+        
+    </body>
+</html>

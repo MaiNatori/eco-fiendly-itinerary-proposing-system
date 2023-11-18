@@ -1,0 +1,220 @@
+@charset "UTF-8";
+
+body {
+    background-color:#fbf9f0;
+    width: 1250px;
+    margin: 0 0 0 0;
+}
+
+h1 {
+    color: #575757;
+    font-size: 40px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h2 {
+    color: #575757;
+    font-size: 30px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h3 {
+    color: #575757;
+    font-size: 20px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    text-decoration: underline;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+p {
+    color: #575757;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+
+/* ヘッダー */
+
+header {
+    text-align: center;
+    background-color: #fdbf64;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+nav li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 30px;
+}
+
+main {
+    margin: 0 auto 6% 150px;
+    max-width: 960px;
+}
+
+
+/* 選択したホテル */
+
+.input-area {
+    background-color: #fdbf64;
+    margin-left: 30px;
+    height: 300px;
+    width: 250px;
+    position: relative;
+}
+
+.input-area .button {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+}
+
+
+/* 条件設定 */
+.search-option {
+    border: 5px solid #fdbf64;
+    margin-left: 30px;
+    margin-top: 5px;
+    height: 400px;
+    width: 240px;
+    position: relative;
+}
+
+.search-option p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 20px;
+}
+
+.search-option label {
+    font-size: 13px;
+}
+
+/* 絞り込み条件 */
+.search-option summary {
+    margin-top: 5px;
+    margin-left: 5px;
+    text-decoration: underline;
+    font-size: 15px;
+}
+
+.search-option .filter {
+    background-color: #fdbf64;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
+.search-option .filter dl {
+    margin-bottom: 3px;
+    margin-top: 3px;
+}
+
+.search-option .filter .budget-select {
+    margin-right: 5px;
+}
+
+.search-option .filter .budget-select select {
+    width: 80px;
+}
+
+.search-option .filter .budget-select dd {
+    display: flex;
+    height: 18px;
+}
+
+.search-option .filter .distance-select dd, .search-option .filter .distance-select p {
+    height: 18px;
+    font-size: 13px;
+}
+
+.search-option .button {
+    position: absolute;
+    height: 22px;
+    right: 5px;
+    bottom: 2px;
+}
+
+/* 並び替え条件 */
+.search-option .sorting {
+    background-color: #fdbf64;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
+/* 検索結果表示 */
+.search-result {
+    border: 5px solid #fdbf64;
+    margin-left: 290px;
+    margin-top: 73px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    height: 690px;
+    width: 700px;
+    top: 193px;
+    position: absolute;
+}
+
+.search-result p {
+    height: 10px;
+}
+
+.search-result .search-candidate {
+    background-color: #fdbf64;
+    height: 610px;
+    width: 690px;
+    margin-top: 20px;
+    padding-bottom: 10px;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+.search-result .search-candidate .candidate-contents {
+    background-color: #fbf9f0;
+    height: 100px;
+    width: 640px;
+    position: relative;
+    top: 10px;
+    left: 10px;
+    padding: 5px 5px 5px 5px;
+    margin-bottom: 10px;
+}
+
+.search-result .search-candidate .candidate-contents img {
+    position: relative;
+    height: 100px;
+    width: 100px;
+}
+
+.search-result .search-candidate .candidate-contents h2 {
+    position: relative;
+    bottom: 130px;
+    left: 110px;
+    font-size: 25px;
+}
+
+.search-result .search-candidate .candidate-contents p {
+    position: relative;
+    bottom: 155px;
+    left: 110px;
+}
+
+/* フッター */
+
+footer {
+    clear: both;
+    background-color: #fdbf64;
+    height: 30px;
+    text-align: center;
+    padding-bottom: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 1250px;
+}

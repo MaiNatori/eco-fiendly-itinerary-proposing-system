@@ -1,0 +1,168 @@
+@charset "UTF-8";
+
+body {
+    background-color:#fbf9f0;
+    width: 1250px;
+    margin: 0 0 0 0;
+}
+
+h1 {
+    color: #575757;
+    font-size: 40px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h2 {
+    color: #575757;
+    font-size: 30px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h3 {
+    color: #575757;
+    font-size: 20px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    text-decoration: underline;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+p {
+    color: #575757;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+
+/* ヘッダー */
+
+header {
+    text-align: center;
+    background-color: #fdbf64;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+nav li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 30px;
+}
+
+main {
+    margin: 0 auto 6% 150px;
+    max-width: 960px;
+}
+
+
+/* 確定スポット */
+
+.input-area {
+    margin-left: 30px;
+    margin-bottom: 30px;
+    padding: 5px 5px 5px 5px;
+    background-color: #fdbf64;
+    height: 510px;
+    width: 250px;
+    position: absolute;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+.input-area .select-spot {
+    background-color: #fbf9f0;
+    height: 90px;
+    width: 220px;
+    margin-bottom: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.input-area .select-spot img {
+    position: relative;
+    height: 90px;
+    width: 90px;
+}
+
+.input-area .select-spot h2 {
+    position: relative;
+    left: 100px;
+    bottom: 90px;
+    font-size: 23px;
+}
+
+.input-area .button {
+    display: block;
+    width: 50px;
+    position: relative;
+    top: 5px;
+    left: 180px;
+    margin-bottom: 5px;
+}
+
+
+/* マップ */
+.maps {
+    
+    position: relative;
+    left: 300px;
+    top: 0px;
+    width: 600px;
+    height: 400px;
+    
+}
+
+
+/* 選択したスポット */
+
+.search-result {
+    background-color: #fdbf64;
+    margin-left: 300px;
+    margin-top: 10px;
+    width: 600px;
+    height: 90px;
+    position: relative;
+    padding: 5px 5px 5px 5px;
+}
+
+.search-result img {
+    position: relative;
+    height: 90px;
+    width: 90px;
+}
+
+.search-result h2 {
+    position: absolute;
+    margin: 0 0 0 0;
+    top: 5px;
+    left: 110px;
+    font-size: 30px;
+}
+
+.search-result p {
+    position: absolute;
+    margin: 0 0 0 0;
+    top: 45px;
+    left: 110px;
+}
+
+.search-result .button {
+    display: block;
+    width: 50px;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+
+
+/* フッター */
+
+footer {
+    clear: both;
+    background-color: #fdbf64;
+    height: 30px;
+    text-align: center;
+    padding-bottom: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 1250px;
+}

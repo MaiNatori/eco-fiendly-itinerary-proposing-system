@@ -1,0 +1,132 @@
+@charset "UTF-8";
+
+body {
+    background-color:#fbf9f0;
+    width: 1250px;
+    margin: 0 0 0 0;
+}
+
+h1 {
+    color: #575757;
+    font-size: 40px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h2 {
+    color: #575757;
+    font-size: 30px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+h3 {
+    color: #575757;
+    font-size: 20px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    text-decoration: underline;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+p {
+    color: #575757;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+
+/* ヘッダー */
+
+header {
+    text-align: center;
+    background-color: #fdbf64;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+nav li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 30px;
+}
+
+main {
+    margin: 0 auto 6% 150px;
+    max-width: 960px;
+}
+
+/* 出発地と到着地の入力 */
+.first-day {
+    background-color: #fdbf64;
+    height: 150px;
+    width: 200px;
+}
+
+.first-day h3 {
+    text-align: center;
+    padding-top: 5px;
+}
+
+.first-day label {
+    display: flex;
+    margin-left: 10px;
+    height: 35px;
+}
+
+.first-day .button {
+    position: relative;
+    bottom: 5px;
+    left: 150px;
+}
+
+.last-day {
+    background-color: #fdbf64;
+    height: 150px;
+    width: 200px;
+    position: absolute;
+    left: 900px;
+    top: 266.6px;
+}
+
+.last-day h3 {
+    text-align: center;
+    padding-top: 5px;
+}
+
+.last-day label {
+    display: flex;
+    margin-left: 10px;
+    height: 35px;
+}
+
+.add-days .button {
+    position: absolute;
+    left: 600px;
+    top: 340px;
+}
+
+/* 確認 */
+.inputcheck-area {
+    background-color: #fdbf64;
+    padding-top: 10px;
+    padding-left: 5px;
+    height: 300px;
+}
+
+.inputcheck-area .button {
+    position: relative;
+    top: 165px;
+    left: 905px;
+}
+
+/* フッター */
+
+footer {
+    clear: both;
+    background-color: #fdbf64;
+    height: 30px;
+    text-align: center;
+    padding-bottom: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 1250px;
+}
