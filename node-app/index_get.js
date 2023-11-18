@@ -54,7 +54,7 @@ async function fetchRestaurantViaV2TextSearch() {
 app.get('/', async (req, res) => {
   try {
     const result = await fetchRestaurantViaV2TextSearch();
-    const placesId = result.places.id;
+    const placesId = result.places.map(places => places.id);
     res.render('index.ejs', { places_id: placesId });
   } catch (error) {
     console.log(error)
