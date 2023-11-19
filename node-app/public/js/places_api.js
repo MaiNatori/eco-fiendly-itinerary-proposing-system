@@ -51,25 +51,40 @@ function doFindPlaceFromQuery (
 }
 */
 
+function doGet(place_id_array) {
+  console.log("doGet: ", place_id_array)
+  for (let i = 0; i < place_id_array.length; i++) {
+    const placeid = place_id_array[i];
+    getPlaceDetails(placeid, function (itsPlace) {
+      // コールバック; 詳細データを取得、結果は第1引数に渡す
+      createMarker(itsPlace, (i === 0)); // Mapにピンさし, 0番目だけは中心に設定する
+    });
+  }
+}
+
+function inqueryPlaceIds() {
+  fetch("/interface") // 問い合わせ
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // On Error
+      return response.json(); // On OK 
+    })
+    .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
+      console.log(data.places_id)
+      doGet(data.places_id)
+    });
+}
+
 // Place Details を PlaceID によって実行し、コールバックを呼び出す
 // コールバックは引数placeをとる
 // 従量課金対象外
-
-fetch("/interface")
-  .then(response => {
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    return response.json();
-  })
-  .then(data => console.log(data))
-  .then(data => getPlaceDetails(data))
-
-function getPlaceDetails (callback) {
+function getPlaceDetails (place_id, callback) {
   const request = {
-    placeId: placeid,
+    placeId: place_id,
     fields: ['types', 'name', 'icon', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'url', 'website', 'geometry']  // 検索で取得するフィールド(情報)
-  };
-  
+  }
+
   service = new google.maps.places.PlacesService(map);
+
   // リクエスト実行
   service.getDetails(request, (place, status) => {
     // 結果取得
@@ -77,8 +92,8 @@ function getPlaceDetails (callback) {
       callback(place)
     }
   });
-  
-  /** メモ **
+
+   /** メモ **
   * placeId: "ChIJf9HI5PWMGGARDtbKJKNm38I", fields: ['name', 'rating', 'formatted_phone_number', 'geometry']
   * この時、次のようなオブジェクトが帰ってきた
 
@@ -102,15 +117,6 @@ function getPlaceDetails (callback) {
   }
 
  */
-}
-
-function doGet() {
-  for (let i = 0; i < data.places.length; i++) {
-    const placeid = data.places[i];
-    console.log(placeid);
-    // その他の文
-    getPlaceDetails(placeid, コールバック関数)
-  }
 }
 
 // Google Map にピンをさす
