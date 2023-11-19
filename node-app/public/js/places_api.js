@@ -58,13 +58,14 @@ function doFindPlaceFromQuery (
 fetch("/interface")
   .then(response => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    return response.json( {places_id: placesId} );
+    return response.json();
   })
-  .then(data => console.log(data));
+  .then(data => console.log(data))
+  .then(data => getPlaceDetails(data))
 
-function getPlaceDetails (place_id = places_id, callback) {
+function getPlaceDetails (callback) {
   const request = {
-    placeId: place_id,
+    placeId: placeid,
     fields: ['types', 'name', 'icon', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'url', 'website', 'geometry']  // 検索で取得するフィールド(情報)
   };
   
@@ -76,7 +77,7 @@ function getPlaceDetails (place_id = places_id, callback) {
       callback(place)
     }
   });
-
+  
   /** メモ **
   * placeId: "ChIJf9HI5PWMGGARDtbKJKNm38I", fields: ['name', 'rating', 'formatted_phone_number', 'geometry']
   * この時、次のようなオブジェクトが帰ってきた
@@ -101,6 +102,15 @@ function getPlaceDetails (place_id = places_id, callback) {
   }
 
  */
+}
+
+function doGet() {
+  for (let i = 0; i < data.places.length; i++) {
+    const placeid = data.places[i];
+    console.log(placeid);
+    // その他の文
+    getPlaceDetails(placeid, コールバック関数)
+  }
 }
 
 // Google Map にピンをさす
