@@ -16,6 +16,8 @@ function initMap(
   infowindow = new google.maps.InfoWindow();  // div#map にGoogle Mapを挿入
 
   map = new google.maps.Map(document.getElementById('map'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
+  
+  inqueryPlaceIds();
 }
 
 /*
@@ -94,31 +96,6 @@ function getPlaceDetails (places_id, callback) {
       callback(place)
     }
   });
-
-  /** メモ **
-  * placeId: "ChIJf9HI5PWMGGARDtbKJKNm38I", fields: ['name', 'rating', 'formatted_phone_number', 'geometry']
-  * この時、次のようなオブジェクトが帰ってきた
-
-  {
-    "formatted_phone_number": "03-3269-2911",
-    "geometry": {
-        "location": {
-            "lat": 35.69446909999999,
-            "lng": 139.7312741
-        },
-        "viewport": {
-            "south": 35.69287586970849,
-            "west": 139.7298783197085,
-            "north": 35.69557383029149,
-            "east": 139.7325762802915
-        }
-    },
-    "name": "食のゾーン J’s Cafe（JICA 国際協力機構研究所 内 民間利用可）",
-    "rating": 4.1,
-    "html_attributions": []
-  }
-
- */
 }
 
 // Google Map にピンをさす
