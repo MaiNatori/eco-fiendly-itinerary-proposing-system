@@ -53,14 +53,21 @@ async function fetchRestaurantViaV2TextSearch() {
 
 app.get('/', async (req, res) => {
   try {
-    const result = await fetchRestaurantViaV2TextSearch();
-    const placesId = result.places.map(places => places.id);
-    res.json( {places_id: placesId} );
     res.render('index.ejs');
   } catch (error) {
     console.log(error)
   }
 });
+
+app.get('/interface', async (req, res) => {
+  try {
+    const result = await fetchRestaurantViaV2TextSearch();
+    const placesId = result.places.map(places => places.id);
+    res.json( {places_id: placesId} );
+  } catch (error) {
+    console.log(error)
+  }
+})
 /*
 //GETリクエストの設定
 //'/get'でアクセスされた時に、JSONとログを出力するようにする

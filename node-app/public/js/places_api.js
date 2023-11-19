@@ -55,10 +55,10 @@ function doFindPlaceFromQuery (
 // コールバックは引数placeをとる
 // 従量課金対象外
 
-fetch("/")
+fetch("/interface")
   .then(response => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    return response.json();
+    return response.json( {places_id: placesId} );
   })
   .then(data => console.log(data));
 
