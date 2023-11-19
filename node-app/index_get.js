@@ -55,7 +55,8 @@ app.get('/', async (req, res) => {
   try {
     const result = await fetchRestaurantViaV2TextSearch();
     const placesId = result.places.map(places => places.id);
-    res.render('index.ejs', { places_id: placesId });
+    res.json( {places_id: placesId} );
+    res.render('index.ejs');
   } catch (error) {
     console.log(error)
   }

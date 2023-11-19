@@ -1,11 +1,30 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Places API</title>
+    <style>
+        #map {
+            height: 100%;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </head>
+
 <body>
-    <h1><%- places_id %></h1>
+    <div id="map"></div>
+    <script src="./public/js/places_api.js"></script>
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6UaRw_ME-1NiWguJurxiCUPq83Q0R6lI&libraries=places&callback=initMap">
+        </script>
 </body>
+
 </html>
