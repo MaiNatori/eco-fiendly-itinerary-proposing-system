@@ -16,7 +16,7 @@ function initMap(
   infowindow = new google.maps.InfoWindow();
   service = new google.maps.places.PlacesService(map);
 
-  map = new google.maps.Map(document.getElementById('map'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
+  map = new google.maps.Map(document.getElementById('maps'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
   
   inqueryPlaceIds();
 }
@@ -119,7 +119,7 @@ function createMarker(place, doItCenter = false) {
     nameElement.textContent = place.name;
     content.appendChild(nameElement);
 
-    const typesElement = document.createElement("h3");
+    const typesElement = document.createElement("p");
     typesElement.textContent = place.types;
     content.appendChild(typesElement);
 
@@ -130,24 +130,14 @@ function createMarker(place, doItCenter = false) {
     const phoneNumberElement = document.createElement("p");
     phoneNumberElement.textContent = place.formatted_phone_number;
     content.appendChild(phoneNumberElement);
-    
-    const businessStatusElement = document.createElement("p");
-    businessStatusElement.textContent = place.business_status;
-    content.appendChild(businessStatusElement);
 
     const openingHoursElement = document.createElement("p");
     openingHoursElement.textContent = place.opening_hours.weekday_text;
     content.appendChild(openingHoursElement);
 
-    const urlElement = document.createElement("p");
-    urlElement.textContent = place.url;
-    content.appendChild(urlElement);
-
-    if (!(place.url === place.website)) {
-      const websiteElement = document.createElement("p");
-      websiteElement.textContent = place.website;
-      content.appendChild(websiteElement);
-    };
+    const websiteElement = document.createElement("p");
+    websiteElement.textContent = place.website;
+    content.appendChild(websiteElement);
 
     infowindow.setContent(content);
     infowindow.open(map, marker);
