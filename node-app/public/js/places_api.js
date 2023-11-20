@@ -17,42 +17,10 @@ function initMap(
   service = new google.maps.places.PlacesService(map);
 
   map = new google.maps.Map(document.getElementById('maps'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
-  
+
   inqueryPlaceIds();
-}
 
-/*
-// findPlaceFromQuery を実行、ついでにgetPlaceDetailsを実行する
-// 実行注意(従量課金) ひと月あたり1000リクエストまで無料
-function doFindPlaceFromQuery (
-  query = "SDGs 市ヶ谷 レストラン"  // 検索クエリ
-) {
-  const request = {
-    query: query,
-    fields: ['name', 'place_id'],  // 検索で取得するフィールド(情報)
-    location: new google.maps.LatLng(35.6810603, 139.76730746),
-    radius: "500"
-  };
-  const service = new google.maps.places.PlacesService(map); // コンストラクト
-
-  // 実行
-  service.textSearch(request, (results, status) => {
-    // 実行結果の処理
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      // 結果 -> results ; 結果の配列
-      for (let i = 0; i < results.length; i++) {
-        console.log("results[", i, "]", results[i])
-        getPlaceDetails(
-          results[i].place_id,  // doFindPlaceFromQueryの結果からplace_idを取り出し
-          function (itsPlace) { // コールバック; 詳細データを取得、結果は第1引数に渡す
-            createMarker(itsPlace, (i === 0)); // Mapにピンさし, 0番目だけは中心に設定する
-          }
-        );
-      }
-    }
-  });
 }
-*/
 
 function doGet(place_id_array) {
   console.log("doGet: ", place_id_array)
