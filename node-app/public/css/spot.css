@@ -101,7 +101,7 @@ main {
 
 
 /* マップ */
-.maps {
+#maps {
     
     position: relative;
     left: 300px;

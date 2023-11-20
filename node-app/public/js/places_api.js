@@ -13,7 +13,8 @@ function initMap(
 
   console.log(defaultPlace)
 
-  infowindow = new google.maps.InfoWindow();  // div#map にGoogle Mapを挿入
+  infowindow = new google.maps.InfoWindow();
+  service = new google.maps.places.PlacesService(map);
 
   map = new google.maps.Map(document.getElementById('map'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
   
@@ -112,8 +113,44 @@ function createMarker(place, doItCenter = false) {
   });
 
   google.maps.event.addListener(marker, "click", () => {
-    infowindow.setContent(place.name || "");
-    infowindow.open(map);
+    const content = document.createElement("div");
+
+    const nameElement = document.createElement("h2");
+    nameElement.textContent = place.name;
+    content.appendChild(nameElement);
+
+    const typesElement = document.createElement("h3");
+    typesElement.textContent = place.types;
+    content.appendChild(typesElement);
+
+    const placeAddressElement = document.createElement("p");
+    placeAddressElement.textContent = place.formatted_address;
+    content.appendChild(placeAddressElement);
+    
+    const phoneNumberElement = document.createElement("p");
+    phoneNumberElement.textContent = place.formatted_phone_number;
+    content.appendChild(phoneNumberElement);
+    
+    const businessStatusElement = document.createElement("p");
+    businessStatusElement.textContent = place.business_status;
+    content.appendChild(businessStatusElement);
+
+    const openingHoursElement = document.createElement("p");
+    openingHoursElement.textContent = place.opening_hours.weekday_text;
+    content.appendChild(openingHoursElement);
+
+    const urlElement = document.createElement("p");
+    urlElement.textContent = place.url;
+    content.appendChild(urlElement);
+
+    if (!(place.url === place.website)) {
+      const websiteElement = document.createElement("p");
+      websiteElement.textContent = place.website;
+      content.appendChild(websiteElement);
+    };
+
+    infowindow.setContent(content);
+    infowindow.open(map, marker);
   });
 
   if (doItCenter) map.setCenter(place.geometry.location); // Trueのとき、それを中心にセット

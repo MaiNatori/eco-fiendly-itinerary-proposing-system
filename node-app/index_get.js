@@ -30,7 +30,7 @@ async function fetchRestaurantViaV2TextSearch() {
   const requestBody = {
       textQuery: "市ヶ谷周辺のレストラン",
       languageCode: "ja",
-      maxResultCount: 20,
+      maxResultCount: 5,
       // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
       // strictTypeFiltering: boolean,
       // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE
@@ -53,7 +53,7 @@ async function fetchRestaurantViaV2TextSearch() {
 
 app.get('/', async (req, res) => {
   try {
-    res.render('index.ejs');
+    res.render('spot.ejs');
   } catch (error) {
     console.log(error)
   }
@@ -61,49 +61,11 @@ app.get('/', async (req, res) => {
 
 app.get('/interface', async (req, res) => {
   try {
-    // const result = await fetchRestaurantViaV2TextSearch();
-    // const placesId = result.places.map(places => places.id);
-    // res.json( {places_id: placesId} );
-
-    // --- テスト用 ---
-    // APIの無料枠使い切るの怖いので、疑似的に
-    const test = {
-      places_id: [
-        "ChIJT3uLlGCMGGAR93pYEzgfN68",
-        "ChIJlxSZ-mCMGGAR96CeYLIoCg0",
-        "ChIJAQBwEWGMGGARZdl3ojfR-DY",
-        "ChIJmVnECGGMGGARBRpt08Onimo",
-        "ChIJY1KBOl6MGGARaO6sSubg2g8",
-        "ChIJb6HtSGeMGGARn8lCdfLfu7Q",
-        "ChIJmVnECGGMGGARcviNnirYt-8",
-        "ChIJucopg4qNGGARAtcgsKvcv6Q",
-        "ChIJqeVhN16MGGARH2KeHUoDKa0",
-        "ChIJOSGkdF6MGGARh4p0aRP2h_o",
-        "ChIJ7-1BdWeMGGARZt7MRFQ0onw",
-        "ChIJUR5wH2GMGGARQlD0rrYQ598",
-        "ChIJ5W2kGmeMGGARCHWNAnQLJnE",
-        "ChIJ2bXqGmGMGGARFOVEty4fahQ",
-        "ChIJCXem81-MGGARZeJZIBTRh8Q",
-        "ChIJq-9ANCiNGGARdOQb0YHZDyI",
-        "ChIJUR5wH2GMGGARl_ggMCghrzE",
-        "ChIJw0FFtmeMGGAR0F7bhsBTRLo",
-        "ChIJ1QpW2V2MGGARPVBufPKS5UU",
-        "ChIJoWVltmCMGGAROk9-acBwWAQ"
-      ]
-    }
-    res.json( test );
-    // --- テスト用 ---
-
+    const result = await fetchRestaurantViaV2TextSearch();
+    const placesId = result.places.map(places => places.id);
+    res.json( {places_id: placesId} );
   } catch (error) {
     console.log(error)
   }
 })
-/*
-//GETリクエストの設定
-//'/get'でアクセスされた時に、JSONとログを出力するようにする
-app.get('/searchText', (req, res) => {
-  console.log('GETリクエストを受け取りました');
-  fetchRestaurantViaV2TextSearch();
-  res.end();
-});
-*/
+
