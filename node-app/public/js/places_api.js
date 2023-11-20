@@ -55,7 +55,7 @@ function getPlaceDetails (places_id, callback) {
   const request = {
     language: "ja",
     placeId: places_id,
-    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry']  // 検索で取得するフィールド(情報)
+    fields: ['types', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry']  // 検索で取得するフィールド(情報)
   }
   
   // リクエスト実行
