@@ -14,9 +14,10 @@ function initMap(
   console.log(defaultPlace)
 
   infowindow = new google.maps.InfoWindow();
-  service = new google.maps.places.PlacesService(map);
 
   map = new google.maps.Map(document.getElementById('maps'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
+
+  service = new google.maps.places.PlacesService(map);
 
   inqueryPlaceIds();
 
@@ -52,12 +53,11 @@ function inqueryPlaceIds() {
 // 従量課金対象外
 function getPlaceDetails (places_id, callback) {
   const request = {
+    language: "ja",
     placeId: places_id,
-    fields: ['types', 'name', 'icon', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'url', 'website', 'geometry']  // 検索で取得するフィールド(情報)
+    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry']  // 検索で取得するフィールド(情報)
   }
   
-  service = new google.maps.places.PlacesService(map);
-
   // リクエスト実行
   service.getDetails(request, (place, status) => {
     // 結果取得
@@ -99,8 +99,12 @@ function createMarker(place, doItCenter = false) {
     phoneNumberElement.textContent = place.formatted_phone_number;
     content.appendChild(phoneNumberElement);
 
-    const openingHoursElement = document.createElement("p");
-    openingHoursElement.textContent = place.opening_hours.weekday_text;
+    const openingHoursElement = document.createElement("div");
+    place.opening_hours.weekday_text.forEach(day => {
+      const dayElement = document.createElement("p");
+      dayElement.textContent = day;
+      openingHoursElement.appendChild(dayElement);
+    });
     content.appendChild(openingHoursElement);
 
     const websiteElement = document.createElement("p");
