@@ -69,9 +69,8 @@
 
         <div class="search-result">
             <img src="images/example_spot.jpg" alt="表示例">
-            <h2>スポット名</h2>    
-            <p>HP：<a href="https://miyakejima-birdy.com/">https://miyakejima-birdy.com/</a><br>
-            ここ三宅島で毎年宿泊させてもらってたとこ。</p>
+            <h2><%- name %></h2>    
+            <p>HP：<a href="<%- website %>" target="_blank"><%- website %></a></p>
             <input type="submit" method="post" name="add" value="追加" onclick="location.href='spot.html'" class="button">
         </div>
     </main>

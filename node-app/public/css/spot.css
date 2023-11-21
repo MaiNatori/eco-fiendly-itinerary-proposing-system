@@ -102,15 +102,12 @@ main {
 
 /* マップ */
 #maps {
-    
     position: relative;
     left: 300px;
     top: 0px;
     width: 600px;
     height: 400px;
-    
 }
-
 
 /* 選択したスポット */
 

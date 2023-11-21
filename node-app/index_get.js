@@ -28,7 +28,7 @@ async function fetchRestaurantViaV2TextSearch() {
   });
 
   const requestBody = {
-      textQuery: "市ヶ谷周辺のレストラン",
+      textQuery: "SDGs 市ヶ谷 レストラン",
       languageCode: "ja",
       maxResultCount: 5,
       // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
@@ -69,3 +69,8 @@ app.get('/interface', async (req, res) => {
   }
 })
 
+app.post('/sendDetails', (req,res) => {
+  const { name, formattedAddress, website, location } = req.body;
+  console.log('received data:', { name, formattedAddress, website, location });
+  res.render('spot', { name, formattedAddress, website });
+});

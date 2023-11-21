@@ -23,8 +23,9 @@ function initMap(
 
 }
 
-function doGet(place_id_array) {
-  console.log("doGet: ", place_id_array)
+// place_id配列を1つずつ取り出す関数
+function placeIdsArray(place_id_array) {
+  console.log("placeIdsArray: ", place_id_array)
   for (let i = 0; i < place_id_array.length; i++) {
     const placeid = place_id_array[i];
     getPlaceDetails(placeid, function (itsPlace) {
@@ -34,6 +35,7 @@ function doGet(place_id_array) {
   }
 }
 
+// index_get.jsにアクセスしてplace_idを取得する
 function inqueryPlaceIds() {
   fetch("/interface")
     .then(response => {
@@ -44,32 +46,28 @@ function inqueryPlaceIds() {
     })
     .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
       console.log(data.places_id)
-      doGet(data.places_id)
+      placeIdsArray(data.places_id)
     });
 }
 
-// Place Details を PlaceID によって実行し、コールバックを呼び出す
-// コールバックは引数placeをとる
-// 従量課金対象外
+// Place Details を PlaceID によって実行
 function getPlaceDetails (places_id, callback) {
   const request = {
     language: "ja",
     placeId: places_id,
-    fields: ['types', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry']  // 検索で取得するフィールド(情報)
+    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry']  // 検索で取得するフィールド(情報)
   }
   
   // リクエスト実行
   service.getDetails(request, (place, status) => {
     // 結果取得
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-      callback(place)
+      callback(place);
     }
   });
 }
 
 // Google Map にピンをさす
-// 引数 placeには、getPlaceDetailsで取得したplaceオブジェクトを入れる
-// 引数 doItCenterは、そのピン位置を中心にしたいときにtrueを指定する
 function createMarker(place, doItCenter = false) {
   console.log("Markered place: ", place);
 
@@ -82,10 +80,14 @@ function createMarker(place, doItCenter = false) {
 
   google.maps.event.addListener(marker, "click", () => {
     const content = document.createElement("div");
+    content.style.width = "300px";
+    content.style.height = "100px";
 
     const nameElement = document.createElement("h2");
     nameElement.textContent = place.name;
+    nameElement.style.fontSize = "20px";
     content.appendChild(nameElement);
+    
 
     const typesElement = document.createElement("p");
     typesElement.textContent = place.types;
@@ -113,7 +115,33 @@ function createMarker(place, doItCenter = false) {
 
     infowindow.setContent(content);
     infowindow.open(map, marker);
+    
+    // index_get.jsにplace detailsを送信
+    const sendData = {
+      name: place.name,
+      formattedAddress: place.formatted_address,
+      website: place.website,
+      location: place.geometry.location,
+    };
+
+    fetch("/sendDetails", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sendData),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Data sent successfully:', data);
+      })   
   });
 
   if (doItCenter) map.setCenter(place.geometry.location); // Trueのとき、それを中心にセット
+
 }
