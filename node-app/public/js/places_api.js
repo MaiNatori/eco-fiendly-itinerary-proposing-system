@@ -121,7 +121,6 @@ function createMarker(place, doItCenter = false) {
       name: place.name,
       formattedAddress: place.formatted_address,
       website: place.website,
-      location: place.geometry.location,
     };
 
     fetch("/sendDetails", {

@@ -70,7 +70,7 @@ app.get('/interface', async (req, res) => {
 })
 
 app.post('/sendDetails', (req,res) => {
-  const { name, formattedAddress, website, location } = req.body;
-  console.log('received data:', { name, formattedAddress, website, location });
+  const { name, formattedAddress, website } = req.body;
+  console.log('received data:', { name, formattedAddress, website });
   res.render('spot', { name, formattedAddress, website });
 });
