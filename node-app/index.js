@@ -145,7 +145,7 @@ async function getPlaceIds(req, res) {
 
     const placeIds = result.places.map(places => places.id);
 
-    res.json({ places_id: placesId });
+    res.json({ places_id: placeIds });
     } catch (error) {
       console.log(error)
     }
