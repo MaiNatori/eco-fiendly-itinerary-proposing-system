@@ -144,3 +144,12 @@ function createMarker(place, doItCenter = false) {
   if (doItCenter) map.setCenter(place.geometry.location); // Trueのとき、それを中心にセット
 
 }
+
+
+/*
+・マップ下部にname、website(url)、formatted_address、photos Arrayの0番目のhtml_attributionsの欄の'<a href="https://maps.google.com/maps/contrib/111830602295026422485">TO THE HERBS 市ヶ谷店</a>'
+から写真データを取得して、ピンをクリックしたらマップ下部の詳細欄に表示
+・HPのURLをリンク有効にする
+・追加ボタンを押したらマップ左側にクリックして表示してる場所の写真とnameを表示
+・追加ボタンを押した場所の緯度経度(place.geometry.location)をnode.jsに送り保存
+*/
