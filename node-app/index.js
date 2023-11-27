@@ -124,15 +124,15 @@ async function getPlaceIds(req, res) {
     console.log("fetchRestaurantViaV2TextSearch > requestBody: \n", requestBody);
   
     try {
-        const rawResponse = await fetch(`${BASE_URL}`, {
-            method: "POST",
-            headers: requestHeader,
-            body: JSON.stringify(requestBody)
-        })
-  
-        const response = await rawResponse.json()
-        
-        return response;
+      const rawResponse = await fetch(`${BASE_URL}`, {
+          method: "POST",
+          headers: requestHeader,
+          body: JSON.stringify(requestBody)
+      })
+
+      const response = await rawResponse.json()
+      
+      return response;
     } catch (error) {
         console.log(error)
     }
@@ -149,7 +149,7 @@ async function getPlaceIds(req, res) {
     } catch (error) {
       console.log(error)
     }
-  }
+}
 
 // Error handler
 app.use(function(err, req, res, next) {

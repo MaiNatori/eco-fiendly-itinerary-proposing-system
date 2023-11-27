@@ -55,52 +55,8 @@ main {
 }
 
 
-/* 確定スポット */
-
-.input-area {
-    margin-left: 30px;
-    margin-bottom: 30px;
-    padding: 5px 5px 5px 5px;
-    background-color: #fdbf64;
-    height: 510px;
-    width: 250px;
-    position: absolute;
-    overflow: auto;
-    overflow-x: hidden;
-}
-
-.input-area .select-spot {
-    background-color: #fbf9f0;
-    height: 90px;
-    width: 220px;
-    margin-bottom: 5px;
-    padding: 5px 5px 5px 5px;
-}
-
-.input-area .select-spot img {
-    position: relative;
-    height: 90px;
-    width: 90px;
-}
-
-.input-area .select-spot h2 {
-    position: relative;
-    left: 100px;
-    bottom: 90px;
-    font-size: 23px;
-}
-
-.input-area .button {
-    display: block;
-    width: 50px;
-    position: relative;
-    top: 5px;
-    left: 180px;
-    margin-bottom: 5px;
-}
-
-
 /* マップ */
+
 #maps {
     position: relative;
     left: 300px;
@@ -130,16 +86,21 @@ main {
 .search-result h2 {
     position: absolute;
     margin: 0 0 0 0;
-    top: 5px;
+    top: 10px;
     left: 110px;
-    font-size: 30px;
+    font-size: 100%;
+    width: 480px;
+    height: 50px;
 }
 
 .search-result p {
     position: absolute;
     margin: 0 0 0 0;
-    top: 45px;
+    top: 40px;
     left: 110px;
+    width: 500px;
+    height: 40px;
+    font-size: 100%;
 }
 
 .search-result .button {
@@ -150,6 +111,55 @@ main {
     right: 5px;
 }
 
+/* 確定スポット */
+
+.input-area {
+    top: 259px;
+    margin-left: 30px;
+    margin-bottom: 30px;
+    padding: 5px 5px 5px 5px;
+    background-color: #fdbf64;
+    height: 500px;
+    width: 250px;
+    position: absolute;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+.input-area .select-spot {
+    background-color: #fbf9f0;
+    height: 90px;
+    width: 240px;
+    margin-bottom: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.input-area .select-spot img {
+    position: relative;
+    height: 90px;
+    width: 90px;
+}
+
+.input-area .select-spot h2 {
+    position: relative;
+    left: 100px;
+    bottom: 97px;
+    margin: 5px 0 5px 0;
+    font-size: 100%;
+    width: 135px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.input-area .button {
+    display: block;
+    width: 50px;
+    position: relative;
+    top: 5px;
+    left: 190px;
+    margin-bottom: 5px;
+}
 
 /* フッター */
 

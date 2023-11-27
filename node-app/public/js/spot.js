@@ -139,8 +139,8 @@ function viewSearchResult(place) { // place = getDetails result object
     img.alt = "お店の画像";
   const h2 = document.createElement("h2");
     h2.innerText = place.name;
-  const p = document.createElement("h2");
-    p.innerHTML = (place.website !== undefined) ? `<a href="${place.website}" target="_blank">ホームページ</a>` : "";
+  const p = document.createElement("p");
+    p.innerHTML = (place.website !== undefined) ? `<a href="${place.website}" target="_blank">${place.website}</a>` : "";
   const input = document.createElement("input");
     input.setAttribute("type", "submit");
     input.setAttribute("method", "post");
@@ -211,7 +211,7 @@ function sendSelectSpots(){
   }
 
   // 送信
- fetch("/userslctspots", {
+ fetch("/userselectspots", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(selectedSpotIds)
@@ -229,11 +229,3 @@ function sendSelectSpots(){
       else alert("送信失敗！");
     });
 }
-
-/*
-・マップ下部にname、website(url)、formatted_address、photos Arrayの0番目のhtml_attributionsの欄の'<a href="https://maps.google.com/maps/contrib/111830602295026422485">TO THE HERBS 市ヶ谷店</a>'
-から写真データを取得して、ピンをクリックしたらマップ下部の詳細欄に表示
-・HPのURLをリンク有効にする
-・追加ボタンを押したらマップ左側にクリックして表示してる場所の写真とnameを表示
-・追加ボタンを押した場所の緯度経度(place.geometry.location)をnode.jsに送り保存
-*/

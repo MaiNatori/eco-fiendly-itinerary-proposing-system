@@ -25,13 +25,6 @@
 
     <main>
         <h2>②行きたい場所の選択</h2>
-        <div class="input-area">
-            <!-- <div class="select-spot">
-                <img src="images/example_spot.jpg" alt="表示例">
-                <h2>スポット名</h2>
-            </div> -->
-            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='hotel.html'" class="button">
-        </div>
         <div id="maps">
             <script async
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6UaRw_ME-1NiWguJurxiCUPq83Q0R6lI&libraries=places&callback=initMap"
@@ -42,9 +35,18 @@
         <div class="search-result">
             <!-- <img src="/images/example_spot.jpg" alt="表示例">
             <h2></h2>    
-            <p>HP：<a href="" target="_blank"></a></p>
-            <input type="submit" method="post" name="add" value="追加" onclick="location.href='/spot'" class="button"> -->
+            <p>HP：<a href="" target="_blank"></a></p> -->
+            <input type="submit" method="post" name="add" value="追加"  class="button">
         </div>
+
+        <div class="input-area">
+            <!-- <div class="select-spot">
+                <img src="images/example_spot.jpg" alt="表示例">
+                <h2>スポット名</h2>
+            </div> -->
+            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='hotel.ejs'" class="button">
+        </div>
+
     </main>
     <footer>
         <p>Copyright 2023 Mai</p>
