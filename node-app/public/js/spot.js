@@ -148,7 +148,7 @@ function viewSearchResult(place) { // place = getDetails result object
     input.setAttribute("value", "追加");
     input.classList.add("button");
 
-    input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSlctSpotList を起動するように登録
+    input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
     target.appendChild(img);
     target.appendChild(h2);
@@ -190,7 +190,7 @@ function addSelectSpotList(place_id) {
   }
 }
 
-// 画面左の選択済みスポットリストを消去する（今のところボタンはない）
+// 画面左の選択済みスポットリストを消去する
 function clearSelectSpotList(){
   const target = document.querySelector(".input-area"); // 表示先
   // 表示先の子要素をすべて削除（表示中のものを削除）

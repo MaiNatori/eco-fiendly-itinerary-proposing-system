@@ -129,7 +129,7 @@ main {
 .input-area .select-spot {
     background-color: #fbf9f0;
     height: 90px;
-    width: 240px;
+    width: 220px;
     margin-bottom: 5px;
     padding: 5px 5px 5px 5px;
 }
@@ -140,24 +140,33 @@ main {
     width: 90px;
 }
 
-.input-area .select-spot h2 {
+.input-area .select-spot > h2 {
     position: relative;
     left: 100px;
     bottom: 97px;
     margin: 5px 0 5px 0;
-    font-size: 100%;
-    width: 135px;
+    width: 120px;
     height: 80px;
     display: flex;
     align-items: center;
+    
 }
 
-.input-area .button {
+.input-area .delete-button {
+    display: block;
+    width: 50px;
+    position: relative;
+    top: 36px;
+    left: 120px;
+    margin-bottom: 5px;
+}
+
+.input-area .next-button {
     display: block;
     width: 50px;
     position: relative;
     top: 5px;
-    left: 190px;
+    left: 180px;
     margin-bottom: 5px;
 }
 
