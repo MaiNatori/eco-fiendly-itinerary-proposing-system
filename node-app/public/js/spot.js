@@ -187,6 +187,23 @@ function addSelectSpotList(place_id) {
 
     target.prepend(div); // リストの先頭に追加
 
+    /*
+    function adjustFontSize() {
+      const container = document.querySelector('.select-spot > h2');
+      const maxHeight = 80; // Set your maximum height here
+      const currentHeight = container.clientHeight;
+      const currentFontSize = parseFloat(window.getComputedStyle(container).fontSize);
+    
+      if (currentHeight > maxHeight) {
+        const newSize = (maxHeight / currentHeight) * currentFontSize;
+        container.style.fontSize = newSize + 'px';
+      }
+    }
+    
+    // Call the function on window resize and page load
+    window.addEventListener('resize', adjustFontSize);
+    window.addEventListener('load', adjustFontSize);
+    */
   }
 }
 
