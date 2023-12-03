@@ -157,11 +157,19 @@ function viewSearchResult(place) { // place = getDetails result object
 
 }
 
+let arr = [];
+
 // 画面下部（追加）ボタンに登録
 // 画面左の選択済みスポットリストに、選択したショップを登録する（表示する）
 function addSelectSpotList(place_id) {
 
-  getPlaceDetails(place_id, appendIt); // 引数のplace_idから、再度getPlaceDetailsで情報取得
+  if (!arr.includes(place_id)) {
+    arr.push(place_id);
+    getPlaceDetails(place_id, appendIt); // 引数のplace_idから、再度getPlaceDetailsで情報取得
+  }
+  else {
+    console.log('既に追加済みです');
+  }
 
   function appendIt (place) {
     const target = document.querySelector(".input-area"); // 表示先
@@ -175,45 +183,36 @@ function addSelectSpotList(place_id) {
     const h2 = document.createElement("h2");
       h2.innerText = place.name;
 
-    const input = document.createElement("input"); // 隠し属性のinputで、要素にplace_idを隠し持っておく
-      input.setAttribute("type", "hidden");
-      input.setAttribute("value", place.place_id);
-      input.classList.add("this-place-id");
+    const inputhidden = document.createElement("input"); // 隠し属性のinputで、要素にplace_idを隠し持っておく
+      inputhidden.setAttribute("type", "hidden");
+      inputhidden.setAttribute("value", place.place_id);
+      inputhidden.classList.add("this-place-id");
+    
+    const input = document.createElement("input");
+      input.setAttribute("type", "button");
+      input.setAttribute("name", "delete");
+      input.setAttribute("value", "削除");
+      input.classList.add("delete-button");
 
+      input.setAttribute("onclick", "clearSelectSpotList()"); // [追加] ボタンで addSelectSpotList を起動するように登録
 
     div.appendChild(img);
     div.appendChild(h2);
+    div.appendChild(inputhidden);
     div.appendChild(input);
 
     target.prepend(div); // リストの先頭に追加
 
-    /*
-    function adjustFontSize() {
-      const container = document.querySelector('.select-spot > h2');
-      const maxHeight = 80; // Set your maximum height here
-      const currentHeight = container.clientHeight;
-      const currentFontSize = parseFloat(window.getComputedStyle(container).fontSize);
-    
-      if (currentHeight > maxHeight) {
-        const newSize = (maxHeight / currentHeight) * currentFontSize;
-        container.style.fontSize = newSize + 'px';
-      }
-    }
-    
-    // Call the function on window resize and page load
-    window.addEventListener('resize', adjustFontSize);
-    window.addEventListener('load', adjustFontSize);
-    */
   }
 }
 
 // 画面左の選択済みスポットリストを消去する
 function clearSelectSpotList(){
-  const target = document.querySelector(".input-area"); // 表示先
-  // 表示先の子要素をすべて削除（表示中のものを削除）
-  while(target.firstChild) {
-    target.removeChild(target.firstChild);
-  }
+  const target = document.querySelector(".input-area");
+  const selectSpotElements = target.querySelectorAll(".select-spot");
+  selectSpotElements.forEach(element => {
+    element.remove();
+  });
 }
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移

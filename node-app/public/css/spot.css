@@ -140,24 +140,29 @@ main {
     width: 90px;
 }
 
-.input-area .select-spot > h2 {
+.input-area .select-spot h2 {
     position: relative;
     left: 100px;
     bottom: 97px;
-    margin: 5px 0 5px 0;
+    margin: 5px 0;
     width: 120px;
     height: 80px;
+    font-size: 10px;
+    line-height: 15px;
     display: flex;
     align-items: center;
+    overflow: hidden;
 }
 
-.input-area .delete-button {
+.input-area .select-spot .delete-button {
     display: block;
-    width: 50px;
+    width: 30px;
+    height: 20px;
     position: relative;
-    top: 36px;
-    left: 120px;
-    margin-bottom: 5px;
+    left: 190px;
+    font-size: 10px;
+    bottom: 115px;
+    padding: 2px 2px 2px 2px;
 }
 
 .input-area .next-button {
