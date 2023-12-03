@@ -168,7 +168,7 @@ function addSelectSpotList(place_id) {
     getPlaceDetails(place_id, appendIt); // 引数のplace_idから、再度getPlaceDetailsで情報取得
   }
   else {
-    console.log('既に追加済みです');
+    alert('既に追加済みです');
   }
 
   function appendIt (place) {
@@ -194,7 +194,7 @@ function addSelectSpotList(place_id) {
       input.setAttribute("value", "削除");
       input.classList.add("delete-button");
 
-      input.setAttribute("onclick", "clearSelectSpotList()"); // [追加] ボタンで addSelectSpotList を起動するように登録
+      input.setAttribute("onclick", `clearSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
     div.appendChild(img);
     div.appendChild(h2);
@@ -207,11 +207,19 @@ function addSelectSpotList(place_id) {
 }
 
 // 画面左の選択済みスポットリストを消去する
-function clearSelectSpotList(){
+function clearSelectSpotList(placeId){
   const target = document.querySelector(".input-area");
   const selectSpotElements = target.querySelectorAll(".select-spot");
   selectSpotElements.forEach(element => {
-    element.remove();
+    const deleteId = element.querySelector(".this-place-id").value;
+    if (placeId === deleteId){
+      element.remove();
+      // 配列arrからplace_idを削除するコード
+      const index = arr.indexOf(deleteId);
+      if (index !== -1) {
+        arr.splice(index, 1);
+      }
+    }
   });
 }
 
@@ -220,7 +228,7 @@ function sendSelectSpots(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
   let selectedSpotIds = []; // 選択されたplace_idの配列
 
-  const spots = document.querySelectorAll(".input-area"); // 選択済みスポットリスト
+  const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
   for (const s of spots) {
     const placeId = s.querySelector(".this-place-id").value;
     selectedSpotIds.push(placeId);
