@@ -63,6 +63,8 @@ main {
     height: 300px;
     width: 250px;
     position: relative;
+    overflow: auto;
+    overflow-x: hidden;
 }
 
 .input-area .button {

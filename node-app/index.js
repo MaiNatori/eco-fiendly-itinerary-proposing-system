@@ -37,13 +37,15 @@ app.get('/place', viewPlace);
 app.get('/result', viewResult);
 
 // Places API
-app.get('/interface', getPlaceIds);
+app.get('/interfacespots', getSpotPlaceIds);
+app.get('/interfacehotels', getHotelPlaceIds);
 
-// 選択したスポットのIDをPOST
+// 選択したIDをPOST
 app.post('/userselectspots', doGetUserSelectSpots);
+app.post('/userselecthotels', doGetUserSelectHotels);
 
 
-// 関数定義
+// 目的地ページ
 function viewDestination(req, res) {
   try {
     res.render('destination.ejs');
@@ -52,37 +54,10 @@ function viewDestination(req, res) {
   }
 }
 
+// スポットページ
 function viewSpot(req, res) {
   try {
     res.render('spot.ejs');
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-function viewHotel(req, res) {
-  // const sess = new Session(req, res); // session利用準備
-  // sess.check("selectspots"); // 念のためsession.selectspotsを確認
-  console.log("session.selectspots > ", req.session.selectspots);
-
-  try {
-    res.render('hotel.ejs');
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-function viewPlace(req, res) {
-  try {
-    res.render('place.ejs');
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-function viewResult(req, res) {
-  try {
-    res.render('result.ejs');
   } catch (error) {
     console.log(error)
   }
@@ -101,7 +76,7 @@ function doGetUserSelectSpots(req, res) {
   res.json({ result: true });
 }
 
-async function getPlaceIds(req, res) {
+async function getSpotPlaceIds(req, res) {
 
   async function fetchRestaurantViaV2TextSearch() {
 
@@ -142,7 +117,7 @@ async function getPlaceIds(req, res) {
   try {
     const result = await fetchRestaurantViaV2TextSearch();
 
-    console.log("getPlaceIds.result > ", result);
+    console.log("getSpotPlaceIds.result > ", result);
 
     const placeIds = result.places.map(places => places.id);
 
@@ -150,6 +125,101 @@ async function getPlaceIds(req, res) {
     } catch (error) {
       console.log(error)
     }
+}
+
+// ホテルページ
+function viewHotel(req, res) {
+  // const sess = new Session(req, res); // session利用準備
+  // sess.check("selectspots"); // 念のためsession.selectspotsを確認
+  console.log("session.selectspots > ", req.session.selectspots);
+
+  try {
+    res.render('hotel.ejs');
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+function doGetUserSelectHotels(req, res) {
+  const placeIds = req.body; // 選択されたスポットのplace_id配列
+  console.log('received data:', placeIds);
+
+  // const sess = new Session(req, res); // session利用準備
+  // sess.set("selectspots", placeIds); // sessionのselectspotsというキーにplaceIdsを保管
+  req.session.selecthotels = placeIds;
+  req.session.save();
+  console.log("session.selecthotels > ", req.session.selecthotels);
+
+  res.json({ result: true });
+}
+
+async function getHotelPlaceIds(req, res) {
+
+  async function fetchHotelViaV2TextSearch() {
+
+    const BASE_URL = "https://places.googleapis.com/v1/places:searchText";
+  
+    const requestHeader = new Headers({
+        'Content-Type': 'application/json',
+        'X-Goog-FieldMask': 'places.id',
+        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY
+    });
+  
+    const requestBody = {
+        textQuery: "SDGs 新宿 ホテル",
+        languageCode: "ja",
+        maxResultCount: 5,
+        // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
+        // strictTypeFiltering: boolean,
+        // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE
+    };
+
+    console.log("fetchHotelViaV2TextSearch > requestBody: \n", requestBody);
+  
+    try {
+      const rawResponse = await fetch(`${BASE_URL}`, {
+          method: "POST",
+          headers: requestHeader,
+          body: JSON.stringify(requestBody)
+      })
+
+      const response = await rawResponse.json()
+      
+      return response;
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+  try {
+    const result = await fetchHotelViaV2TextSearch();
+
+    console.log("getHotelPlaceIds.result > ", result);
+
+    const placeIds = result.places.map(places => places.id);
+
+    res.json({ places_id: placeIds });
+    } catch (error) {
+      console.log(error)
+    }
+}
+
+// 出発地・到着地入力ページ
+function viewPlace(req, res) {
+  try {
+    res.render('place.ejs');
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 結果表示ページ
+function viewResult(req, res) {
+  try {
+    res.render('result.ejs');
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 // Error handler

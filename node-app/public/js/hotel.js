@@ -1,4 +1,12 @@
-// 機能作成
+/*
+・「地名 SDGs ホテル 宿」で検索してplace_idを取得
+・place_idから以下の情報を取得
+・fields: ['types','photos', 'name', 'formatted_address', 'website', 'geometry', 'place_id', 'price_level']  // 検索で取得するフィールド(情報)
+・types == lodging(宿泊施設)
+・表示する内容：ホテル名、金額帯、住所、HPのURL
+・ホテル複数選択できるようにしてみようか
+*/
+
 let map;
 let service;
 let infowindow;
@@ -9,6 +17,7 @@ function initMap(
   default_center_lat = 35.6810603,    // 表示マップの初期位置 lat座標
   default_center_lng = 139.76730746   // 表示マップの初期位置 lng座標
 ) {
+
   const defaultPlace = new google.maps.LatLng(default_center_lat, default_center_lng);
 
   console.log(defaultPlace)
@@ -23,14 +32,14 @@ function initMap(
 
 }
 
-// index_get.jsにアクセスしてplace_idを取得する
+// index.jsにアクセスしてplace_idを取得する
 function inqueryPlaceIds() {
-  fetch("/interfacespots")
+  fetch("/interfacehotels")
     .then(response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-      return response.json();
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    };
+    return response.json();
     })
     .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
       console.log(data.places_id)
@@ -43,10 +52,7 @@ function placeIdsArray(place_id_array) {
   console.log("placeIdsArray: ", place_id_array)
   for (let i = 0; i < place_id_array.length; i++) {
     const placeid = place_id_array[i];
-    getPlaceDetails(placeid, function (itsPlace) {
-      // コールバック; 詳細データを取得、結果は第1引数に渡す
-      createMarker(itsPlace, (i === 0)); // Mapにピンさし、0番目だけは中心に設定
-    });
+    getPlaceDetails(placeid);
   }
 }
 
@@ -55,7 +61,7 @@ function getPlaceDetails (places_id, callback) {
   const request = {
     language: "ja",
     placeId: places_id,
-    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
+    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
   }
   
   // リクエスト実行
@@ -68,79 +74,20 @@ function getPlaceDetails (places_id, callback) {
   });
 }
 
-// Google Map にピンをさす
-function createMarker(place, doItCenter = false) {
-
-  if (!place.geometry || !place.geometry.location) return; // placeにlatおよびlngデータがあるか確認
-
-  const marker = new google.maps.Marker({
-    map,
-    position: place.geometry.location, // latおよびlngデータ取り出し
-  });
-
-  google.maps.event.addListener(marker, "click", () => {
-    const content = document.createElement("div");
-    content.style.width = "300px";
-    content.style.height = "100px";
-
-    const nameElement = document.createElement("h2");
-    nameElement.textContent = place.name;
-    nameElement.style.fontSize = "15px";
-    content.appendChild(nameElement);
-    
-
-    const typesElement = document.createElement("p");
-    typesElement.textContent = place.types;
-    content.appendChild(typesElement);
-
-    const placeAddressElement = document.createElement("p");
-    placeAddressElement.textContent = place.formatted_address;
-    content.appendChild(placeAddressElement);
-    
-    const phoneNumberElement = document.createElement("p");
-    phoneNumberElement.textContent = place.formatted_phone_number;
-    content.appendChild(phoneNumberElement);
-
-    const openingHoursElement = document.createElement("div");
-    place.opening_hours.weekday_text.forEach(day => {
-      const dayElement = document.createElement("p");
-      dayElement.textContent = day;
-      openingHoursElement.appendChild(dayElement);
-    });
-    content.appendChild(openingHoursElement);
-
-    const websiteElement = document.createElement("p");
-    websiteElement.textContent = place.website;
-    content.appendChild(websiteElement);
-
-    infowindow.setContent(content);
-    infowindow.open(map, marker);
-
-    viewSearchResult(place);
-  
-  });
-
-  if (doItCenter) map.setCenter(place.geometry.location); // Trueのとき、それを中心にセット
-
-}
-
 // 検索結果の表示
 function viewSearchResult(place) { // place = getDetails result object
-  const target = document.querySelector(".search-result"); // 表示先
-
-  // 表示先の子要素をすべて削除（表示中のものを削除）
-  while(target.firstChild) {
-    target.removeChild(target.firstChild);
-  }
+  const target = document.querySelector(".search-candidate"); // 表示先
 
   // 表示
+  const div = document.createElement("div");
+    div.classList.add("candidate-contents");
   const img = document.createElement("img");
     img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage.png";
     img.alt = "お店の画像";
   const h2 = document.createElement("h2");
     h2.innerText = place.name;
   const p = document.createElement("p");
-    p.innerHTML = (place.website !== undefined) ? `<a href="${place.website}" target="_blank">${place.website}</a>` : "";
+    p.innerHTML = (place.website !== undefined) ? `HP: <a href="${place.website}" target="_blank">${place.website}</a>` : "";
   const input = document.createElement("input");
     input.setAttribute("type", "submit");
     input.setAttribute("method", "post");
@@ -150,15 +97,15 @@ function viewSearchResult(place) { // place = getDetails result object
 
     input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
-    target.appendChild(img);
-    target.appendChild(h2);
-    target.appendChild(p);
-    target.appendChild(input);
-
+  target.appendChild(img);
+  target.appendChild(h2);
+  target.appendChild(p);
+  target.appendChild(input);
+  
 }
-
+  
 let arr = [];
-
+  
 // 画面下部（追加）ボタンに登録
 // 画面左の選択済みスポットリストに、選択したショップを登録する（表示する）
 function addSelectSpotList(place_id) {
@@ -205,7 +152,7 @@ function addSelectSpotList(place_id) {
 
   }
 }
-
+/*
 // 画面左の選択済みスポットリストを消去する
 function clearSelectSpotList(placeId){
   const target = document.querySelector(".input-area");
@@ -253,3 +200,4 @@ function sendSelectSpots(){
       else alert("送信失敗！");
     });
 }
+*/
