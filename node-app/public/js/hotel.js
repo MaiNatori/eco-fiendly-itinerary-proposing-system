@@ -101,11 +101,11 @@ function viewSearchResult(place) { // place = getDetails result object
 
     input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
+  div.appendChild(img);
+  div.appendChild(h2);
+  div.appendChild(p);
+  div.appendChild(input);
   target.appendChild(div);
-  target.appendChild(img);
-  target.appendChild(h2);
-  target.appendChild(p);
-  target.appendChild(input);
   
 }
   
