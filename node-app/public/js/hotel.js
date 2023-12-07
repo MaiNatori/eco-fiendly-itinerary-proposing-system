@@ -52,7 +52,10 @@ function placeIdsArray(place_id_array) {
   console.log("placeIdsArray: ", place_id_array)
   for (let i = 0; i < place_id_array.length; i++) {
     const placeid = place_id_array[i];
-    getPlaceDetails(placeid);
+    getPlaceDetails(placeid, function (itsPlace) {
+      // コールバック; 詳細データを取得、結果は第1引数に渡す
+      viewSearchResult(itsPlace);
+    });
   }
 }
 
@@ -70,6 +73,7 @@ function getPlaceDetails (places_id, callback) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       console.log(place);
       callback(place);
+      //viewSearchResult(place);
     }
   });
 }
@@ -97,6 +101,7 @@ function viewSearchResult(place) { // place = getDetails result object
 
     input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
+  target.appendChild(div);
   target.appendChild(img);
   target.appendChild(h2);
   target.appendChild(p);
