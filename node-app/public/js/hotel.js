@@ -82,6 +82,7 @@ function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 表示
+  if (place.website !== undefined) {
     const div = document.createElement("div");
       div.classList.add("candidate-contents");
     const img = document.createElement("img");
@@ -109,13 +110,13 @@ function viewSearchResult(place) { // place = getDetails result object
 
     div.appendChild(img);
     div.appendChild(h2);
-    div.appendChild(pPrice)
+    div.appendChild(pPrice);
     div.appendChild(pAddress);
     div.appendChild(pPhone);
     div.appendChild(pHP);
     div.appendChild(input);
     target.appendChild(div);
-  
+  };
 }
   
 let arr = [];
