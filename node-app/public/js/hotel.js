@@ -64,7 +64,7 @@ function getPlaceDetails (places_id, callback) {
   const request = {
     language: "ja",
     placeId: places_id,
-    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
+    fields: ['types','photos', 'icon', 'name','price_level', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
   }
   
   // リクエスト実行
@@ -73,7 +73,6 @@ function getPlaceDetails (places_id, callback) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       console.log(place);
       callback(place);
-      //viewSearchResult(place);
     }
   });
 }
@@ -83,29 +82,39 @@ function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 表示
-  const div = document.createElement("div");
-    div.classList.add("candidate-contents");
-  const img = document.createElement("img");
-    img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage.png";
-    img.alt = "お店の画像";
-  const h2 = document.createElement("h2");
-    h2.innerText = place.name;
-  const p = document.createElement("p");
-    p.innerHTML = (place.website !== undefined) ? `HP: <a href="${place.website}" target="_blank">${place.website}</a>` : "";
-  const input = document.createElement("input");
-    input.setAttribute("type", "submit");
-    input.setAttribute("method", "post");
-    input.setAttribute("name", "add");
-    input.setAttribute("value", "追加");
-    input.classList.add("button");
+    const div = document.createElement("div");
+      div.classList.add("candidate-contents");
+    const img = document.createElement("img");
+      img.src = (place && place.photos && place.photos.length > 0) ? place.photos[0].getUrl() :
+      (place && place.icon) ? place.icon : "/images/noimage_hotel.png";
+      img.alt = "お店の画像";
+    const h2 = document.createElement("h2");
+      h2.innerText = place.name;
+    const pPrice = document.createElement("p");
+      pPrice.innerHTML = (place.price_level !== undefined) ? `価格帯: ${place.price_level}` : "価格帯：--";
+    const pAddress = document.createElement("p");
+      pAddress.innerHTML = (place.formatted_address !== undefined) ? `住所: ${place.formatted_address}` : "住所：--";
+    const pPhone = document.createElement("p");
+      pPhone.innerHTML = (place.formatted_phone_number !== undefined) ? `電話番号: ${place.formatted_phone_number}` : "電話番号：--";
+    const pHP = document.createElement("p");
+      pHP.innerHTML = (place.website !== undefined) ? `HP: <a href="${place.website}" target="_blank">${place.website}</a>` : "HP：--";
+    const input = document.createElement("input");
+      input.setAttribute("type", "submit");
+      input.setAttribute("method", "post");
+      input.setAttribute("name", "add");
+      input.setAttribute("value", "追加");
+      input.classList.add("button");
 
-    input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
+      input.setAttribute("onclick", `addSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
-  div.appendChild(img);
-  div.appendChild(h2);
-  div.appendChild(p);
-  div.appendChild(input);
-  target.appendChild(div);
+    div.appendChild(img);
+    div.appendChild(h2);
+    div.appendChild(pPrice)
+    div.appendChild(pAddress);
+    div.appendChild(pPhone);
+    div.appendChild(pHP);
+    div.appendChild(input);
+    target.appendChild(div);
   
 }
   
@@ -130,7 +139,7 @@ function addSelectSpotList(place_id) {
     const div = document.createElement("div");
       div.classList.add("select-spot");
     const img = document.createElement("img");
-      img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage.png";
+      img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage_hotel.png";
       img.alt = "お店の画像";
     const h2 = document.createElement("h2");
       h2.innerText = place.name;
