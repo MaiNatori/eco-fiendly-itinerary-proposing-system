@@ -25,9 +25,6 @@
 
     <main>
         <h2>③宿泊先の選択</h2>
-        <div class="input-area">
-            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='place.html'" class="button">
-        </div>
         <div class="search-option">
             <div class="filter">
                 <summary>絞り込み条件</summary>
@@ -161,17 +158,15 @@
                 <p>並び替え条件：</p>
             </div>
             <div class="search-candidate">
-                <!--
-                <div class="candidate-contents">
-                    <img src="images/example_hotel.jpg" alt="表示例">
-                    <h2>ホテル名</h2>
-                    <p>金額帯：○○円～<br>
-                    アクセス：○○駅から徒歩●分<br>
-                    HP：<a href="https://hotels.his-j.com/HotelDetail/LGK00005.aspx">https://hotels.his-j.com/HotelDetail/LGK00005.aspx</a></p>
-                </div>
-                -->
             </div>
         </div>
+
+        <div class="input-area-frame">
+            <div class="input-area">
+            </div>
+            <input type="submit" method="post" name="next" value="次へ" onclick="sendSelectHotels()" class="button">
+        </div>
+
     </main>
     <footer>
         <p>Copyright 2023 Mai</p>

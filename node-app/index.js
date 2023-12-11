@@ -166,9 +166,9 @@ async function getHotelPlaceIds(req, res) {
     });
   
     const requestBody = {
-        textQuery: "SDGs 新宿 ホテル",
+        textQuery: "SDGs 東京 ホテル",
         languageCode: "ja",
-        maxResultCount: 5,
+        maxResultCount: 20,
         // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
         // strictTypeFiltering: boolean,
         // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE

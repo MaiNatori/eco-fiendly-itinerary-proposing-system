@@ -138,7 +138,7 @@ function addSelectSpotList(place_id) {
 
     // 表示
     const div = document.createElement("div");
-      div.classList.add("select-spot");
+      div.classList.add("select-hotel");
     const img = document.createElement("img");
       img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage_hotel.png";
       img.alt = "お店の画像";
@@ -167,11 +167,11 @@ function addSelectSpotList(place_id) {
 
   }
 }
-/*
+
 // 画面左の選択済みスポットリストを消去する
 function clearSelectSpotList(placeId){
   const target = document.querySelector(".input-area");
-  const selectSpotElements = target.querySelectorAll(".select-spot");
+  const selectSpotElements = target.querySelectorAll(".select-hotel");
   selectSpotElements.forEach(element => {
     const deleteId = element.querySelector(".this-place-id").value;
     if (placeId === deleteId){
@@ -186,18 +186,18 @@ function clearSelectSpotList(placeId){
 }
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
-function sendSelectSpots(){
+function sendSelectHotels(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
   let selectedSpotIds = []; // 選択されたplace_idの配列
 
-  const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
+  const spots = document.querySelectorAll(".select-hotel"); // 選択済みスポットリスト
   for (const s of spots) {
     const placeId = s.querySelector(".this-place-id").value;
     selectedSpotIds.push(placeId);
   }
 
   // 送信
- fetch("/userselectspots", {
+ fetch("/userselecthotels", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(selectedSpotIds)
@@ -209,10 +209,9 @@ function sendSelectSpots(){
       return response.json();
     })
     .then(data => {
-      console.log("POST /userselectspots -> ", data);
+      console.log("POST /userselecthotels -> ", data);
       // 送信成功なら /hotel に遷移、失敗なら警告表示
-      if (data.result == true) window.location.href = "/hotel"
+      if (data.result == true) window.location.href = "/place"
       else alert("送信失敗！");
     });
 }
-*/
