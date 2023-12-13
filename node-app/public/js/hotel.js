@@ -1,10 +1,5 @@
 /*
-・「地名 SDGs ホテル 宿」で検索してplace_idを取得
-・place_idから以下の情報を取得
-・fields: ['types','photos', 'name', 'formatted_address', 'website', 'geometry', 'place_id', 'price_level']  // 検索で取得するフィールド(情報)
-・types == lodging(宿泊施設)
-・表示する内容：ホテル名、金額帯、住所、HPのURL
-・ホテル複数選択できるようにしてみようか
+・types == lodging(宿泊施設) で絞込
 */
 
 let map;
@@ -82,7 +77,7 @@ function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 表示
-  if (place.website !== undefined) {
+  if ((place.types.includes('lodging') == true) && (place.website !== undefined)) {
     const div = document.createElement("div");
       div.classList.add("candidate-contents");
     const img = document.createElement("img");
