@@ -1,30 +1,11 @@
-let map;
-let service;
-let infowindow;
-
-// Google Map HTML 初期化 (Maps JavaScript APIをロードしたときに自動で最初に呼び出される)
-// default_center_lat, default_center_lngの位置を中心としたマップを表示する * 初期値は東京駅の座標
-function initMap(
-  default_center_lat = 35.6810603,    // 表示マップの初期位置 lat座標
-  default_center_lng = 139.76730746   // 表示マップの初期位置 lng座標
-) {
-
-  const defaultPlace = new google.maps.LatLng(default_center_lat, default_center_lng);
-
-  console.log(defaultPlace)
-
-  infowindow = new google.maps.InfoWindow();
-
-  map = new google.maps.Map(document.getElementById('maps'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
-
-  service = new google.maps.places.PlacesService(map);
-
-  inqueryPlaceIds();
-
-}
-
+/*
+・/interfacehotels で施設番号を取得
+・施設番号を使用して施設情報を取得
+・情報を表示
+・緯度・経度または住所を保存
+*/
 // index.jsにアクセスしてplace_idを取得する
-function inqueryPlaceIds() {
+function inqueryFacilityNumbers() {
   fetch("/interfacehotels")
     .then(response => {
       if (!response.ok) {
@@ -32,42 +13,11 @@ function inqueryPlaceIds() {
       };
     return response.json();
     })
-    .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
-      console.log(data.places_id)
-      placeIdsArray(data.places_id)
+    .then(data => {
+      console.log(data.results);
     });
 }
-
-// place_id配列を1つずつ取り出す関数
-function placeIdsArray(place_id_array) {
-  console.log("placeIdsArray: ", place_id_array)
-  for (let i = 0; i < place_id_array.length; i++) {
-    const placeid = place_id_array[i];
-    getPlaceDetails(placeid, function (itsPlace) {
-      // コールバック; 詳細データを取得、結果は第1引数に渡す
-      viewSearchResult(itsPlace);
-    });
-  }
-}
-
-// Place Details を PlaceID によって実行
-function getPlaceDetails (places_id, callback) {
-  const request = {
-    language: "ja",
-    placeId: places_id,
-    fields: ['types','photos', 'icon', 'name','price_level', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
-  }
-  
-  // リクエスト実行
-  service.getDetails(request, (place, status) => {
-    // 結果取得
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      console.log(place);
-      callback(place);
-    }
-  });
-}
-
+/*
 // 検索結果の表示
 function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-candidate"); // 表示先
@@ -206,3 +156,5 @@ function sendSelectHotels(){
       else alert("送信失敗！");
     });
 }
+*/
+inqueryFacilityNumbers();

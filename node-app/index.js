@@ -2,11 +2,15 @@ const { session, initSession } = require('./mods/session.js');
 const express = require('express');
 const path = require('path');
 const { default: fetch, Headers } = require('node-fetch-cjs');
+const querystring = require('querystring');
 
 require('dotenv').config();
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 console.log("GOOGLE_PLACES_API_KEY > ", GOOGLE_PLACES_API_KEY);
+
+const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID;
+console.log("RAKUTEN_APP_ID > ", RAKUTEN_APP_ID);
 
 // expressのインスタンス化
 const app = express();
@@ -38,7 +42,8 @@ app.get('/result', viewResult);
 
 // Places API
 app.get('/interfacespots', getSpotPlaceIds);
-app.get('/interfacehotels', getHotelPlaceIds);
+//app.get('/interfacehotels', getHotelPlaceIds);
+app.get('/interfacehotels', getHotelDetails);
 
 // 選択したIDをPOST
 app.post('/userselectspots', doGetUserSelectSpots);
@@ -152,7 +157,7 @@ function doGetUserSelectHotels(req, res) {
 
   res.json({ result: true });
 }
-
+/* ホテルのPlace ID
 async function getHotelPlaceIds(req, res) {
 
   async function fetchHotelViaV2TextSearch() {
@@ -202,6 +207,96 @@ async function getHotelPlaceIds(req, res) {
     } catch (error) {
       console.log(error)
     }
+}
+*/
+
+// 楽天トラベル施設検索APIで地区区分コードから施設番号を検索、施設番号から施設情報を取得
+async function getHotelDetails(req, res) {
+
+  // 施設番号の検索
+  async function fetchHotelSearch() {
+
+    const BASE_URL = "https://app.rakuten.co.jp/services/api/Travel/SimpleHotelSearch/20170426";
+  
+    const params = {
+      'format': "json",
+      'elements': "hotelNo",
+      'formatVersion': "2",
+      'largeClassCode': "japan",
+      'middleClassCode': "tokyo", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "tokyo", //市区町村 destinationページで選択されたもの
+      'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
+      'page': 1,
+      'hits': "10",
+      'applicationId': RAKUTEN_APP_ID
+    }
+
+    console.log("fetchHotelSearch > params: \n", params);
+
+    try {
+      const queryString = querystring.stringify(params);
+  
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // 施設番号の抽出、配列化
+  const result = await fetchHotelSearch();
+  console.log("getFacilityNumbers.result >");
+  const flattenedHotels = result.hotels.flat(); // ネストされた配列をフラットに
+  const facilityNumbers = flattenedHotels.map(hotel => hotel.hotelBasicInfo.hotelNo);
+  console.log(facilityNumbers);
+
+  // 施設情報の検索
+  async function fetchHotelDetail(hotelNo) {
+
+    const BASE_URL = "https://app.rakuten.co.jp/services/api/Travel/HotelDetailSearch/20170426";
+  
+    const params = {
+      'format': "json",
+      'elements': "hotelName,hotelInformantionUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
+      'formatVersion': "2",
+      'hotelNo': hotelNo,
+      'page': 1,
+      'hits': "10",
+      'applicationId': RAKUTEN_APP_ID
+    }
+
+    try {
+      const queryString = querystring.stringify(params);
+  
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  try {
+    const resultsArray = [];
+    for (const hotelNo of facilityNumbers) {
+      const resultDetail = await fetchHotelDetail(hotelNo);
+      console.log("hotelNo: ", hotelNo);
+      console.log("getHotelDetails.result > ", resultDetail);
+      resultsArray.push(resultDetail);
+    }
+    res.json({ results: resultsArray });
+  }
+  catch (error) {
+    console.log(error)
+  }
+
 }
 
 // 出発地・到着地入力ページ
