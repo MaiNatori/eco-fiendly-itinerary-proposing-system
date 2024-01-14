@@ -261,7 +261,7 @@ async function getHotelDetails(req, res) {
   
     const params = {
       'format': "json",
-      'elements': "hotelName,hotelInformantionUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
+      'elements': "hotelNo,hotelName,hotelInformationUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'hotelNo': hotelNo,
       'page': 1,

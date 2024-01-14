@@ -179,8 +179,10 @@ main {
     position: relative;
     bottom: 115px;
     left: 110px;
-    font-size: 20px;
-    margin: 8px 0 ;
+    width: 530px;
+    line-height: 15px;
+    font-size: 15px;
+    margin: 10px 0 10px 0;
 }
 
 .search-result .search-candidate .candidate-contents p {
@@ -197,8 +199,8 @@ main {
 }
 
 .search-result .search-candidate .candidate-contents .button {
-    position: relative;
-    bottom: 145px;
+    position: absolute;
+    bottom: 10px;
     left: 600px;
     height: 20px;
     padding: 2px 2px 2px 2px;
