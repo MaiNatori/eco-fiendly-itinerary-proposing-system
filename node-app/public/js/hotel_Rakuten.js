@@ -24,15 +24,21 @@ function viewSearchResult(results) {
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 各ホテル情報を取り出す
-  results.forEach(hotelGroup => {
-    const hotelInfo = hotelGroup.hotels[0][0].hotelBasicInfo;
+  results.hotels.forEach(hotelGroup => {
+    const hotelInfo = hotelGroup[0].hotelBasicInfo;
   
     // 表示
     const div = document.createElement("div");
       div.classList.add("candidate-contents");
+      div.dataset.hotelNo = `${hotelInfo.hotelNo}`;
 
     const img = document.createElement("img");
-      img.src = (hotelInfo.hotelImageUrl !== undefined) ? `${hotelInfo.hotelImageUrl}` : "/images/noimage_hotel.png";
+      img.onload = () => {
+      };
+      img.onerror = () => {
+        img.src = "/images/noimage_hotel.jpg"
+      };
+      img.src = (hotelInfo.hotelImageUrl !== undefined) ? `${hotelInfo.hotelImageUrl}` : "/images/noimage_hotel.jpg";
       img.alt = "ホテルの画像";
 
     const h2 = document.createElement("h2");
@@ -56,8 +62,10 @@ function viewSearchResult(results) {
       input.setAttribute("name", "add");
       input.setAttribute("value", "追加");
       input.classList.add("button");
-      input.setAttribute("onclick", `addSelectSpotList("${hotelInfo.hotelNo}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
-
+      //input.dataset.hotelNo = hotelInfo.hotelNo;
+      input.dataset.hotelName = hotelInfo.hotelName;
+      input.dataset.hotelImageUrl = hotelInfo.hotelImageUrl;
+      input.addEventListener("click", (event) => addSelectSpotList(event));
     div.appendChild(img);
     div.appendChild(h2);
     div.appendChild(pPrice);
@@ -69,37 +77,49 @@ function viewSearchResult(results) {
     target.appendChild(div);
   });
 }
-/*  
+
 let arr = [];
-  
+
 // 画面下部（追加）ボタンに登録
 // 画面左の選択済みスポットリストに、選択したショップを登録する（表示する）
-function addSelectSpotList(results) {
+function addSelectSpotList(event) {
+
+  // クリックされた要素のデータ属性を取得
+  const clickedElement = event.target.closest('.button');
+  const hotelNo = clickedElement.dataset.hotelNo;
+  const hotelName = clickedElement.dataset.hotelName;
+  const hotelImageUrl = clickedElement.dataset.hotelImageUrl;
 
   if (!arr.includes(hotelNo)) {
-    arr.push(results.hotelNo);
-    const result = results.find(result => results.hotelNo === hotelNo);
+    arr.push(hotelNo);
+    appendIt(hotelNo, hotelName, hotelImageUrl);
   }
   else {
     alert('既に追加済みです');
   }
 
-  function appendIt(place) {
+  function appendIt(hotelNo, hotelName, hotelImageUrl) {
     const target = document.querySelector(".input-area"); // 表示先
 
     // 表示
     const div = document.createElement("div");
       div.classList.add("select-hotel");
     const img = document.createElement("img");
-      img.src = (place.photos[0] !== undefined) ? place.photos[0].getUrl() : "/images/noimage_hotel.png";
-      img.alt = "お店の画像";
+      img.onload = () => {
+      };
+      img.onerror = () => {
+        img.src = "/images/noimage_hotel.jpg"
+      };
+      img.src = (hotelImageUrl !== undefined) ? `${hotelImageUrl}` : "/images/noimage_hotel.jpg";
+      img.alt = "ホテルの画像";
+
     const h2 = document.createElement("h2");
-      h2.innerText = place.name;
+      h2.innerText = hotelName;
 
     const inputhidden = document.createElement("input"); // 隠し属性のinputで、要素にplace_idを隠し持っておく
       inputhidden.setAttribute("type", "hidden");
-      inputhidden.setAttribute("value", place.place_id);
-      inputhidden.classList.add("this-place-id");
+      inputhidden.setAttribute("value", hotelNo);
+      inputhidden.classList.add("this-hotel-no");
     
     const input = document.createElement("input");
       input.setAttribute("type", "button");
@@ -107,7 +127,7 @@ function addSelectSpotList(results) {
       input.setAttribute("value", "削除");
       input.classList.add("delete-button");
 
-      input.setAttribute("onclick", `clearSelectSpotList("${place.place_id}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
+      input.setAttribute("onclick", `clearSelectHotelList("${hotelNo}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
 
     div.appendChild(img);
     div.appendChild(h2);
@@ -120,38 +140,94 @@ function addSelectSpotList(results) {
 }
 
 // 画面左の選択済みスポットリストを消去する
-function clearSelectSpotList(placeId){
+function clearSelectHotelList(hotelNos){
   const target = document.querySelector(".input-area");
-  const selectSpotElements = target.querySelectorAll(".select-hotel");
-  selectSpotElements.forEach(element => {
-    const deleteId = element.querySelector(".this-place-id").value;
-    if (placeId === deleteId){
+  const selectHotelElements = target.querySelectorAll(".select-hotel");
+  selectHotelElements.forEach(element => {
+    const deleteNo = element.querySelector(".this-hotel-no").value;
+    if (hotelNos === deleteNo){
       element.remove();
       // 配列arrからplace_idを削除するコード
-      const index = arr.indexOf(deleteId);
+      const index = arr.indexOf(deleteNo);
       if (index !== -1) {
         arr.splice(index, 1);
       }
     }
   });
 }
+/*
+// 絞り込み・並び替え
+function applyFilter(){
 
+}
+//絞り込み hotelClassCodeの種類が知りたい、hotelMinChargeで予算絞り込み、accessの駅近絞り込み
+function classNarrowDown(){
+
+}
+
+function chargeNarrowDown(minRange, maxRange){
+
+} 
+
+function accessNarrowDown(){
+
+}
+
+//並び替え 安い順(hotelMinCharge)、高い順(hotelMinCharge)、駅近順(access)、人気順(reviewAverage)
+function minChargeSort(){
+    fetch("/interfacehotels")
+      .then(response => {
+        if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+        };
+      return response.json();
+      })
+      .then(data => {
+        console.log("Fetched hotel details: ", data);
+
+        const newParams = { ...data.params, 'sort': "+roomCharge" };
+
+        fetchHotelSearch(newParams)
+         .then(searchResult => {
+          console.log("Search result with sorted room charge:", searchResult);
+         })
+         .catch(error => {
+          console.error("Error fetching search result:", error);
+         });
+      })
+      .catch(error => {
+        console.error("Error fetching hotel details:", error);
+      })
+}
+/*
+function maxChargeSort(){
+
+}
+
+function accessSort(){
+
+}
+
+function reviewSort(){
+
+}
+*/
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
-  let selectedSpotIds = []; // 選択されたplace_idの配列
+  let selectedHotelNos = []; // 選択されたplace_idの配列
 
-  const spots = document.querySelectorAll(".select-hotel"); // 選択済みスポットリスト
-  for (const s of spots) {
-    const placeId = s.querySelector(".this-place-id").value;
-    selectedSpotIds.push(placeId);
+  const hotels = document.querySelectorAll(".select-hotel"); // 選択済みスポットリスト
+  for (const s of hotels) {
+    const hotelNumber = s.querySelector(".this-hotel-no").value;
+    selectedHotelNos.push(hotelNumber);
   }
 
   // 送信
  fetch("/userselecthotels", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(selectedSpotIds)
+    body: JSON.stringify(selectedHotelNos)
   })
     .then(response => {
       if (!response.ok) {
@@ -166,5 +242,5 @@ function sendSelectHotels(){
       else alert("送信失敗！");
     });
 }
-*/
+
 inqueryFacilityNumbers();

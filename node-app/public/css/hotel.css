@@ -56,10 +56,10 @@ main {
 /* 条件設定 */
 .search-option {
     border: 5px solid #fdbf64;
-    top: 470px;
+    top: 510px;
     margin-left: 30px;
     margin-top: 5px;
-    height: 400px;
+    height: 360px;
     width: 240px;
     position: absolute;
 }
@@ -216,24 +216,32 @@ main {
     position: absolute;
     top: 265px;
     margin-left: 30px;
-    height: 200px;
+    height: 230px;
     width: 240px;
 }
 .input-area {
     background-color: #fdbf64;
     position: absolute;
     top: 5px;
-    height: 190px;
+    height: 220px;
     width: 200px;
     overflow: auto;
     overflow-x: hidden;
+    /*スクロールバー非表示（IE・Edge）*/
+    -ms-overflow-style: none;
+    /*スクロールバー非表示（Firefox）*/
+    scrollbar-width: none;
+}
+/* スクロールバー非表示（Chrome・Safari） */
+.input-area::-webkit-scrollbar{
+    display: none;
 }
 
 .input-area .select-hotel {
     background-color: #fbf9f0;
     margin: 0px 15px 5px 0px;
     height: 180px;
-    width: 180px;
+    width: 200px;
     position: relative;
 }
 
@@ -244,7 +252,7 @@ main {
 }
 
 .input-area .select-hotel h2 {
-    font-size: 15px;
+    font-size: 12px;
     margin: 0px 5px 5px 5px;
     text-align: center;
 }
@@ -252,8 +260,8 @@ main {
 .input-area .select-hotel .delete-button {
     display: block;
     position: absolute;
-    right: 3px;
-    bottom: 3px;
+    right: 5px;
+    bottom: 155px;
     width: 35px;
     height: 20px;
     font-size: 12px;
