@@ -44,6 +44,9 @@ app.get('/result', viewResult);
 app.get('/interfacespots', getSpotPlaceIds);
 //app.get('/interfacehotels', getHotelPlaceIds);
 app.get('/interfacehotels', getHotelDetails);
+  //並び替え
+  app.get('/minsort', minChargeSort);
+  app.get('/maxsort', maxChargeSort);
 
 // 選択したIDをPOST
 app.post('/userselectspots', doGetUserSelectSpots);
@@ -171,13 +174,13 @@ async function getHotelDetails(req, res) {
       'elements': "hotelNo,hotelName,hotelInformationUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'largeClassCode': "japan",
-      'middleClassCode': "akita", //都道府県 destinationページで選択されたもの
-      'smallClassCode': "honjo", //市区町村 destinationページで選択されたもの
+      'middleClassCode': "miyagi", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "sendai", //市区町村 destinationページで選択されたもの
       //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",
       'applicationId': RAKUTEN_APP_ID
-    }
+    };
 
     console.log("fetchHotelSearch > params: \n", params);
 
@@ -207,6 +210,108 @@ async function getHotelDetails(req, res) {
   }
 
 }
+
+// 新しい入力パラメータを追加する関数たち
+async function minChargeSort(req, res) {
+  
+  async function fetchHotelSearch() {
+
+    const BASE_URL = "https://app.rakuten.co.jp/services/api/Travel/SimpleHotelSearch/20170426";
+  
+    const params = {
+      'format': "json",
+      'responseType': "large",
+      'elements': "hotelNo,hotelName,hotelInformationUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
+      'formatVersion': "2",
+      'largeClassCode': "japan",
+      'middleClassCode': "miyagi", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "sendai", //市区町村 destinationページで選択されたもの
+      //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
+      'page': 1,
+      'hits': "10",
+      'applicationId': RAKUTEN_APP_ID,
+      'sort': "+roomCharge"
+    };
+
+    console.log("fetchHotelSearch > params: \n", params);
+
+    try {
+      const queryString = querystring.stringify(params);
+  
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  try {
+    const result = await fetchHotelSearch();
+
+    console.log("getFacilityNumbers.result > \n", result);
+
+    res.json({ results: result });  
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+async function maxChargeSort(req, res) {
+  
+  async function fetchHotelSearch() {
+
+    const BASE_URL = "https://app.rakuten.co.jp/services/api/Travel/SimpleHotelSearch/20170426";
+  
+    const params = {
+      'format': "json",
+      'responseType': "large",
+      'elements': "hotelNo,hotelName,hotelInformationUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
+      'formatVersion': "2",
+      'largeClassCode': "japan",
+      'middleClassCode': "miyagi", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "sendai", //市区町村 destinationページで選択されたもの
+      //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
+      'page': 1,
+      'hits': "10",
+      'applicationId': RAKUTEN_APP_ID,
+      'sort': "-roomCharge"
+    };
+
+    console.log("fetchHotelSearch > params: \n", params);
+
+    try {
+      const queryString = querystring.stringify(params);
+  
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  try {
+    const result = await fetchHotelSearch();
+
+    console.log("getFacilityNumbers.result > \n", result);
+
+    res.json({ results: result });  
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
 
 // 出発地・到着地入力ページ
 function viewPlace(req, res) {

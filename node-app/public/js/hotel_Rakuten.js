@@ -4,6 +4,7 @@
 ・情報を表示
 ・緯度・経度または住所を保存
 */
+
 // index.jsにアクセスしてplace_idを取得する
 function inqueryFacilityNumbers() {
   fetch("/interfacehotels")
@@ -21,6 +22,9 @@ function inqueryFacilityNumbers() {
 
 // 結果の表示
 function viewSearchResult(results) {
+
+  clearSearchResults();
+
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 各ホテル情報を取り出す
@@ -75,6 +79,7 @@ function viewSearchResult(results) {
     div.appendChild(input);
 
     target.appendChild(div);
+    
   });
 }
 
@@ -155,11 +160,46 @@ function clearSelectHotelList(hotelNos){
     }
   });
 }
-/*
-// 絞り込み・並び替え
-function applyFilter(){
 
+// 既存の表示内容を消去する関数
+function clearSearchResults(){
+  const target = document.querySelector(".search-candidate");
+  while (target.firstChild) {
+    target.removeChild(target.firstChild);
+  }
 }
+
+// 絞り込み・並び替え
+function chbox(){
+  if (document.getElementById("cheap").checked== true) {
+    document.getElementById("expensive").checked = false;
+  }
+}
+
+function exbox(){
+  if (document.getElementById("expensive").checked== true) {
+    document.getElementById("cheap").checked = false;
+  }
+}
+
+function applyFilter(){
+  clearSearchResults();
+
+  let checkboxmin = document.getElementById('cheap');
+  let checkboxmax = document.getElementById('expensive');
+
+  if (checkboxmin.checked && !checkboxmax.checked) {
+    console.log("安い順に並び替え");
+    minChargeSort();
+  } else if (checkboxmax.checked && !checkboxmin.checked) {
+    console.log("高い順に並び替え");
+    maxChargeSort();
+  } else {
+    console.log("並び替え指定なし");
+    inqueryFacilityNumbers();
+  }
+}
+/*
 //絞り込み hotelClassCodeの種類が知りたい、hotelMinChargeで予算絞り込み、accessの駅近絞り込み
 function classNarrowDown(){
 
@@ -172,38 +212,36 @@ function chargeNarrowDown(minRange, maxRange){
 function accessNarrowDown(){
 
 }
-
+*/
 //並び替え 安い順(hotelMinCharge)、高い順(hotelMinCharge)、駅近順(access)、人気順(reviewAverage)
 function minChargeSort(){
-    fetch("/interfacehotels")
-      .then(response => {
-        if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-        };
-      return response.json();
-      })
-      .then(data => {
-        console.log("Fetched hotel details: ", data);
+   fetch("/minsort")
+    .then(response => {
+      if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+      };
+    return response.json();
+    })
+    .then(data => {
+      console.log("安い順", data.results);
+      viewSearchResult(data.results);
+    });
+}
 
-        const newParams = { ...data.params, 'sort': "+roomCharge" };
-
-        fetchHotelSearch(newParams)
-         .then(searchResult => {
-          console.log("Search result with sorted room charge:", searchResult);
-         })
-         .catch(error => {
-          console.error("Error fetching search result:", error);
-         });
-      })
-      .catch(error => {
-        console.error("Error fetching hotel details:", error);
-      })
+function maxChargeSort(){
+  fetch("/maxsort")
+  .then(response => {
+    if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`)
+    };
+  return response.json();
+  })
+  .then(data => {
+    console.log("高い順", data.results);
+    viewSearchResult(data.results);
+  });
 }
 /*
-function maxChargeSort(){
-
-}
-
 function accessSort(){
 
 }
