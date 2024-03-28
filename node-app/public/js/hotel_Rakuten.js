@@ -170,34 +170,31 @@ function clearSearchResults(){
 }
 
 // 絞り込み・並び替え
-function chbox(){
-  if (document.getElementById("cheap").checked== true) {
-    document.getElementById("expensive").checked = false;
-  }
-}
-
-function exbox(){
-  if (document.getElementById("expensive").checked== true) {
-    document.getElementById("cheap").checked = false;
-  }
-}
-
 function applyFilter(){
   clearSearchResults();
 
   let checkboxmin = document.getElementById('cheap');
   let checkboxmax = document.getElementById('expensive');
+  let checkboxaccess = document.getElementById('near');
+  let checkboxpopular = document.getElementById('popular');
 
-  if (checkboxmin.checked && !checkboxmax.checked) {
+  if (checkboxmin.checked) {
     console.log("安い順に並び替え");
     minChargeSort();
-  } else if (checkboxmax.checked && !checkboxmin.checked) {
+  } else if (checkboxmax.checked) {
     console.log("高い順に並び替え");
     maxChargeSort();
+  } else if (checkboxaccess.checked) {
+    console.log("駅から近い順に並び替え");
+    accessChargeSort();
+  } else if (checkboxpopular.checked) {
+    console.log("人気順");
+    reviewSort();
   } else {
     console.log("並び替え指定なし");
     inqueryFacilityNumbers();
   }
+
 }
 /*
 //絞り込み hotelClassCodeの種類が知りたい、hotelMinChargeで予算絞り込み、accessの駅近絞り込み

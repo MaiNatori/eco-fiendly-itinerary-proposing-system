@@ -171,7 +171,7 @@ async function getHotelDetails(req, res) {
     const params = {
       'format': "json",
       'responseType': "large",
-      'elements': "hotelNo,hotelName,hotelInformationUrl,planListUrl,hotelKanaName,hotelMinCharge,address1,address2,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
+      'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'largeClassCode': "japan",
       'middleClassCode': "miyagi", //都道府県 destinationページで選択されたもの
