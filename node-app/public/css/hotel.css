@@ -148,6 +148,44 @@ main {
     height: 10px;
 }
 
+.loading-content {
+	transition: all ease-in-out 1s;
+}
+
+.loading-content.js-loaded {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.loading-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fbf9f0;
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    animation: loadingAnimation 1s infinite;
+}
+
+.loading-content.js-loaded .loading-text {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes loadingAnimation {
+	0% {
+	    transform: translate(-50%, -50%) translateY(0);
+	}
+	50% {
+	    transform: translate(-50%, -50%) translateY(-20px);
+	}
+	100% {
+	    transform: translate(-50%, -50%) translateY(0);
+	}
+}
+
 .search-result .search-candidate {
     background-color: #fdbf64;
     height: 520px;

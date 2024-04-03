@@ -10,13 +10,18 @@ function inqueryFacilityNumbers() {
   fetch("/interfacehotels")
     .then(response => {
       if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
+        throw new Error(`HTTP error! Status: ${response.status}`)
       };
     return response.json();
     })
     .then(data => {
       console.log(data.results);
       viewSearchResult(data.results);
+      const loading = document.querySelector('.js-loading');
+      loading.classList.add('js-loaded');
+    })
+    .catch(error => {
+      console.error("Error fetching data: ", error);
     });
 }
 
@@ -186,7 +191,7 @@ function applyFilter(){
     maxChargeSort();
   } else if (checkboxaccess.checked) {
     console.log("駅から近い順に並び替え");
-    accessChargeSort();
+    accessSort();
   } else if (checkboxpopular.checked) {
     console.log("人気順");
     reviewSort();
@@ -212,6 +217,8 @@ function accessNarrowDown(){
 */
 //並び替え 安い順(hotelMinCharge)、高い順(hotelMinCharge)、駅近順(access)、人気順(reviewAverage)
 function minChargeSort(){
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
    fetch("/minsort")
     .then(response => {
       if (!response.ok) {
@@ -222,31 +229,107 @@ function minChargeSort(){
     .then(data => {
       console.log("安い順", data.results);
       viewSearchResult(data.results);
+      loading.classList.add('js-loaded');
     });
 }
 
 function maxChargeSort(){
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
   fetch("/maxsort")
-  .then(response => {
-    if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`)
-    };
-  return response.json();
-  })
-  .then(data => {
-    console.log("高い順", data.results);
-    viewSearchResult(data.results);
-  });
+    .then(response => {
+      if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+      };
+    return response.json();
+    })
+    .then(data => {
+      console.log("高い順", data.results);
+      viewSearchResult(data.results);
+      loading.classList.add('js-loaded');
+    });
 }
-/*
-function accessSort(){
 
+function accessSort(){
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
+  fetch("/interfacehotels")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      };
+    return response.json();
+    })
+    // アクセス情報を持つホテルのみフィルタリング
+    .then(data => {
+      // アクセス情報を持つホテルの配列
+      const hotelsWithAccess = data.results.hotels.filter(hotelGroup => {
+        const accessInfo = hotelGroup[0].hotelBasicInfo.access;
+        return accessInfo !== undefined;
+      });
+      // 最寄り駅と徒歩時間を抽出し、並び替え
+      const sortedHotels = hotelsWithAccess.sort((a, b) => {
+        const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
+        const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
+        return accessA - accessB;
+      });
+      console.log("駅から近い順", sortedHotels);
+      // 結果を表示
+      viewSearchResult({ hotels: sortedHotels });
+      loading.classList.add('js-loaded');
+    })
+    .catch(error => {
+      console.error("Error fetching data: ", error);
+    });
+}
+
+function extractWalkTime(access) {
+  // 「徒歩」の直後にある「分」の前の数字を抽出して返す
+  const regex = /徒歩\D*(\d+)\D*分/g;
+  let minTime = Infinity;
+  let match;
+  while ((match = regex.exec(access)) !== null) {
+    const time = parseInt(match[1]);
+    if (time < minTime) {
+      minTime = time;
+    }
+  }
+  return minTime;
 }
 
 function reviewSort(){
-
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
+  fetch("/interfacehotels")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      };
+    return response.json();
+    })
+    // アクセス情報を持つホテルのみフィルタリング
+    .then(data => {
+      // アクセス情報を持つホテルの配列
+      const hotelsWithAccess = data.results.hotels.filter(hotelGroup => {
+        const accessInfo = hotelGroup[0].hotelBasicInfo.access;
+        return accessInfo !== undefined;
+      });
+      // 最寄り駅と徒歩時間を抽出し、並び替え
+      const sortedHotels = hotelsWithAccess.sort((a, b) => {
+        const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
+        const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
+        return accessA - accessB;
+      });
+      console.log("人気順", sortedHotels);
+      // 結果を表示
+      viewSearchResult({ hotels: sortedHotels });
+      loading.classList.add('js-loaded');
+    })
+    .catch(error => {
+      console.error("Error fetching data: ", error);
+    });
 }
-*/
+
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
