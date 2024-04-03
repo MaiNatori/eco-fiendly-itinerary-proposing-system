@@ -307,28 +307,26 @@ function reviewSort(){
       };
     return response.json();
     })
-    // アクセス情報を持つホテルのみフィルタリング
     .then(data => {
-      // アクセス情報を持つホテルの配列
-      const hotelsWithAccess = data.results.hotels.filter(hotelGroup => {
-        const accessInfo = hotelGroup[0].hotelBasicInfo.access;
-        return accessInfo !== undefined;
+      // レビュー評価が存在するホテル情報のみをフィルタリングする
+      const hotelsWithReview = data.results.hotels.filter(hotelGroup => {
+        const reviewAverage = hotelGroup[0].hotelBasicInfo.reviewAverage;
+        return reviewAverage !== undefined;
       });
-      // 最寄り駅と徒歩時間を抽出し、並び替え
-      const sortedHotels = hotelsWithAccess.sort((a, b) => {
-        const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
-        const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
-        return accessA - accessB;
+      // レビュー評価が高い順に並び替える
+      hotelsWithReview.sort((a, b) => {
+        const reviewAverageA = a[0].hotelBasicInfo.reviewAverage;
+        const reviewAverageB = b[0].hotelBasicInfo.reviewAverage;
+        return reviewAverageB - reviewAverageA; // レビュー評価が大きい順に並び替える
       });
-      console.log("人気順", sortedHotels);
-      // 結果を表示
-      viewSearchResult({ hotels: sortedHotels });
+      // ソートされた結果を表示
+      console.log(hotelsWithReview);
+      viewSearchResult({ hotels: hotelsWithReview });
       loading.classList.add('js-loaded');
     })
     .catch(error => {
       console.error("Error fetching data: ", error);
-    });
-}
+    });}
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
