@@ -83,7 +83,7 @@
                                     <option value="100000" data-max="100000">100,000円</option>
                                     <option value="150000" data-max="150000">150,000円</option>
                                     <option value="200000" data-max="200000">200,000円</option>
-                                    <option selected value="0" data-max="0">上限なし</option>
+                                    <option selected value="1000000000000" data-max="1000000000000">上限なし</option>
                                 </select>
                             </dd>
                         </div>
@@ -96,7 +96,8 @@
                             <dd>
                                 <p>徒歩約
                                 <select name="minutes" id="minutes">
-                                    <option selected value="0" data-time="0">0</option>
+                                    <option selected value="100">-</option>
+                                    <option value="0" data-time="0">0</option>
                                     <option value ="5" data-time="5">5</option>
                                     <option value ="10" data-time="10">10</option>
                                     <option value ="15" data-time="15">15</option>
@@ -105,7 +106,7 @@
                                     <option value ="30" data-time="30">30</option>
                                     <option value ="35" data-time="35">30～</option>
                                 </select>
-                                分</p>
+                                分以内</p>
                             </dd>
                         </div>
                         <div class="facility-select">
@@ -115,11 +116,11 @@
                                 </label>
                             </dt>
                             <dd>
-                                <p><input type="checkbox" name="facility" value="ホテル" id="hotel" data-class="hotel">
+                                <p><input type="checkbox" name="facility" value="HOTEL" id="hotel" data-class="hotel">
                                 <label for="hotel">ホテル</label></p>
-                                <p><input type="checkbox" name="facility" value="ペンション" id="pension" data-class="pension">
+                                <p><input type="checkbox" name="facility" value="PENSION" id="pension" data-class="pension">
                                 <label for="pension">ペンション</label></p>
-                                <p><input type="checkbox" name="facility" value="旅館" id="ryokan" data-class="ryokan">
+                                <p><input type="checkbox" name="facility" value="RYOKAN" id="ryokan" data-class="ryokan">
                                 <label for="ryokan">旅館</label></p>
                             </dd>
                         </div>
@@ -146,15 +147,9 @@
             <div class="loading-content js-loading">
                 <p class="loading-text">Loading...</p>
             </div>    
-            <!--<div id="maps">
-                <script async
-                    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6UaRw_ME-1NiWguJurxiCUPq83Q0R6lI&libraries=places&callback=initMap"
-                    defer
-                ></script>
-            </div>-->
             <div class="option-result">
-                <p>絞り込み条件：</p>
-                <p>並び替え条件：</p>
+                <p id="filter">絞り込み条件：</p>
+                <p id="sort">並び替え条件：</p>
             </div>
             <div class="search-candidate">
             </div>

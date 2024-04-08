@@ -17,8 +17,6 @@ function inqueryFacilityNumbers() {
     .then(data => {
       console.log(data.results);
       viewSearchResult(data.results);
-      const loading = document.querySelector('.js-loading');
-      loading.classList.add('js-loaded');
     })
     .catch(error => {
       console.error("Error fetching data: ", error);
@@ -27,6 +25,15 @@ function inqueryFacilityNumbers() {
 
 // 結果の表示
 function viewSearchResult(results) {
+  const loading = document.querySelector('.js-loading');
+  loading.classList.add('js-loaded');
+  document.getElementById('range-min').addEventListener('change', handleBudgetChange);
+  document.getElementById('range-max').addEventListener('change', handleBudgetChange);
+  document.getElementById('minutes').addEventListener('change', handleMinutesChange);
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  facilityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', handleTypeSelect);
+  });
 
   clearSearchResults();
 
@@ -71,9 +78,9 @@ function viewSearchResult(results) {
       input.setAttribute("name", "add");
       input.setAttribute("value", "追加");
       input.classList.add("button");
-      //input.dataset.hotelNo = hotelInfo.hotelNo;
       input.dataset.hotelName = hotelInfo.hotelName;
       input.dataset.hotelImageUrl = hotelInfo.hotelImageUrl;
+      input.dataset.hotelNo = hotelInfo.hotelNo;
       input.addEventListener("click", (event) => addSelectSpotList(event));
     div.appendChild(img);
     div.appendChild(h2);
@@ -91,7 +98,7 @@ function viewSearchResult(results) {
 let arr = [];
 
 // 画面下部（追加）ボタンに登録
-// 画面左の選択済みスポットリストに、選択したショップを登録する（表示する）
+// 画面左の選択済みスポットリストに、選択したホテルを登録する（表示する）
 function addSelectSpotList(event) {
 
   // クリックされた要素のデータ属性を取得
@@ -174,113 +181,232 @@ function clearSearchResults(){
   }
 }
 
+// 予算のプルダウンが変更されたときの処理
+function handleBudgetChange() {
+  const rangeMin = parseInt(document.getElementById('range-min').value);
+  const rangeMax = parseInt(document.getElementById('range-max').value);
+  if (rangeMin >= 1000 || rangeMax >= 1000) {
+      document.getElementById('budget').checked = true;
+  } else {
+      document.getElementById('budget').checked = false;
+  }
+}
+
+// 駅からの距離のプルダウンが変更されたときの処理
+function handleMinutesChange() {
+  const minutes = parseInt(document.getElementById('minutes').value)
+  if (minutes < 100) {
+      document.getElementById('distance').checked = true;
+  } else {
+      document.getElementById('distance').checked = false;
+  }
+}
+
+// 施設タイプのチェックボックスが変更されたときの処理
+function handleTypeSelect() {
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  const selectedFacilityTypes = Array.from(facilityCheckboxes).filter(cb => cb.checked);
+  document.getElementById('facility-type').checked = selectedFacilityTypes.length > 0;
+}
+
 // 絞り込み・並び替え
 function applyFilter(){
   clearSearchResults();
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
+
+  let sortCriteria;
+  let filterCriteria = [];
+  let sortText = "";
+  let filterText ="";
 
   let checkboxmin = document.getElementById('cheap');
   let checkboxmax = document.getElementById('expensive');
   let checkboxaccess = document.getElementById('near');
   let checkboxpopular = document.getElementById('popular');
+  let checkboxbudget = document.getElementById('budget');
+  let checkboxdistance = document.getElementById('distance');
+  let checkboxtype = document.getElementById('facility-type');
 
+   // 並び替え条件の処理
   if (checkboxmin.checked) {
-    console.log("安い順に並び替え");
-    minChargeSort();
+    sortCriteria = minChargeSort;
+    sortText = '並び替え条件：料金が安い順';
   } else if (checkboxmax.checked) {
-    console.log("高い順に並び替え");
-    maxChargeSort();
+    sortCriteria = maxChargeSort;
+    sortText = '並び替え条件：料金が高い順';
   } else if (checkboxaccess.checked) {
-    console.log("駅から近い順に並び替え");
-    accessSort();
+    sortCriteria = accessSort;
+    sortText = '並び替え条件：駅から近い順';
   } else if (checkboxpopular.checked) {
-    console.log("人気順");
-    reviewSort();
-  } else {
-    console.log("並び替え指定なし");
-    inqueryFacilityNumbers();
+    sortCriteria = reviewSort;
+    sortText = '並び替え条件：人気順';
   }
 
+  // 絞り込み条件の処理
+  if (checkboxbudget.checked) {
+    filterCriteria.push(chargeFilter);
+    filterText += '予算';
+  }
+  if (checkboxdistance.checked) {
+    filterCriteria.push(distanceFilter);
+    filterText += (filterText ? '、' : '') + '駅からの距離';
+  }
+  if (checkboxtype.checked) {
+    filterCriteria.push(classFilter);
+    filterText += (filterText ? '、' : '') + '施設タイプ';
+  }
+
+  // HTMLに条件を表示
+  document.getElementById('sort').innerText = sortText ? sortText : '並び替え順：';
+  document.getElementById('filter').innerText = filterText ? '絞り込み条件：' + filterText : '絞り込み条件：';
+
+  // console.logで条件を表示
+  console.log(sortText ? sortText : '並び替え条件：なし');
+  console.log(filterText ? '絞り込み条件：' + filterText : 'なし');
+
+  // 絞り込み条件の処理を適用
+  let filteredHotels = fetch("/interfacehotels")
+    .then(response => {
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      let filteredData = data.results.hotels;
+      if (filterCriteria.length > 0) {
+        filterCriteria.forEach(filterFunction => {
+          filteredData = filterFunction(filteredData);
+        });    
+      }
+      // 並び替え条件が選択されている場合、並び替えを適用
+      if (sortCriteria) {
+        sortCriteria(filteredData);
+      } else { // 並び替え条件が選択されていない場合、結果をそのまま表示
+          viewSearchResult({ hotels: filteredData });
+      }
+    })
+  // 絞り込み条件が選択されていない場合で並び替え条件がある場合、並び替え
+  if (filterCriteria === 0 && sortCriteria) {
+    filteredHotels.then(filteredData => {
+      sortCriteria(filteredData);
+    });
+  }
 }
-/*
+
 //絞り込み hotelClassCodeの種類が知りたい、hotelMinChargeで予算絞り込み、accessの駅近絞り込み
-function classNarrowDown(){
-
+function chargeFilter(filteredData){
+  const rangeMin = parseInt(document.getElementById('range-min').value);
+  const rangeMax = parseInt(document.getElementById('range-max').value);
+  return filteredData.filter(hotel => {
+    const charge = parseInt(hotel[0].hotelBasicInfo.hotelMinCharge);
+    return charge >= rangeMin && charge <= rangeMax;
+  });
 }
 
-function chargeNarrowDown(minRange, maxRange){
-
+function distanceFilter(filteredData){
+  const selectedTime = parseInt(document.getElementById('minutes').value);
+  return filteredData.filter(hotel => {
+    const walkTime = extractWalkTime(hotel[0].hotelBasicInfo.access);
+    return walkTime <= selectedTime;
+  });
 } 
 
-function accessNarrowDown(){
+function classFilter(filteredData){
+// 選択されたクラスに合致するホテルデータのみを抽出して返す
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  const selectedFacilityTypes = Array.from(facilityCheckboxes)
+    .filter(checkbox => checkbox.checked)
+    .map(checkbox => checkbox.value);
+  const filteredHotels = filteredData.filter(hotel => {
+    return selectedFacilityTypes.includes(hotel[1].hotelDetailInfo.hotelClassCode);
+  });
 
+  if (filteredHotels.length === 0) {
+    alert("該当する結果がありませんでした。");
+  }
+
+  return filteredHotels;
 }
-*/
+
 //並び替え 安い順(hotelMinCharge)、高い順(hotelMinCharge)、駅近順(access)、人気順(reviewAverage)
-function minChargeSort(){
+function minChargeSort(filteredData){
+  // 料金が存在するホテル情報のみをフィルタリングする
+  const hotelsWithCharge = filteredData.filter(hotel => {
+    const minCharge = hotel[0].hotelBasicInfo.hotelMinCharge;
+    return minCharge !== undefined;
+  });
+  // 料金の小さい順に並び替え
+  const sortedHotels = hotelsWithCharge.sort((a, b) => {
+    const chargeA = a[0].hotelBasicInfo.hotelMinCharge;
+    const chargeB = b[0].hotelBasicInfo.hotelMinCharge;
+    return chargeA - chargeB;
+  });
+  console.log("料金が低い順", sortedHotels);
+  // 結果を表示
+  viewSearchResult({ hotels: sortedHotels });
   const loading = document.querySelector('.js-loading');
-  loading.classList.remove('js-loaded');
-   fetch("/minsort")
-    .then(response => {
-      if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-    return response.json();
-    })
-    .then(data => {
-      console.log("安い順", data.results);
-      viewSearchResult(data.results);
-      loading.classList.add('js-loaded');
-    });
+  loading.classList.add('js-loaded');
+  document.getElementById('range-min').addEventListener('change', handleBudgetChange);
+  document.getElementById('range-max').addEventListener('change', handleBudgetChange);
+  document.getElementById('minutes').addEventListener('change', handleMinutesChange);
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  facilityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', handleTypeSelect);
+  });  
 }
 
-function maxChargeSort(){
+function maxChargeSort(filteredData){
+  // 料金が存在するホテル情報のみをフィルタリングする
+  const hotelsWithCharge = filteredData.filter(hotel => {
+    const minCharge = hotel[0].hotelBasicInfo.hotelMinCharge;
+    return minCharge !== undefined;
+  });
+  // 料金の小さい順に並び替え
+  const sortedHotels = hotelsWithCharge.sort((a, b) => {
+    const chargeA = a[0].hotelBasicInfo.hotelMinCharge;
+    const chargeB = b[0].hotelBasicInfo.hotelMinCharge;
+    return chargeB - chargeA;
+  });
+  console.log("料金が高い順", sortedHotels);
+  // 結果を表示
+  viewSearchResult({ hotels: sortedHotels });
   const loading = document.querySelector('.js-loading');
-  loading.classList.remove('js-loaded');
-  fetch("/maxsort")
-    .then(response => {
-      if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-    return response.json();
-    })
-    .then(data => {
-      console.log("高い順", data.results);
-      viewSearchResult(data.results);
-      loading.classList.add('js-loaded');
-    });
+  loading.classList.add('js-loaded');
+  document.getElementById('range-min').addEventListener('change', handleBudgetChange);
+  document.getElementById('range-max').addEventListener('change', handleBudgetChange);
+  document.getElementById('minutes').addEventListener('change', handleMinutesChange);
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  facilityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', handleTypeSelect);
+  });  
 }
 
-function accessSort(){
+function accessSort(filteredData){
+  // アクセス情報を持つホテルのみフィルタリング
+  const hotelsWithAccess = filteredData.filter(hotel => {
+    const accessInfo = hotel[0].hotelBasicInfo.access;
+    return accessInfo !== undefined;
+  });
+  // 最寄り駅と徒歩時間を抽出し、並び替え
+  const sortedHotels = hotelsWithAccess.sort((a, b) => {
+    const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
+    const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
+    return accessA - accessB;
+  });
+  console.log("駅から近い順", sortedHotels);
+  // 結果を表示
+  viewSearchResult({ hotels: sortedHotels });
   const loading = document.querySelector('.js-loading');
-  loading.classList.remove('js-loaded');
-  fetch("/interfacehotels")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-    return response.json();
-    })
-    // アクセス情報を持つホテルのみフィルタリング
-    .then(data => {
-      // アクセス情報を持つホテルの配列
-      const hotelsWithAccess = data.results.hotels.filter(hotelGroup => {
-        const accessInfo = hotelGroup[0].hotelBasicInfo.access;
-        return accessInfo !== undefined;
-      });
-      // 最寄り駅と徒歩時間を抽出し、並び替え
-      const sortedHotels = hotelsWithAccess.sort((a, b) => {
-        const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
-        const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
-        return accessA - accessB;
-      });
-      console.log("駅から近い順", sortedHotels);
-      // 結果を表示
-      viewSearchResult({ hotels: sortedHotels });
-      loading.classList.add('js-loaded');
-    })
-    .catch(error => {
-      console.error("Error fetching data: ", error);
-    });
+  loading.classList.add('js-loaded');
+  document.getElementById('range-min').addEventListener('change', handleBudgetChange);
+  document.getElementById('range-max').addEventListener('change', handleBudgetChange);
+  document.getElementById('minutes').addEventListener('change', handleMinutesChange);
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  facilityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', handleTypeSelect);
+  });  
 }
 
 function extractWalkTime(access) {
@@ -297,36 +423,31 @@ function extractWalkTime(access) {
   return minTime;
 }
 
-function reviewSort(){
+function reviewSort(filteredData){
+  // レビュー評価が存在するホテル情報のみをフィルタリングする
+  const hotelsWithReview = filteredData.filter(hotel => {
+    const reviewAverage = hotel[0].hotelBasicInfo.reviewAverage;
+    return reviewAverage !== undefined;
+  });
+  // レビュー評価が高い順に並び替える
+  hotelsWithReview.sort((a, b) => {
+    const reviewAverageA = a[0].hotelBasicInfo.reviewAverage;
+    const reviewAverageB = b[0].hotelBasicInfo.reviewAverage;
+    return reviewAverageB - reviewAverageA; // レビュー評価が大きい順に並び替える
+  });
+  // ソートされた結果を表示
+  console.log(hotelsWithReview);
+  viewSearchResult({ hotels: hotelsWithReview });
   const loading = document.querySelector('.js-loading');
-  loading.classList.remove('js-loaded');
-  fetch("/interfacehotels")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-    return response.json();
-    })
-    .then(data => {
-      // レビュー評価が存在するホテル情報のみをフィルタリングする
-      const hotelsWithReview = data.results.hotels.filter(hotelGroup => {
-        const reviewAverage = hotelGroup[0].hotelBasicInfo.reviewAverage;
-        return reviewAverage !== undefined;
-      });
-      // レビュー評価が高い順に並び替える
-      hotelsWithReview.sort((a, b) => {
-        const reviewAverageA = a[0].hotelBasicInfo.reviewAverage;
-        const reviewAverageB = b[0].hotelBasicInfo.reviewAverage;
-        return reviewAverageB - reviewAverageA; // レビュー評価が大きい順に並び替える
-      });
-      // ソートされた結果を表示
-      console.log(hotelsWithReview);
-      viewSearchResult({ hotels: hotelsWithReview });
-      loading.classList.add('js-loaded');
-    })
-    .catch(error => {
-      console.error("Error fetching data: ", error);
-    });}
+  loading.classList.add('js-loaded');
+  document.getElementById('range-min').addEventListener('change', handleBudgetChange);
+  document.getElementById('range-max').addEventListener('change', handleBudgetChange);
+  document.getElementById('minutes').addEventListener('change', handleMinutesChange);
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  facilityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', handleTypeSelect);
+  });  
+}
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
@@ -338,6 +459,8 @@ function sendSelectHotels(){
     const hotelNumber = s.querySelector(".this-hotel-no").value;
     selectedHotelNos.push(hotelNumber);
   }
+
+  console.log(selectedHotelNos);
 
   // 送信
  fetch("/userselecthotels", {
