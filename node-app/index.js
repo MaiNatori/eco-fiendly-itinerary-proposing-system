@@ -35,6 +35,7 @@ app.listen(PORT, () => {
 // HTML表示
 app.get('/', viewDestination);
 app.get('/destination', viewDestination);
+app.get('/destination-search', viewDestinationSearch);
 app.get('/spot', viewSpot);
 app.get('/hotel', viewHotel);
 app.get('/place', viewPlace);
@@ -53,7 +54,16 @@ app.post('/userselecthotels', doGetUserSelectHotels);
 // 目的地ページ
 function viewDestination(req, res) {
   try {
-    res.render('destination.ejs');
+    res.render('destination-modal.ejs');
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 目的から目的地を探すページ
+function viewDestinationSearch(req, res) {
+  try {
+    res.render('destination-search.ejs');
   } catch (error) {
     console.log(error)
   }
@@ -168,11 +178,11 @@ async function getHotelDetails(req, res) {
     const params = {
       'format': "json",
       'responseType': "large",
-      'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,nearestStation,hotelImageUrl,reviewAverage,hotelClassCode",
+      'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'largeClassCode': "japan",
-      'middleClassCode': "miyagi", //都道府県 destinationページで選択されたもの
-      'smallClassCode': "sendai", //市区町村 destinationページで選択されたもの
+      'middleClassCode': "gunma", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "ikaho", //市区町村 destinationページで選択されたもの
       //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",

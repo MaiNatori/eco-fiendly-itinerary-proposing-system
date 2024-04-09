@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>環境に優しい観光ルート作成</title>
-        <link rel="stylesheet" href="public/css/destination.css">
+        <link rel="stylesheet" href="/css/destination.css">
     </head>
 
     <body>
@@ -13,10 +13,10 @@
         <h1>ロゴ</h1>
         <nav>
             <ul>
-                <li><a href="destination.html">旅行先の選択</a></li>
-                <li><a href="spot.html">行きたい場所の選択</a></li>
-                <li><a href="hotel.html">宿泊場所の選択</a></li>
-                <li><a href="place.html">出発場所・到着場所の入力</a></li>
+                <li><a href="destination-modal.ejs">旅行先の選択</a></li>
+                <li><a href="spot.ejs">行きたい場所の選択</a></li>
+                <li><a href="hotel.ejs">宿泊場所の選択</a></li>
+                <li><a href="place.ejs">出発場所・到着場所の入力</a></li>
             </ul>
         </nav>
         </div>
@@ -49,7 +49,7 @@
             </table>
             </div>
 
-            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot.html'" class="button">
+            <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot'" class="button">
     
         </div>
                 
@@ -1064,7 +1064,7 @@
         </details>
 
 
-        <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot.html'" class="button">
+        <input type="submit" method="post" name="next" value="次へ" onclick="location.href='spot'" class="button">
 
         </div>
         </div>
@@ -1285,7 +1285,7 @@
 
         <h4>その他<input  type="search" method="get" placeholder="その他"></h4>
 
-        <input type="submit" method="post" name="search" value="検索" onclick="location.href='destination-search.html'" class="button">
+        <input type="submit" method="post" name="search" value="検索" onclick="location.href='destination-search'" class="button">
     
     </div>
 
@@ -1295,7 +1295,7 @@
         <p>Copyright 2023 Mai</p>
     </footer>
 
-    <script src="public/js/destination.js"></script>
+    <script src="/js/destination.js"></script>
     
     </body>
 </html>

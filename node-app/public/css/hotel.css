@@ -229,6 +229,9 @@ main {
     line-height: 15px;
     font-size: 15px;
     margin: 10px 0 10px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .search-result .search-candidate .candidate-contents p {

@@ -31,7 +31,7 @@ function viewSearchResult(results) {
   document.getElementById('range-max').addEventListener('change', handleBudgetChange);
   document.getElementById('minutes').addEventListener('change', handleMinutesChange);
   const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
-  facilityCheckboxes.forEach(function(checkbox) {
+  facilityCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', handleTypeSelect);
   });
 
@@ -69,6 +69,9 @@ function viewSearchResult(results) {
     const pPhone = document.createElement("p");
       pPhone.innerHTML = (hotelInfo.telephoneNo !== undefined) ? `電話番号: ${hotelInfo.telephoneNo}` : "電話番号：--";
 
+    const pReview = document.createElement("p");
+      pReview.innerHTML = (hotelInfo.reviewAverage !== undefined) ? `評価：${hotelInfo.reviewAverage}` : "評価：--"; 
+
     const pHP = document.createElement("p");
       pHP.innerHTML = (hotelInfo.hotelInformationUrl !== undefined) ? `HP: <a href="${hotelInfo.hotelInformationUrl}" target="_blank">${hotelInfo.hotelInformationUrl}</a>` : "HP: --";
 
@@ -87,6 +90,7 @@ function viewSearchResult(results) {
     div.appendChild(pPrice);
     div.appendChild(pAccess);
     div.appendChild(pPhone);
+    div.appendChild(pReview);
     div.appendChild(pHP);
     div.appendChild(input);
 
@@ -185,7 +189,7 @@ function clearSearchResults(){
 function handleBudgetChange() {
   const rangeMin = parseInt(document.getElementById('range-min').value);
   const rangeMax = parseInt(document.getElementById('range-max').value);
-  if (rangeMin >= 1000 || rangeMax >= 1000) {
+  if ((rangeMin > 0 || rangeMax < 1000000000000) && rangeMin < rangeMax) {
       document.getElementById('budget').checked = true;
   } else {
       document.getElementById('budget').checked = false;
@@ -215,11 +219,12 @@ function applyFilter(){
   const loading = document.querySelector('.js-loading');
   loading.classList.remove('js-loaded');
 
-  let sortCriteria;
-  let filterCriteria = [];
-  let sortText = "";
-  let filterText ="";
+  let sortCriteria; // 並び替えの関数を格納
+  let filterCriteria = []; // 絞り込みの関数を格納
+  let sortText = ""; // 並び替え条件を画面に表示
+  let filterText =""; // 絞り込み条件を画面に表示
 
+  // どの条件が選択されているか
   let checkboxmin = document.getElementById('cheap');
   let checkboxmax = document.getElementById('expensive');
   let checkboxaccess = document.getElementById('near');
@@ -263,7 +268,7 @@ function applyFilter(){
 
   // console.logで条件を表示
   console.log(sortText ? sortText : '並び替え条件：なし');
-  console.log(filterText ? '絞り込み条件：' + filterText : 'なし');
+  console.log(filterText ? '絞り込み条件：' + filterText : '絞り込み条件：なし');
 
   // 絞り込み条件の処理を適用
   let filteredHotels = fetch("/interfacehotels")
@@ -275,23 +280,26 @@ function applyFilter(){
     })
     .then(data => {
       let filteredData = data.results.hotels;
+      // 絞り込み条件が選択されている場合
       if (filterCriteria.length > 0) {
         filterCriteria.forEach(filterFunction => {
           filteredData = filterFunction(filteredData);
         });    
       }
-      // 並び替え条件が選択されている場合、並び替えを適用
+      // 並び替え条件が選択されている場合
       if (sortCriteria) {
         sortCriteria(filteredData);
-      } else { // 並び替え条件が選択されていない場合、結果をそのまま表示
+      } else { // 並び替え条件が選択されていない場合
           viewSearchResult({ hotels: filteredData });
       }
     })
-  // 絞り込み条件が選択されていない場合で並び替え条件がある場合、並び替え
+  // 絞り込み条件が選択されていない場合で並び替え条件がある場合
   if (filterCriteria === 0 && sortCriteria) {
     filteredHotels.then(filteredData => {
       sortCriteria(filteredData);
     });
+  } else if (filterCriteria === 0 && !sortCriteria) { // 絞り込みも並び替えも選択されていない場合
+    inqueryFacilityNumbers();
   }
 }
 
