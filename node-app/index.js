@@ -181,8 +181,8 @@ async function getHotelDetails(req, res) {
       'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'largeClassCode': "japan",
-      'middleClassCode': "gunma", //都道府県 destinationページで選択されたもの
-      'smallClassCode': "ikaho", //市区町村 destinationページで選択されたもの
+      'middleClassCode': "saitama", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "saitama", //市区町村 destinationページで選択されたもの
       //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",

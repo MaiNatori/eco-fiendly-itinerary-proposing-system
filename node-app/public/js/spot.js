@@ -139,8 +139,12 @@ function viewSearchResult(place) { // place = getDetails result object
     img.alt = "お店の画像";
   const h2 = document.createElement("h2");
     h2.innerText = place.name;
-  const p = document.createElement("p");
-    p.innerHTML = (place.website !== undefined) ? `<a href="${place.website}" target="_blank">${place.website}</a>` : "";
+  const pAddress = document.createElement("p");
+    pAddress.innerHTML = (place.formatted_address !== undefined) ? `住所: ${place.formatted_address}` : "住所: --";
+  const pPhone = document.createElement("p");
+    pPhone.innerHTML = (place.formatted_phone_number !== undefined) ? `電話番号: ${place.formatted_phone_number}` : "電話番号: --";
+  const pWebsite = document.createElement("p");
+    pWebsite.innerHTML = (place.website !== undefined) ? `HP: <a href="${place.website}" target="_blank">${place.website}</a>` : "HP: --";
   const input = document.createElement("input");
     input.setAttribute("type", "submit");
     input.setAttribute("method", "post");
@@ -152,7 +156,9 @@ function viewSearchResult(place) { // place = getDetails result object
 
     target.appendChild(img);
     target.appendChild(h2);
-    target.appendChild(p);
+    target.appendChild(pAddress);
+    target.appendChild(pPhone);
+    target.appendChild(pWebsite);
     target.appendChild(input);
 
 }
