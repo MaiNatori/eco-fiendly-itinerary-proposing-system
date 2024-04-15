@@ -6,6 +6,12 @@ const querystring = require('querystring');
 
 require('dotenv').config();
 
+const GOOGLE_CUSTOM_SEARCH_API_KEY = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
+console.log("GOOGLE_CUSTOM_SEARCH_API_KEY > ", GOOGLE_CUSTOM_SEARCH_API_KEY);
+
+const GOOGLE_CUSTOM_SEARCH_ENGINE_ID = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
+console.log("GOOGLE_CUSTOM_SEARCH_ENGINE_ID > ", GOOGLE_CUSTOM_SEARCH_ENGINE_ID);
+
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 console.log("GOOGLE_PLACES_API_KEY > ", GOOGLE_PLACES_API_KEY);
 
@@ -43,7 +49,7 @@ app.get('/result', viewResult);
 
 // Places API
 app.get('/interfacespots', getSpotPlaceIds);
-//app.get('/interfacehotels', getHotelPlaceIds);
+app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacehotels', getHotelDetails);
 
 // 選択したIDをPOST
@@ -64,6 +70,57 @@ function viewDestination(req, res) {
 function viewDestinationSearch(req, res) {
   try {
     res.render('destination-search.ejs');
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function getDestinationSpots(req, res) {
+
+  async function fetchCustomSearch() {
+
+    const BASE_URL = "https://www.googleapis.com/customsearch/v1";
+  
+    const params = {
+      'key': GOOGLE_CUSTOM_SEARCH_API_KEY, // APIキー
+      'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID, // 検索エンジンID
+      'c2coff': "1", // 中国語の検索を無効
+      'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
+      // 'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+      'fileType': "json", // 結果を指定した拡張子のファイルに制限
+      'filter': "1", // 重複コンテンツ フィルタを有効
+      'gl': "jp", // エンドユーザーの位置情報
+      'hl': "ja", // ユーザー インターフェースの言語を設定
+      // 'hq': "", // 指定したクエリ語句を論理AND演算子で結合されているかのようにクエリに追加
+      'lr': "lang_ja", //検索対象を特定の言語に設定
+      'num': 10, // 返される検索結果の数
+      // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
+      'q': "日本 海水浴場", // クエリ
+    };
+
+    console.log("fetchHotelSearch > params: \n", params);
+
+    try {
+      const queryString = querystring.stringify(params);
+  
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  try {
+    const result = await fetchCustomSearch();
+
+    console.log("getDestinationSearch.result > \n", result);
+
+    res.json({ results: result });  
+
   } catch (error) {
     console.log(error)
   }
