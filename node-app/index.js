@@ -305,8 +305,11 @@ async function getHotelDetails(req, res) {
 
     // ホテルごとにSDGsに関する情報を検索して抽出
     const hotelPromises = hotels.map(async hotelGroup => {
-      const hotelInfo = hotelGroup[0].hotelBasicInfo;
-      const sdgsInfo = await fetchHotelSDGs(hotelInfo.hotelName);
+      const hotelInfo = {
+        hotelBasicInfo: hotelGroup[0].hotelBasicInfo,
+        hotelDetailInfo: hotelGroup[1].hotelDetailInfo
+      };
+      const sdgsInfo = await fetchHotelSDGs(hotelInfo.hotelBasicInfo.hotelName);
       if (sdgsInfo && sdgsInfo.items && sdgsInfo.items.length > 0) {
         return { hotelInfo, sdgsInfo };
       } else {

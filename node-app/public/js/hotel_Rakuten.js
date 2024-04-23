@@ -41,7 +41,7 @@ function viewSearchResult(results) {
 
   // 各ホテル情報を取り出す
   results.forEach(hotelGroup => {
-    const hotelInfo = hotelGroup.hotelInfo;
+    const hotelInfo = hotelGroup.hotelInfo.hotelBasicInfo;
   
     // 表示
     const div = document.createElement("div");
@@ -279,7 +279,7 @@ function applyFilter(){
       return response.json();
     })
     .then(data => {
-      let filteredData = data.results.hotels;
+      let filteredData = data.results;
       // 絞り込み条件が選択されている場合
       if (filterCriteria.length > 0) {
         filterCriteria.forEach(filterFunction => {
@@ -290,7 +290,7 @@ function applyFilter(){
       if (sortCriteria) {
         sortCriteria(filteredData);
       } else { // 並び替え条件が選択されていない場合
-          viewSearchResult({ hotels: filteredData });
+          viewSearchResult(filteredData);
       }
     })
   // 絞り込み条件が選択されていない場合で並び替え条件がある場合
@@ -308,7 +308,7 @@ function chargeFilter(filteredData){
   const rangeMin = parseInt(document.getElementById('range-min').value);
   const rangeMax = parseInt(document.getElementById('range-max').value);
   return filteredData.filter(hotel => {
-    const charge = parseInt(hotel[0].hotelBasicInfo.hotelMinCharge);
+    const charge = parseInt(hotel.hotelInfo.hotelBasicInfo.hotelMinCharge);
     return charge >= rangeMin && charge <= rangeMax;
   });
 }
@@ -316,7 +316,7 @@ function chargeFilter(filteredData){
 function distanceFilter(filteredData){
   const selectedTime = parseInt(document.getElementById('minutes').value);
   return filteredData.filter(hotel => {
-    const walkTime = extractWalkTime(hotel[0].hotelBasicInfo.access);
+    const walkTime = extractWalkTime(hotel.hotelInfo.hotelBasicInfo.access);
     return walkTime <= selectedTime;
   });
 } 
@@ -328,7 +328,7 @@ function classFilter(filteredData){
     .filter(checkbox => checkbox.checked)
     .map(checkbox => checkbox.value);
   const filteredHotels = filteredData.filter(hotel => {
-    return selectedFacilityTypes.includes(hotel[1].hotelDetailInfo.hotelClassCode);
+    return selectedFacilityTypes.includes(hotel.hotelInfo.hotelDetailInfo.hotelClassCode);
   });
 
   if (filteredHotels.length === 0) {
@@ -342,18 +342,18 @@ function classFilter(filteredData){
 function minChargeSort(filteredData){
   // 料金が存在するホテル情報のみをフィルタリングする
   const hotelsWithCharge = filteredData.filter(hotel => {
-    const minCharge = hotel[0].hotelBasicInfo.hotelMinCharge;
+    const minCharge = hotel.hotelInfo.hotelBasicInfo.hotelMinCharge;
     return minCharge !== undefined;
   });
   // 料金の小さい順に並び替え
   const sortedHotels = hotelsWithCharge.sort((a, b) => {
-    const chargeA = a[0].hotelBasicInfo.hotelMinCharge;
-    const chargeB = b[0].hotelBasicInfo.hotelMinCharge;
+    const chargeA = a.hotelInfo.hotelBasicInfo.hotelMinCharge;
+    const chargeB = b.hotelInfo.hotelBasicInfo.hotelMinCharge;
     return chargeA - chargeB;
   });
   console.log("料金が低い順", sortedHotels);
   // 結果を表示
-  viewSearchResult({ hotels: sortedHotels });
+  viewSearchResult(sortedHotels);
   const loading = document.querySelector('.js-loading');
   loading.classList.add('js-loaded');
   document.getElementById('range-min').addEventListener('change', handleBudgetChange);
@@ -368,18 +368,18 @@ function minChargeSort(filteredData){
 function maxChargeSort(filteredData){
   // 料金が存在するホテル情報のみをフィルタリングする
   const hotelsWithCharge = filteredData.filter(hotel => {
-    const minCharge = hotel[0].hotelBasicInfo.hotelMinCharge;
+    const minCharge = hotel.hotelInfo.hotelBasicInfo.hotelMinCharge;
     return minCharge !== undefined;
   });
   // 料金の小さい順に並び替え
   const sortedHotels = hotelsWithCharge.sort((a, b) => {
-    const chargeA = a[0].hotelBasicInfo.hotelMinCharge;
-    const chargeB = b[0].hotelBasicInfo.hotelMinCharge;
+    const chargeA = a.hotelInfo.hotelBasicInfo.hotelMinCharge;
+    const chargeB = b.hotelInfo.hotelBasicInfo.hotelMinCharge;
     return chargeB - chargeA;
   });
   console.log("料金が高い順", sortedHotels);
   // 結果を表示
-  viewSearchResult({ hotels: sortedHotels });
+  viewSearchResult(sortedHotels);
   const loading = document.querySelector('.js-loading');
   loading.classList.add('js-loaded');
   document.getElementById('range-min').addEventListener('change', handleBudgetChange);
@@ -394,18 +394,18 @@ function maxChargeSort(filteredData){
 function accessSort(filteredData){
   // アクセス情報を持つホテルのみフィルタリング
   const hotelsWithAccess = filteredData.filter(hotel => {
-    const accessInfo = hotel[0].hotelBasicInfo.access;
+    const accessInfo = hotel.hotelInfo.hotelBasicInfo.access;
     return accessInfo !== undefined;
   });
   // 最寄り駅と徒歩時間を抽出し、並び替え
   const sortedHotels = hotelsWithAccess.sort((a, b) => {
-    const accessA = extractWalkTime(a[0].hotelBasicInfo.access);
-    const accessB = extractWalkTime(b[0].hotelBasicInfo.access);
+    const accessA = extractWalkTime(a.hotelInfo.hotelBasicInfo.access);
+    const accessB = extractWalkTime(b.hotelInfo.hotelBasicInfo.access);
     return accessA - accessB;
   });
   console.log("駅から近い順", sortedHotels);
   // 結果を表示
-  viewSearchResult({ hotels: sortedHotels });
+  viewSearchResult(sortedHotels);
   const loading = document.querySelector('.js-loading');
   loading.classList.add('js-loaded');
   document.getElementById('range-min').addEventListener('change', handleBudgetChange);
@@ -434,18 +434,18 @@ function extractWalkTime(access) {
 function reviewSort(filteredData){
   // レビュー評価が存在するホテル情報のみをフィルタリングする
   const hotelsWithReview = filteredData.filter(hotel => {
-    const reviewAverage = hotel[0].hotelBasicInfo.reviewAverage;
+    const reviewAverage = hotel.hotelInfo.hotelBasicInfo.reviewAverage;
     return reviewAverage !== undefined;
   });
   // レビュー評価が高い順に並び替える
   hotelsWithReview.sort((a, b) => {
-    const reviewAverageA = a[0].hotelBasicInfo.reviewAverage;
-    const reviewAverageB = b[0].hotelBasicInfo.reviewAverage;
+    const reviewAverageA = a.hotelInfo.hotelBasicInfo.reviewAverage;
+    const reviewAverageB = b.hotelInfo.hotelBasicInfo.reviewAverage;
     return reviewAverageB - reviewAverageA; // レビュー評価が大きい順に並び替える
   });
   // ソートされた結果を表示
   console.log(hotelsWithReview);
-  viewSearchResult({ hotels: hotelsWithReview });
+  viewSearchResult(hotelsWithReview);
   const loading = document.querySelector('.js-loading');
   loading.classList.add('js-loaded');
   document.getElementById('range-min').addEventListener('change', handleBudgetChange);
