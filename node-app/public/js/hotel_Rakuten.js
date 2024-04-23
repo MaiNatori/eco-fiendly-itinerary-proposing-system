@@ -40,8 +40,8 @@ function viewSearchResult(results) {
   const target = document.querySelector(".search-candidate"); // 表示先
 
   // 各ホテル情報を取り出す
-  results.hotels.forEach(hotelGroup => {
-    const hotelInfo = hotelGroup[0].hotelBasicInfo;
+  results.forEach(hotelGroup => {
+    const hotelInfo = hotelGroup.hotelInfo;
   
     // 表示
     const div = document.createElement("div");

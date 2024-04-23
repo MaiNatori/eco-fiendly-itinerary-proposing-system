@@ -84,24 +84,24 @@ async function getDestinationSpots(req, res) {
     const params = {
       'key': GOOGLE_CUSTOM_SEARCH_API_KEY, // APIキー
       'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID, // 検索エンジンID
-      'c2coff': "1", // 中国語の検索を無効
-      'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
-      // 'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
-      'fileType': "json", // 結果を指定した拡張子のファイルに制限
-      'filter': "1", // 重複コンテンツ フィルタを有効
-      'gl': "jp", // エンドユーザーの位置情報
-      'hl': "ja", // ユーザー インターフェースの言語を設定
+      // 'c2coff': "1", // 中国語の検索を無効
+      // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
+      //'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+      // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
+      // 'filter': "1", // 重複コンテンツ フィルタを有効
+      // 'gl': "jp", // エンドユーザーの位置情報
+      // 'hl': "ja", // ユーザー インターフェースの言語を設定
       // 'hq': "", // 指定したクエリ語句を論理AND演算子で結合されているかのようにクエリに追加
       'lr': "lang_ja", //検索対象を特定の言語に設定
-      'num': 10, // 返される検索結果の数
+      'num': 5, // 返される検索結果の数
       // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
-      'q': "日本 海水浴場", // クエリ
+      'q': "横浜ロイヤルパークホテル SDGs 公式", // クエリ
     };
 
     console.log("fetchHotelSearch > params: \n", params);
 
     try {
-      const queryString = querystring.stringify(params);
+      const queryString = new URLSearchParams(params).toString();
   
       const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
     
@@ -264,13 +264,66 @@ async function getHotelDetails(req, res) {
 
   try {
     const result = await fetchHotelSearch();
+    const hotels = result.hotels;
 
-    console.log("getFacilityNumbers.result > \n", result);
+    async function fetchHotelSDGs(hotelName) {
 
-    res.json({ results: result });  
+      console.log(hotelName);
 
+      const BASE_URL = "https://www.googleapis.com/customsearch/v1";
+    
+      const params = {
+        'key': GOOGLE_CUSTOM_SEARCH_API_KEY, // APIキー
+        'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID, // 検索エンジンID
+        // 'c2coff': "1", // 中国語の検索を無効
+        // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
+        'exactTerms': "SDGs OR 環境保全", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+        // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
+        // 'filter': "1", // 重複コンテンツ フィルタを有効
+        // 'gl': "jp", // エンドユーザーの位置情報
+        // 'hl': "ja", // ユーザー インターフェースの言語を設定
+        // 'hq': "", // 指定したクエリ語句を論理AND演算子で結合されているかのようにクエリに追加
+        'lr': "lang_ja", //検索対象を特定の言語に設定
+        'num': 5, // 返される検索結果の数
+        // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
+        'q': `${hotelName} 公式`, // クエリ
+      };
+
+      try {
+        const queryString = querystring.stringify(params);
+      
+        const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+      
+        const response = await urlWithParams.json()
+
+        return response;
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    // ホテルごとにSDGsに関する情報を検索して抽出
+    const hotelPromises = hotels.map(async hotelGroup => {
+      const hotelInfo = hotelGroup[0].hotelBasicInfo;
+      const sdgsInfo = await fetchHotelSDGs(hotelInfo.hotelName);
+      if (sdgsInfo && sdgsInfo.items && sdgsInfo.items.length > 0) {
+        return { hotelInfo, sdgsInfo };
+      } else {
+        return null; // SDGs関連の情報が見つからない場合はnullを返す
+      }
+    });
+
+    // すべてのホテルのSDGsに関する情報を取得
+    const hotelsWithSDGs = await Promise.all(hotelPromises);
+
+    // nullを除外し、hotel_Rakuten.jsに結果を送信
+    const filteredHotels = hotelsWithSDGs.filter(hotel => hotel !== null);
+    console.log(filteredHotels);
+    res.json({ results: filteredHotels });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 
 }
