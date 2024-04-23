@@ -95,13 +95,13 @@ async function getDestinationSpots(req, res) {
       'lr': "lang_ja", //検索対象を特定の言語に設定
       'num': 5, // 返される検索結果の数
       // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
-      'q': "横浜ロイヤルパークホテル SDGs 公式", // クエリ
+      'q': "海水浴 旅行スポット", // クエリ
     };
 
     console.log("fetchHotelSearch > params: \n", params);
 
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = querystring.stringify(params);
   
       const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
     
@@ -273,8 +273,8 @@ async function getHotelDetails(req, res) {
       const BASE_URL = "https://www.googleapis.com/customsearch/v1";
     
       const params = {
-        'key': GOOGLE_CUSTOM_SEARCH_API_KEY, // APIキー
-        'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID, // 検索エンジンID
+        'key': GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL, // APIキー
+        'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL, // 検索エンジンID
         // 'c2coff': "1", // 中国語の検索を無効
         // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
         'exactTerms': "SDGs OR 環境保全", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
