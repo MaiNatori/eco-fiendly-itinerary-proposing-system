@@ -1,10 +1,3 @@
-/*
-・/interfacehotels で施設番号を取得
-・施設番号を使用して施設情報を取得
-・情報を表示
-・緯度・経度または住所を保存
-*/
-
 // index.jsにアクセスしてplace_idを取得する
 function inqueryFacilityNumbers() {
   fetch("/interfacehotels")
@@ -460,21 +453,20 @@ function reviewSort(filteredData){
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
-  let selectedHotelNos = []; // 選択されたplace_idの配列
+  let selectedHotels = []; // 選択されたplace_idの配列
 
   const hotels = document.querySelectorAll(".select-hotel"); // 選択済みスポットリスト
   for (const s of hotels) {
     const hotelNumber = s.querySelector(".this-hotel-no").value;
-    selectedHotelNos.push(hotelNumber);
+    const hotelName = s.querySelector("h2").innerText;
+    selectedHotels.push({ hotelNumber, hotelName }); // オブジェクトとして格納
   }
-
-  console.log(selectedHotelNos);
 
   // 送信
  fetch("/userselecthotels", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(selectedHotelNos)
+    body: JSON.stringify(selectedHotels)
   })
     .then(response => {
       if (!response.ok) {

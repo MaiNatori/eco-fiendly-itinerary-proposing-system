@@ -46,8 +46,19 @@
             <h2>⑤確認</h2>
                 <div class="inputcheck-area">
                     <h3>行きたい場所</h3>
+                    <ul>
+                        <% selectedSpots.forEach(spot => { %>
+                            <li><%= spot.placeName %></li>
+                        <% }); %>
+                    </ul>
                     <h3>宿泊地</h3>
-                    <input type="submit" method="post" name="create" value="作成" onclick="location.href='result.html'" class="button">
+                    <ul>
+                        <% selectedHotels.forEach(hotel => { %>
+                            <li><%= hotel.hotelName %></li>
+                        <% }); %>
+                    </ul>
+
+                    <input type="submit" method="post" name="create" value="作成" onclick="location.href='result.ejs'" class="button">
                 </div>
         </div>
     </main>

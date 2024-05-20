@@ -232,19 +232,20 @@ function clearSelectSpotList(placeId){
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectSpots(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
-  let selectedSpotIds = []; // 選択されたplace_idの配列
+  let selectedSpots = []; // 選択されたplace_idの配列
 
   const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
   for (const s of spots) {
     const placeId = s.querySelector(".this-place-id").value;
-    selectedSpotIds.push(placeId);
+    const placeName = s.querySelector("h2").innerText;
+    selectedSpots.push({ placeId, placeName }); // オブジェクトとして格納
   }
 
   // 送信
  fetch("/userselectspots", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(selectedSpotIds)
+    body: JSON.stringify(selectedSpots)
   })
     .then(response => {
       if (!response.ok) {

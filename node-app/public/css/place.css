@@ -24,12 +24,20 @@ h3 {
     font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
     text-decoration: underline;
     margin-top: 5px;
+    margin-bottom: 5px;
     margin-left: 10px;
 }
 
 p {
     color: #575757;
     font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+ul {
+    color: #575757;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    font-size: 15px;
+    margin: 5px 0;
 }
 
 

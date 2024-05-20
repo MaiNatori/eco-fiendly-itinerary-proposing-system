@@ -6,11 +6,17 @@ const querystring = require('querystring');
 
 require('dotenv').config();
 
-const GOOGLE_CUSTOM_SEARCH_API_KEY = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
-console.log("GOOGLE_CUSTOM_SEARCH_API_KEY > ", GOOGLE_CUSTOM_SEARCH_API_KEY);
+const GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION;
+console.log("GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION > ", GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION);
 
-const GOOGLE_CUSTOM_SEARCH_ENGINE_ID = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
-console.log("GOOGLE_CUSTOM_SEARCH_ENGINE_ID > ", GOOGLE_CUSTOM_SEARCH_ENGINE_ID);
+const GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION;
+console.log("GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION > ", GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION);
+
+const GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL;
+console.log("GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL > ", GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL);
+
+const GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL;
+console.log("GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL > ", GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL);
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 console.log("GOOGLE_PLACES_API_KEY > ", GOOGLE_PLACES_API_KEY);
@@ -56,6 +62,16 @@ app.get('/interfacehotels', getHotelDetails);
 app.post('/userselectspots', doGetUserSelectSpots);
 app.post('/userselecthotels', doGetUserSelectHotels);
 
+let dataFromScripts = {};
+let selectedSpots = [];
+let selectedHotels = [];
+
+app.post('/data', (req, res) => {
+  const { source, data } = req.body;
+  dataFromScripts[source] = data;
+  res.sendStatus(200);
+});
+
 
 // 目的地ページ
 function viewDestination(req, res) {
@@ -82,11 +98,11 @@ async function getDestinationSpots(req, res) {
     const BASE_URL = "https://www.googleapis.com/customsearch/v1";
   
     const params = {
-      'key': GOOGLE_CUSTOM_SEARCH_API_KEY, // APIキー
-      'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID, // 検索エンジンID
+      'key': GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION, // APIキー
+      'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION, // 検索エンジンID
       // 'c2coff': "1", // 中国語の検索を無効
       // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
-      //'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+      // 'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
       // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
       // 'filter': "1", // 重複コンテンツ フィルタを有効
       // 'gl': "jp", // エンドユーザーの位置情報
@@ -95,7 +111,7 @@ async function getDestinationSpots(req, res) {
       'lr': "lang_ja", //検索対象を特定の言語に設定
       'num': 5, // 返される検索結果の数
       // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
-      'q': "海水浴 旅行スポット", // クエリ
+      'q': "海水浴場 HP", // クエリ
     };
 
     console.log("fetchHotelSearch > params: \n", params);
@@ -136,12 +152,12 @@ function viewSpot(req, res) {
 }
 
 function doGetUserSelectSpots(req, res) {
-  const placeIds = req.body; // 選択されたスポットのplace_id配列
-  console.log('received data:', placeIds);
+  selectedSpots = req.body; // 選択されたスポットのオブジェクト配列
+  console.log('received selected spots:', selectedSpots);
 
   // const sess = new Session(req, res); // session利用準備
-  // sess.set("selectspots", placeIds); // sessionのselectspotsというキーにplaceIdsを保管
-  req.session.selectspots = placeIds;
+  // sess.set("selectspots", selectedSpots); // sessionのselectspotsというキーにselectedSpotsを保管
+  req.session.selectspots = selectedSpots;
   req.session.save();
   console.log("session.selectspots > ", req.session.selectspots);
 
@@ -213,12 +229,12 @@ function viewHotel(req, res) {
 }
 
 function doGetUserSelectHotels(req, res) {
-  const placeIds = req.body; // 選択されたスポットのplace_id配列
-  console.log('received data:', placeIds);
+  selectedHotels = req.body; // 選択されたスポットのオブジェクト配列
+  console.log('received data:', selectedHotels);
 
   // const sess = new Session(req, res); // session利用準備
-  // sess.set("selectspots", placeIds); // sessionのselectspotsというキーにplaceIdsを保管
-  req.session.selecthotels = placeIds;
+  // sess.set("selecthotels", selectedHotels); // sessionのselecthotelsというキーにselectedHotelsを保管
+  req.session.selecthotels = selectedHotels;
   req.session.save();
   console.log("session.selecthotels > ", req.session.selecthotels);
 
@@ -238,9 +254,9 @@ async function getHotelDetails(req, res) {
       'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
       'largeClassCode': "japan",
-      'middleClassCode': "saitama", //都道府県 destinationページで選択されたもの
-      'smallClassCode': "saitama", //市区町村 destinationページで選択されたもの
-      //'detailClassCode': "A", //駅、詳細地域 destinationページで選択されたもの
+      'middleClassCode': "hokkaido", //都道府県 destinationページで選択されたもの
+      'smallClassCode': "sapporo", //市区町村 destinationページで選択されたもの
+      'detailClassCode': "B", //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",
       'applicationId': RAKUTEN_APP_ID
@@ -277,7 +293,7 @@ async function getHotelDetails(req, res) {
         'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL, // 検索エンジンID
         // 'c2coff': "1", // 中国語の検索を無効
         // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
-        'exactTerms': "SDGs OR 環境保全", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+        'exactTerms': "SDGs OR 環境保全 OR 環境に優しい OR 地産地消 OR 環境に配慮 OR エコ OR エシカル OR 持続可能 OR オーガニック", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
         // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
         // 'filter': "1", // 重複コンテンツ フィルタを有効
         // 'gl': "jp", // エンドユーザーの位置情報
@@ -334,7 +350,7 @@ async function getHotelDetails(req, res) {
 // 出発地・到着地入力ページ
 function viewPlace(req, res) {
   try {
-    res.render('place.ejs');
+    res.render('place.ejs', { data: dataFromScripts, selectedSpots, selectedHotels });
   } catch (error) {
     console.log(error)
   }
