@@ -1,5 +1,6 @@
 const { session, initSession } = require('./mods/session.js');
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const { default: fetch, Headers } = require('node-fetch-cjs');
 const querystring = require('querystring');
@@ -35,6 +36,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //8080番ポートでサーバー待ち
 const PORT = 8080;
@@ -59,6 +61,7 @@ app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacehotels', getHotelDetails);
 
 // 選択したIDをPOST
+app.post('/userselectplaces', doGetUserSelectPlaces);
 app.post('/userselectspots', doGetUserSelectSpots);
 app.post('/userselecthotels', doGetUserSelectHotels);
 
@@ -72,8 +75,7 @@ app.post('/data', (req, res) => {
   res.sendStatus(200);
 });
 
-
-// 目的地ページ
+// 目的地ページの表示
 function viewDestination(req, res) {
   try {
     res.render('destination-modal.ejs');
@@ -91,6 +93,7 @@ function viewDestinationSearch(req, res) {
   }
 }
 
+// 目的に沿った観光地を取得
 async function getDestinationSpots(req, res) {
 
   async function fetchCustomSearch() {
@@ -142,7 +145,21 @@ async function getDestinationSpots(req, res) {
   }
 }
 
-// スポットページ
+// 選択した目的地(都道府県名・エリア名)
+async function doGetUserSelectPlaces(req, res) {
+  selectedPlaces = req.body; // 選択されたスポットのオブジェクト配列
+  console.log('received selected places:', selectedPlaces);
+
+  // const sess = new Session(req, res); // session利用準備
+  // sess.set("selectspots", selectedSpots); // sessionのselectspotsというキーにselectedSpotsを保管
+  req.session.selectplaces = selectedPlaces;
+  req.session.save();
+  console.log("session.selectplaces > ", req.session.selectplaces);
+
+  res.json({ result: true });
+}
+
+// スポットページの表示
 function viewSpot(req, res) {
   try {
     res.render('spot.ejs');
@@ -151,6 +168,59 @@ function viewSpot(req, res) {
   }
 }
 
+// スポット情報の取得
+async function getSpotPlaceIds(req,res) {
+  const selectedPlaces = req.session.selectplaces;
+  const prefecture = selectedPlaces.prefecture;
+  const area = selectedPlaces.area;
+
+  try {
+    const result = await fetchRestaurantViaV2TextSearch(prefecture, area);
+
+    console.log("getSpotPlaceIds.result > ", result);
+
+    const placeIds = result.places.map(places => places.id);
+
+    res.json({ places_id: placeIds });
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function fetchRestaurantViaV2TextSearch(prefecture, area) {
+  const BASE_URL = "https://places.googleapis.com/v1/places:searchText";
+
+  const requestHeader = new Headers({
+      'Content-Type': 'application/json',
+      'X-Goog-FieldMask': 'places.id',
+      'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY
+  });
+
+  const requestBody = {
+      textQuery: `SDGs 観光スポット ${prefecture} ${area}`,
+      languageCode: "ja",
+      maxResultCount: 5,
+      // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
+      // strictTypeFiltering: boolean,
+      // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE
+  };
+  console.log("fetchRestaurantViaV2TextSearch > requestBody: \n", requestBody);
+
+  try {
+    const rawResponse = await fetch(`${BASE_URL}`, {
+        method: "POST",
+        headers: requestHeader,
+        body: JSON.stringify(requestBody)
+    })
+    const response = await rawResponse.json()
+    console.log("getSpotPlaceIds.result > ", response);
+    return response;
+  } catch (error) {
+      console.log(error)
+  }
+}
+
+// 選択したスポット
 function doGetUserSelectSpots(req, res) {
   selectedSpots = req.body; // 選択されたスポットのオブジェクト配列
   console.log('received selected spots:', selectedSpots);
@@ -164,58 +234,7 @@ function doGetUserSelectSpots(req, res) {
   res.json({ result: true });
 }
 
-async function getSpotPlaceIds(req, res) {
-
-  async function fetchRestaurantViaV2TextSearch() {
-
-    const BASE_URL = "https://places.googleapis.com/v1/places:searchText";
-  
-    const requestHeader = new Headers({
-        'Content-Type': 'application/json',
-        'X-Goog-FieldMask': 'places.id',
-        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY
-    });
-  
-    const requestBody = {
-        textQuery: "SDGs 市ヶ谷 レストラン",
-        languageCode: "ja",
-        maxResultCount: 5,
-        // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
-        // strictTypeFiltering: boolean,
-        // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE
-    };
-
-    console.log("fetchRestaurantViaV2TextSearch > requestBody: \n", requestBody);
-  
-    try {
-      const rawResponse = await fetch(`${BASE_URL}`, {
-          method: "POST",
-          headers: requestHeader,
-          body: JSON.stringify(requestBody)
-      })
-
-      const response = await rawResponse.json()
-      
-      return response;
-    } catch (error) {
-        console.log(error)
-    }
-  }
-
-  try {
-    const result = await fetchRestaurantViaV2TextSearch();
-
-    console.log("getSpotPlaceIds.result > ", result);
-
-    const placeIds = result.places.map(places => places.id);
-
-    res.json({ places_id: placeIds });
-    } catch (error) {
-      console.log(error)
-    }
-}
-
-// ホテルページ
+// ホテルページの表示
 function viewHotel(req, res) {
   // const sess = new Session(req, res); // session利用準備
   // sess.check("selectspots"); // 念のためsession.selectspotsを確認
@@ -227,22 +246,51 @@ function viewHotel(req, res) {
     console.log(error)
   }
 }
+/*
+// hotel_areaClass.jsonの読み込み
+fs.readFile(path.join(__dirname, 'hotel_areaClass.json'), 'utf8', (err, data) => {
+  if (err) {
+    console.error("Error reading the JSON file: ", err);
+    return;
+  }
+  try {
+    hotelAreaClassData = JSON.parse(data);
+  } catch (parseError) {
+    console.error("Error parsing the JSON file: ", parseError);
+  }
+});
 
-function doGetUserSelectHotels(req, res) {
-  selectedHotels = req.body; // 選択されたスポットのオブジェクト配列
-  console.log('received data:', selectedHotels);
+// 都道府県とエリア名を元にclassCodeを取得する関数
+function getClassCode(prefecture, area) {
+  const largeClass = hotelAreaClassData.areaClasses.largeClasses.find(lc => lc[0].largeClassName === '日本');
+  if (!largeClass) return null;
 
-  // const sess = new Session(req, res); // session利用準備
-  // sess.set("selecthotels", selectedHotels); // sessionのselecthotelsというキーにselectedHotelsを保管
-  req.session.selecthotels = selectedHotels;
-  req.session.save();
-  console.log("session.selecthotels > ", req.session.selecthotels);
+  const middleClass = largeClass[1].middleClasses.find(mc => mc.middleClass[0].middleClassName === prefecture);
+  if (!middleClass) return null;
 
-  res.json({ result: true });
+  for (const smallClassGroup of middleClass.middleClass[1].smallClasses) {
+      const smallClass = smallClassGroup.smallClass.find(sc => sc.smallClassName === area);
+      if (smallClass) {
+          return {
+              largeClassCode: largeClass[0].largeClassCode,
+              middleClassCode: middleClass.middleClass[0].middleClassCode,
+              smallClassCode: smallClass.smallClassCode,
+              detailClassCode: smallClass.detailClasses ? smallClass.detailClasses[0].detailClassCode : null
+          };
+      }
+  }
+  console.log("large:",large,"middle:",middle,"small:",small,"detail:",detail);
+  return null;
 }
-
-// 楽天トラベル施設検索APIで地区区分コードから施設情報を取得
+*/
+// 楽天トラベル施設検索APIで宿泊施設情報を取得
 async function getHotelDetails(req, res) {
+  /*const { prefecture, area } = req.body;
+  const classCode = getClassCode(prefecture, area);
+
+  if(!classCode) {
+    return res.status(400).json({ error: 'Invalid area selection' });
+  }*/
 
   async function fetchHotelSearch() {
 
@@ -253,10 +301,10 @@ async function getHotelDetails(req, res) {
       'responseType': "large",
       'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
-      'largeClassCode': "japan",
-      'middleClassCode': "hokkaido", //都道府県 destinationページで選択されたもの
-      'smallClassCode': "sapporo", //市区町村 destinationページで選択されたもの
-      'detailClassCode': "B", //駅、詳細地域 destinationページで選択されたもの
+      'largeClassCode': "japan",//classCode.largeClassCode,
+      'middleClassCode': "hokkaido",//classCode.middleClassCode, //都道府県 destinationページで選択されたもの
+      'smallClassCode': "sapporo",//classCode.smallClassCode, //市区町村 destinationページで選択されたもの
+      'detailClassCode': "A",//classCode.detailClassCode, //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",
       'applicationId': RAKUTEN_APP_ID
@@ -345,6 +393,20 @@ async function getHotelDetails(req, res) {
     res.status(500).json({ error: 'Internal server error' });
   }
 
+}
+
+// 選択したホテル
+function doGetUserSelectHotels(req, res) {
+  selectedHotels = req.body; // 選択されたスポットのオブジェクト配列
+  console.log('received data:', selectedHotels);
+
+  // const sess = new Session(req, res); // session利用準備
+  // sess.set("selecthotels", selectedHotels); // sessionのselecthotelsというキーにselectedHotelsを保管
+  req.session.selecthotels = selectedHotels;
+  req.session.save();
+  console.log("session.selecthotels > ", req.session.selecthotels);
+
+  res.json({ result: true });
 }
 
 // 出発地・到着地入力ページ

@@ -374,13 +374,11 @@ const placeSelect = document.getElementById('place-select');
 prefectures.forEach(prefecture => {
     const option = document.createElement('option');
     option.textContent = prefecture;
-  
     prefectureSelect.appendChild(option);    
   });
   
   // 大分類が選択されたら小分類のプルダウンを生成
   prefectureSelect.addEventListener('input', () => {
-  
     // 小分類のプルダウンをリセット
     const options = document.querySelectorAll('#place-select > option');
     options.forEach(option => {
@@ -411,7 +409,6 @@ prefectures.forEach(prefecture => {
       }
     });
   });
-
 
 // モーダルウィンドウ 北海道
 const modalH = document.querySelector('#js-modal-H');
@@ -612,3 +609,37 @@ modalCloseO.addEventListener('click', () => {
   detailsElementO.removeAttribute('open');
   console.log('button-close')
 });
+
+// 画面左の選択済みスポットリストをサーバに送信して、画面遷移
+function sendSelectPlaces(){
+  const selectedPrefecture = prefectureSelect.value;
+  const selectedPlace = placeSelect.value;
+  if (selectedPrefecture === '選択してください' || selectedPlace === '選択してください') {
+    alert('都道府県とエリアを選択してください。');
+    return;
+  }
+  console.log('選択された都道府県: ', selectedPrefecture);
+  console.log('選択されたエリア: ', selectedPlace);
+
+  // 送信
+ fetch("/userselectplaces", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prefecture: selectedPrefecture,
+      area: selectedPlace
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("POST /userselectplaces -> ", data);
+    // 送信成功なら /hotel に遷移、失敗なら警告表示
+    if (data.result == true) window.location.href = "/spot"
+    else alert("送信失敗！");
+  });
+}
