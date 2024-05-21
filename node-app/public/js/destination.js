@@ -408,7 +408,7 @@ prefectures.forEach(prefecture => {
         placeSelect.appendChild(option);
       }
     });
-  });
+});
 
 // モーダルウィンドウ 北海道
 const modalH = document.querySelector('#js-modal-H');

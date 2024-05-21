@@ -151,7 +151,7 @@ async function doGetUserSelectPlaces(req, res) {
   console.log('received selected places:', selectedPlaces);
 
   // const sess = new Session(req, res); // session利用準備
-  // sess.set("selectspots", selectedSpots); // sessionのselectspotsというキーにselectedSpotsを保管
+  // sess.set("selectplaces", selectedPlaces); // sessionのselectspotsというキーにselectedPlacesを保管
   req.session.selectplaces = selectedPlaces;
   req.session.save();
   console.log("session.selectplaces > ", req.session.selectplaces);
