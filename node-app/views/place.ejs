@@ -26,7 +26,7 @@
     <main>
         <h2>④出発地と到着地の入力</h2>
         <div class="input-place">
-            <div class="first-day">
+            <div class="day">
                 <h3>1日目</h3>
                 <label>出発地</label>
                 <label>到着地</label>
@@ -38,7 +38,10 @@
                 <label>到着地</label>
             </div>
             <div class="add-days">
-                <input type="submit" method="post" name="add" value="追加" onclick="location.href='place.html'" class="button">
+                <button class="plus-button" onclick="addNewDay()">
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
 

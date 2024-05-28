@@ -63,27 +63,28 @@ main {
 }
 
 /* 出発地と到着地の入力 */
-.first-day {
+.input-place {
+    height: 150px;
+    display: flex;
+}
+
+.day {
+    position: relative;
     background-color: #fdbf64;
     height: 150px;
     width: 200px;
+    margin-right: 20px;
 }
 
-.first-day h3 {
+.day h3 {
     text-align: center;
     padding-top: 5px;
 }
 
-.first-day label {
+.day label {
     display: flex;
     margin-left: 10px;
     height: 35px;
-}
-
-.first-day .button {
-    position: relative;
-    bottom: 5px;
-    left: 150px;
 }
 
 .last-day {
@@ -92,7 +93,7 @@ main {
     width: 200px;
     position: absolute;
     left: 900px;
-    top: 266.6px;
+    top: 250px;
 }
 
 .last-day h3 {
@@ -106,24 +107,48 @@ main {
     height: 35px;
 }
 
-.add-days .button {
+.plus-button {
     position: absolute;
-    left: 600px;
-    top: 340px;
+    top: 290px;
+    left: 400px;
+    width: 60px;
+    height: 60px;
+    background: #fddba7;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+    z-index: 2147483647;
+}
+
+.plus-button span {
+    width: 50px;
+    height: 2px;
+    background: orange;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 25px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.plus-button span:nth-child(2) {
+    transform: rotate(-90deg);
 }
 
 /* 確認 */
 .inputcheck-area {
+    position: relative;
     background-color: #fdbf64;
     padding-top: 10px;
     padding-left: 5px;
     height: 300px;
 }
 
-.inputcheck-area .button {
-    position: relative;
-    top: 165px;
-    left: 905px;
+.button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
 }
 
 /* フッター */

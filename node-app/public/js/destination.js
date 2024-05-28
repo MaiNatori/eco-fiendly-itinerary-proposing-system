@@ -416,23 +416,24 @@ const modalButtonH = document.querySelector('.js-modal-button-H');
 const modalCloseH = document.querySelector('.js-close-button-H');
 const detailsElementH = document.querySelector('.accordion-hokkaido');
 
-var moda = false;
-
-modalButtonH.addEventListener('click', () => {
-  if (!moda) {
+detailsElementH.addEventListener('toggle', () => {
+  if (detailsElementH.open) {
     modalH.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalH.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseH.addEventListener('click', () => {
-  modalH.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementH.removeAttribute('open');
-  console.log('button-close')
+modalCloseH.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalH.classList.contains('is-open')) {
+    modalH.classList.remove('is-open');
+    detailsElementH.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　東北
@@ -441,23 +442,24 @@ const modalButtonT = document.querySelector('.js-modal-button-T');
 const modalCloseT = document.querySelector('.js-close-button-T');
 const detailsElementT = document.querySelector('.accordion-tohoku')
 
-var moda = false
-
-modalButtonT.addEventListener('click', () => {
-  if (!moda) {
+detailsElementT.addEventListener('toggle', () => {
+  if (detailsElementT.open) {
     modalT.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalT.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseT.addEventListener('click', () => {
-  modalT.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementT.removeAttribute('open');
-  console.log('button-close')
+modalCloseT.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalT.classList.contains('is-open')) {
+    modalT.classList.remove('is-open');
+    detailsElementT.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　関東
@@ -466,23 +468,24 @@ const modalButtonK = document.querySelector('.js-modal-button-K');
 const modalCloseK = document.querySelector('.js-close-button-K');
 const detailsElementK = document.querySelector('.accordion-kanto')
 
-var moda = false
-
-modalButtonK.addEventListener('click', () => {
-  if (!moda) {
+detailsElementK.addEventListener('toggle', () => {
+  if (detailsElementK.open) {
     modalK.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalK.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseK.addEventListener('click', () => {
-  modalK.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementK.removeAttribute('open');
-  console.log('button-close')
+modalCloseK.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalK.classList.contains('is-open')) {
+    modalK.classList.remove('is-open');
+    detailsElementK.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　中部
@@ -491,23 +494,24 @@ const modalButtonC = document.querySelector('.js-modal-button-C');
 const modalCloseC = document.querySelector('.js-close-button-C');
 const detailsElementC = document.querySelector('.accordion-chubu')
 
-var moda = false
-
-modalButtonC.addEventListener('click', () => {
-  if (!moda) {
+detailsElementC.addEventListener('toggle', () => {
+  if (detailsElementC.open) {
     modalC.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalC.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseC.addEventListener('click', () => {
-  modalC.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementC.removeAttribute('open');
-  console.log('button-close')
+modalCloseC.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalC.classList.contains('is-open')) {
+    modalC.classList.remove('is-open');
+    detailsElementC.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　近畿
@@ -516,23 +520,24 @@ const modalButtonKK = document.querySelector('.js-modal-button-KK');
 const modalCloseKK = document.querySelector('.js-close-button-KK');
 const detailsElementKK = document.querySelector('.accordion-kinki')
 
-var moda = false
-
-modalButtonKK.addEventListener('click', () => {
-  if (!moda) {
+detailsElementKK.addEventListener('toggle', () => {
+  if (detailsElementKK.open) {
     modalKK.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalKK.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseKK.addEventListener('click', () => {
-  modalKK.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementKK.removeAttribute('open');
-  console.log('button-close')
+modalCloseKK.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalKK.classList.contains('is-open')) {
+    modalKK.classList.remove('is-open');
+    detailsElementKK.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　中四国
@@ -541,23 +546,24 @@ const modalButtonCS = document.querySelector('.js-modal-button-CS');
 const modalCloseCS = document.querySelector('.js-close-button-CS');
 const detailsElementCS = document.querySelector('.accordion-chushikoku')
 
-var moda = false
-
-modalButtonCS.addEventListener('click', () => {
-  if (!moda) {
+detailsElementCS.addEventListener('toggle', () => {
+  if (detailsElementCS.open) {
     modalCS.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalCS.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseCS.addEventListener('click', () => {
-  modalCS.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementCS.removeAttribute('open');
-  console.log('button-close')
+modalCloseCS.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalCS.classList.contains('is-open')) {
+    modalCS.classList.remove('is-open');
+    detailsElementCS.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　九州
@@ -566,23 +572,24 @@ const modalButtonKS = document.querySelector('.js-modal-button-KS');
 const modalCloseKS = document.querySelector('.js-close-button-KS');
 const detailsElementKS = document.querySelector('.accordion-kyushu')
 
-var moda = false
-
-modalButtonKS.addEventListener('click', () => {
-  if (!moda) {
+detailsElementKS.addEventListener('toggle', () => {
+  if (detailsElementKS.open) {
     modalKS.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalKS.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseKS.addEventListener('click', () => {
-  modalKS.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementKS.removeAttribute('open');
-  console.log('button-close')
+modalCloseKS.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalKS.classList.contains('is-open')) {
+    modalKS.classList.remove('is-open');
+    detailsElementKS.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 //モーダルウィンドウ　沖縄
@@ -591,44 +598,64 @@ const modalButtonO = document.querySelector('.js-modal-button-O');
 const modalCloseO = document.querySelector('.js-close-button-O');
 const detailsElementO = document.querySelector('.accordion-okinawa')
 
-var moda = false
-
-modalButtonO.addEventListener('click', () => {
-  if (!moda) {
+detailsElementO.addEventListener('toggle', () => {
+  if (detailsElementO.open) {
     modalO.classList.add('is-open');
-    moda = true;
+    console.log('open');
   } else {
-    moda = false;
+    modalO.classList.remove('is-open');
+    console.log('modal-close');
   }
-  console.log('open');
 });
 
-modalCloseO.addEventListener('click', () => {
-  modalO.classList.remove('is-open');
-  console.log('modal-close');
-  detailsElementO.removeAttribute('open');
-  console.log('button-close')
+modalCloseO.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (modalO.classList.contains('is-open')) {
+    modalO.classList.remove('is-open');
+    detailsElementO.removeAttribute('open');
+    console.log('close');
+  }
 });
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectPlaces(){
   const selectedPrefecture = prefectureSelect.value;
   const selectedPlace = placeSelect.value;
-  if (selectedPrefecture === '選択してください' || selectedPlace === '選択してください') {
-    alert('都道府県とエリアを選択してください。');
-    return;
-  }
-  console.log('選択された都道府県: ', selectedPrefecture);
-  console.log('選択されたエリア: ', selectedPlace);
+  let bodyData = {};
 
+  if (selectedPrefecture === '選択してください' && selectedPlace === '選択してください') {
+    const selectedRadioButton = document.querySelector('input[type="radio"]:checked');
+    if (selectedRadioButton) {
+      const selectedPrefectureSummary = selectedRadioButton.closest('details').querySelector('summary').textContent;
+      const selectedPlaceValue = selectedRadioButton.value;
+        console.log('マップから選択');
+        console.log('選択された都道府県: ', selectedPrefectureSummary);
+        console.log('選択されたエリア: ', selectedPlaceValue);
+
+        bodyData = {
+          prefecture: selectedPrefectureSummary,
+          area: selectedPlaceValue
+        };
+    } else {
+      alert('都道府県とエリアを選択してください。');
+      return;
+    }
+  } else {
+    console.log('プルダウンから選択');
+    console.log('選択された都道府県: ', selectedPrefecture);
+    console.log('選択されたエリア: ', selectedPlace);
+
+    bodyData = {
+      prefecture: selectedPrefecture,
+      area: selectedPlace
+    };
+  }
   // 送信
  fetch("/userselectplaces", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      prefecture: selectedPrefecture,
-      area: selectedPlace
-    })
+    body: JSON.stringify(bodyData)
   })
   .then(response => {
     if (!response.ok) {
@@ -639,7 +666,10 @@ function sendSelectPlaces(){
   .then(data => {
     console.log("POST /userselectplaces -> ", data);
     // 送信成功なら /hotel に遷移、失敗なら警告表示
-    if (data.result == true) window.location.href = "/spot"
-    else alert("送信失敗！");
+    if (data.result == true) {
+      window.location.href = "/spot";
+    } else {
+      alert("送信失敗！");
+    }
   });
 }

@@ -170,6 +170,7 @@ function viewSpot(req, res) {
 
 // スポット情報の取得
 async function getSpotPlaceIds(req,res) {
+  console.log('req.session:', req.session);
   const selectedPlaces = req.session.selectplaces;
   const prefecture = selectedPlaces.prefecture;
   const area = selectedPlaces.area;
@@ -197,7 +198,7 @@ async function fetchRestaurantViaV2TextSearch(prefecture, area) {
   });
 
   const requestBody = {
-      textQuery: `SDGs 観光スポット ${prefecture} ${area}`,
+      textQuery: `${prefecture} ${area} 観光スポット`,
       languageCode: "ja",
       maxResultCount: 5,
       // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限

@@ -100,7 +100,7 @@ function createMarker(place, doItCenter = false) {
     const phoneNumberElement = document.createElement("p");
     phoneNumberElement.textContent = place.formatted_phone_number;
     content.appendChild(phoneNumberElement);
-
+/*
     const openingHoursElement = document.createElement("div");
     place.opening_hours.weekday_text.forEach(day => {
       const dayElement = document.createElement("p");
@@ -108,7 +108,7 @@ function createMarker(place, doItCenter = false) {
       openingHoursElement.appendChild(dayElement);
     });
     content.appendChild(openingHoursElement);
-
+*/
     const websiteElement = document.createElement("p");
     websiteElement.textContent = place.website;
     content.appendChild(websiteElement);
@@ -229,6 +229,18 @@ function clearSelectSpotList(placeId){
   });
 }
 
+function nextPage() {
+    const ref = document.referrer;
+    console.log(ref)
+
+    // 遷移元URLによって遷移先URLを設定
+    if (ref.includes('/place')) {
+      returnPlacePage();
+    } else if (ref.includes('/destination') || ref.includes('/destination-search')) {
+      sendSelectSpots();
+    };
+}
+
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectSpots(){
   // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
@@ -257,6 +269,37 @@ function sendSelectSpots(){
       console.log("POST /userselectspots -> ", data);
       // 送信成功なら /hotel に遷移、失敗なら警告表示
       if (data.result == true) window.location.href = "/hotel"
+      else alert("送信失敗！");
+    });
+}
+
+function returnPlacePage(){
+  // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
+  let selectedSpots = []; // 選択されたplace_idの配列
+
+  const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
+  for (const s of spots) {
+    const placeId = s.querySelector(".this-place-id").value;
+    const placeName = s.querySelector("h2").innerText;
+    selectedSpots.push({ placeId, placeName }); // オブジェクトとして格納
+  }
+
+  // 送信
+ fetch("/userselectspots", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(selectedSpots)
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("POST /userselectspots -> ", data);
+      // 送信成功なら /hotel に遷移、失敗なら警告表示
+      if (data.result == true) window.location.href = "/place"
       else alert("送信失敗！");
     });
 }
