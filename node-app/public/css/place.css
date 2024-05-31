@@ -63,6 +63,25 @@ main {
 }
 
 /* 出発地と到着地の入力 */
+.dayNumber {
+    color: #575757;
+    font-size: 25px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    position: absolute;
+    top: 175px;
+    left: 530px;
+}
+
+h3.number {
+    color: #575757;
+    font-size: 30px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    position: absolute;
+    text-decoration: none;
+    top: 170px;
+    left: 640px;
+}
+
 .input-place {
     height: 150px;
     display: flex;
@@ -109,31 +128,54 @@ main {
 
 .plus-button {
     position: absolute;
-    top: 290px;
-    left: 400px;
-    width: 60px;
-    height: 60px;
+    top: 175px;
+    left: 600px;
+    width: 40px;
+    height: 40px;
     background: #fddba7;
     border-radius: 50%;
     padding: 0;
     border: transparent;
     cursor: pointer;
-    z-index: 2147483647;
 }
 
 .plus-button span {
-    width: 50px;
+    width: 20px;
     height: 2px;
     background: orange;
     display: inline-block;
     position: absolute;
-    left: calc(50% - 25px);
+    left: calc(50% - 10px);
     top: 50%;
     border-radius: 20px;
 }
   
 .plus-button span:nth-child(2) {
     transform: rotate(-90deg);
+}
+
+.minus-button {
+    position: absolute;
+    top: 175px;
+    left: 680px;
+    width: 40px;
+    height: 40px;
+    background: #fddba7;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+
+.minus-button span {
+    width: 20px;
+    height: 2px;
+    background: orange;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 10px);
+    top: 50%;
+    border-radius: 20px;
 }
 
 /* 確認 */

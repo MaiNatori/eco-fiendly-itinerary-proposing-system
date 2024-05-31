@@ -25,14 +25,16 @@
 
     <main>
         <h2>④出発地と到着地の入力</h2>
+        <h3 class="dayNumber">日数</h3>
+        <h3 class="number" id="trip-days">2</h3>
         <div class="input-place">
-            <div class="day">
+            <div class="day" id="day-1">
                 <h3>1日目</h3>
                 <label>出発地</label>
                 <label>到着地</label>
-                <input type="submit" method="post" name="confirm" value="確定" onclick="location.href='place.html'" class="button">
+                <input type="submit" method="post" name="confirm" value="確定" onclick="location.href='/place'" class="button">
             </div>
-            <div class="last-day">
+            <div class="day" id="last-day">
                 <h3>最終日</h3>
                 <label>出発地</label>
                 <label>到着地</label>
@@ -40,6 +42,11 @@
             <div class="add-days">
                 <button class="plus-button" onclick="addNewDay()">
                     <span></span>
+                    <span></span>
+                </button>
+            </div>
+            <div class="delete-days">
+                <button class="minus-button" onclick="deleteDay()">
                     <span></span>
                 </button>
             </div>
