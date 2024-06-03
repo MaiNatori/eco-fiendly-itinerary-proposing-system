@@ -55,10 +55,11 @@ app.get('/hotel', viewHotel);
 app.get('/place', viewPlace);
 app.get('/result', viewResult);
 
-// Places API
+// API
 app.get('/interfacespots', getSpotPlaceIds);
 app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacehotels', getHotelDetails);
+app.get('/get-hotels', sendSelectedHotels);
 
 // 選択したIDをPOST
 app.post('/userselectplaces', doGetUserSelectPlaces);
@@ -418,6 +419,12 @@ function viewPlace(req, res) {
     console.log(error)
   }
 }
+
+function sendSelectedHotels(req, res) {
+  console.log("selecthotels: ",req.session.selecthotels);
+  res.json({ selectHotels: req.session.selecthotels });
+}
+
 
 // 結果表示ページ
 function viewResult(req, res) {

@@ -85,14 +85,20 @@ h3.number {
 .input-place {
     height: 150px;
     display: flex;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .day {
+    display: inline-block;
+    vertical-align: top;
     position: relative;
     background-color: #fdbf64;
     height: 150px;
     width: 200px;
-    margin-right: 20px;
+    margin-right: 10px;
+    margin-bottom: 20px;
 }
 
 .day h3 {
@@ -100,30 +106,36 @@ h3.number {
     padding-top: 5px;
 }
 
-.day label {
-    display: flex;
-    margin-left: 10px;
-    height: 35px;
+.day table {
+    width: 100%;
+    table-layout: fixed;
 }
 
-.last-day {
-    background-color: #fdbf64;
-    height: 150px;
-    width: 200px;
-    position: absolute;
-    left: 900px;
-    top: 250px;
+.day th {
+    color: #575757;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 50px;
 }
 
-.last-day h3 {
-    text-align: center;
-    padding-top: 5px;
+.day td {
+    color: #575757;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.last-day label {
-    display: flex;
-    margin-left: 10px;
-    height: 35px;
+.day td input {
+    width: calc(100% - 10px);
+    margin-right: 10px;
+    height: 20px;
+}
+
+.day td select {
+    width: calc(100% - 2px);
+    margin-right: 10px;
+    height: 25px;
 }
 
 .plus-button {

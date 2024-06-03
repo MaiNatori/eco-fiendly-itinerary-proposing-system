@@ -30,14 +30,35 @@
         <div class="input-place">
             <div class="day" id="day-1">
                 <h3>1日目</h3>
-                <label>出発地</label>
-                <label>到着地</label>
-                <input type="submit" method="post" name="confirm" value="確定" onclick="location.href='/place'" class="button">
+                <table>
+                    <tr>
+                        <th><label>出発地</label></th>
+                        <td><input  type="text" placeholder="出発地を入力" class="form" id="departure-1"></td>
+                    </tr>
+                    <tr>
+                        <th><label>到着地</label></th>
+                        <td>
+                            <select id="arrival-1">
+                                <% selectedHotels.forEach(hotel => { %>
+                                    <option value="<%= hotel.hotelName %>"><%= hotel.hotelName %></option>
+                                <% }); %>
+                            </select>
+                        </td>
+                </table>
+                    <input type="submit" method="post" name="confirm" value="確定" onclick="confirmDay(1)" class="button">
             </div>
             <div class="day" id="last-day">
                 <h3>最終日</h3>
-                <label>出発地</label>
-                <label>到着地</label>
+                    <table>
+                        <tr>
+                            <th><label>出発地</label></th>
+                            <td><label id="final-departure">--</label></td>
+                        </tr>
+                        <tr>
+                            <th><label>到着地</label></th>
+                            <td><label id="final-arrival">--</label></td>
+                        </tr>
+                    </table>
             </div>
             <div class="add-days">
                 <button class="plus-button" onclick="addNewDay()">
