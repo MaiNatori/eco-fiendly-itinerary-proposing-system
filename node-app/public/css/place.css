@@ -83,7 +83,7 @@ h3.number {
 }
 
 .input-place {
-    height: 150px;
+    height: 170px;
     display: flex;
     flex-wrap: wrap;
     overflow-x: auto;
