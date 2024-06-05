@@ -47,7 +47,6 @@ app.listen(PORT, () => {
 
 // メソッド
 // HTML表示
-app.get('/', viewDestination);
 app.get('/destination', viewDestination);
 app.get('/destination-search', viewDestinationSearch);
 app.get('/spot', viewSpot);
@@ -248,65 +247,39 @@ function viewHotel(req, res) {
     console.log(error)
   }
 }
-/*
-// hotel_areaClass.jsonの読み込み
-fs.readFile(path.join(__dirname, 'hotel_areaClass.json'), 'utf8', (err, data) => {
-  if (err) {
-    console.error("Error reading the JSON file: ", err);
-    return;
-  }
-  try {
-    hotelAreaClassData = JSON.parse(data);
-  } catch (parseError) {
-    console.error("Error parsing the JSON file: ", parseError);
-  }
-});
 
-// 都道府県とエリア名を元にclassCodeを取得する関数
-function getClassCode(prefecture, area) {
-  const largeClass = hotelAreaClassData.areaClasses.largeClasses.find(lc => lc[0].largeClassName === '日本');
-  if (!largeClass) return null;
-
-  const middleClass = largeClass[1].middleClasses.find(mc => mc.middleClass[0].middleClassName === prefecture);
-  if (!middleClass) return null;
-
-  for (const smallClassGroup of middleClass.middleClass[1].smallClasses) {
-      const smallClass = smallClassGroup.smallClass.find(sc => sc.smallClassName === area);
-      if (smallClass) {
-          return {
-              largeClassCode: largeClass[0].largeClassCode,
-              middleClassCode: middleClass.middleClass[0].middleClassCode,
-              smallClassCode: smallClass.smallClassCode,
-              detailClassCode: smallClass.detailClasses ? smallClass.detailClasses[0].detailClassCode : null
-          };
-      }
-  }
-  console.log("large:",large,"middle:",middle,"small:",small,"detail:",detail);
-  return null;
-}
-*/
 // 楽天トラベル施設検索APIで宿泊施設情報を取得
 async function getHotelDetails(req, res) {
-  /*const { prefecture, area } = req.body;
-  const classCode = getClassCode(prefecture, area);
 
-  if(!classCode) {
-    return res.status(400).json({ error: 'Invalid area selection' });
-  }*/
+  const  { prefectureId, areaId } = req.session.selectplaces;
+  if (!prefectureId || !areaId) {
+    return res.status(400).json({ error: 'No selection found in session'});
+  }
 
   async function fetchHotelSearch() {
 
     const BASE_URL = "https://app.rakuten.co.jp/services/api/Travel/SimpleHotelSearch/20170426";
   
+    let smallAreaId = "";
+    let detailAreaId = "";
+
+    if (areaId.includes("-")) {
+      const areaParts = areaId.split("-");
+      smallAreaId = areaParts[0];
+      detailAreaId = areaParts[1];
+    } else {
+      smallClassCode = areaId;
+    }
+
     const params = {
       'format': "json",
       'responseType': "large",
       'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
       'formatVersion': "2",
-      'largeClassCode': "japan",//classCode.largeClassCode,
-      'middleClassCode': "hokkaido",//classCode.middleClassCode, //都道府県 destinationページで選択されたもの
-      'smallClassCode': "sapporo",//classCode.smallClassCode, //市区町村 destinationページで選択されたもの
-      'detailClassCode': "A",//classCode.detailClassCode, //駅、詳細地域 destinationページで選択されたもの
+      'largeClassCode': "japan",
+      'middleClassCode': prefectureId, //都道府県 destinationページで選択されたもの
+      'smallClassCode': smallAreaId, //市区町村 destinationページで選択されたもの
+      'detailClassCode': detailAreaId, //駅、詳細地域 destinationページで選択されたもの
       'page': 1,
       'hits': "10",
       'applicationId': RAKUTEN_APP_ID
@@ -341,17 +314,9 @@ async function getHotelDetails(req, res) {
       const params = {
         'key': GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL, // APIキー
         'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL, // 検索エンジンID
-        // 'c2coff': "1", // 中国語の検索を無効
-        // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
         'exactTerms': "SDGs OR 環境保全 OR 環境に優しい OR 地産地消 OR 環境に配慮 OR エコ OR エシカル OR 持続可能 OR オーガニック", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
-        // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
-        // 'filter': "1", // 重複コンテンツ フィルタを有効
-        // 'gl': "jp", // エンドユーザーの位置情報
-        // 'hl': "ja", // ユーザー インターフェースの言語を設定
-        // 'hq': "", // 指定したクエリ語句を論理AND演算子で結合されているかのようにクエリに追加
         'lr': "lang_ja", //検索対象を特定の言語に設定
         'num': 5, // 返される検索結果の数
-        // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
         'q': `${hotelName} 公式`, // クエリ
       };
 

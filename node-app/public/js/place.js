@@ -20,8 +20,8 @@ function fetchSelectedHotels() {
       });
   }
 
+//日程の追加
 function addNewDay() { 
-    // 追加される日程ボックスを作成
     const input = document.querySelector(".input-place");
     const div = document.createElement('div');
         div.classList.add('day');
@@ -64,17 +64,12 @@ function addNewDay() {
 
 }
 
+// 日程の削除
 function deleteDay() {
     const days = document.querySelectorAll('.day');
     if (days.length > 2) {
         const lastDayIndex = days.length - 2;
         const lastDay = days[lastDayIndex];
-        //const arrivalSelect = lastDay.querySelector(`#arrival-${lastDayIndex - 1}`);
-
-        /*const finalDeparture = document.getElementById("final-departure");
-        if (arrivalSelect) {
-            finalDeparture.textContent = arrivalSelect.value;
-        }*/
 
         lastDay.remove();
 
@@ -89,6 +84,7 @@ function deleteDay() {
     updateFinalDeparture();
 }
 
+// 日数表示の変更
 function updateDayNumbers() {
     const days = document.querySelectorAll('.day');
     if (days.length === 0) {
@@ -106,6 +102,7 @@ function updateDayNumbers() {
     });
 }
 
+// 翌日の出発地の変更
 function updateNextDeparture(dayNumber) {
     const arrivalSelect = document.getElementById(`arrival-${dayNumber}`);
     const nextDeparture = document.getElementById(`departure-${dayNumber + 1}`);
@@ -113,14 +110,11 @@ function updateNextDeparture(dayNumber) {
     if (nextDeparture) {
       nextDeparture.textContent = arrivalSelect.value;
     }
-  /*
-    if (dayNumber + 1 === tripDays) {
-      const finalDeparture = document.getElementById("final-departure");
-      finalDeparture.textContent = arrivalSelect.value;
-    }*/
+    
     updateFinalDeparture();
 }
 
+// 最終日の出発地の変更
 function updateFinalDeparture() {
     const days = document.querySelectorAll('.day');
     const finalDeparture = document.getElementById("final-departure");
@@ -138,6 +132,7 @@ function updateFinalDeparture() {
     }
 }
 
+// ページがロードされたときに行う初期設定
 window.onload = function() {
     fetchSelectedHotels();
     updateFinalDeparture();
@@ -153,6 +148,7 @@ window.onload = function() {
     }
 }
 
+// 確定ボタンを押したときの挙動
 function confirmDay(dayNumber) {
     const departureInput = document.getElementById(`departure-${dayNumber}`);
     const arrivalSelect = document.getElementById(`arrival-${dayNumber}`);
