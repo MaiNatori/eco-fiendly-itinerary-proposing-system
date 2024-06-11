@@ -4,14 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const { default: fetch, Headers } = require('node-fetch-cjs');
 const querystring = require('querystring');
+const crypto = require('crypto');
 
 require('dotenv').config();
 
-const GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION;
-console.log("GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION > ", GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION);
+const NAVITIME_SID = process.env.NAVITIME_SID;
+console.log("NAVITIME_SID > ", NAVITIME_SID);
 
-const GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION;
-console.log("GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION > ", GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION);
+const NAVITIME_SIGNATURE_KEY = process.env.NAVITIME_SIGNATURE_KEY;
+console.log("NAVITIME_SIGNATURE_KEY > ", NAVITIME_SIGNATURE_KEY);
 
 const GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL;
 console.log("GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL > ", GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL);
@@ -55,8 +56,8 @@ app.get('/place', viewPlace);
 app.get('/result', viewResult);
 
 // API
-app.get('/interfacespots', getSpotPlaceIds);
 app.get('/interfacedestination', getDestinationSpots);
+app.get('/interfacespots', getSpotPlaceIds);
 app.get('/interfacehotels', getHotelDetails);
 app.get('/get-hotels', sendSelectedHotels);
 
@@ -96,52 +97,45 @@ function viewDestinationSearch(req, res) {
 // 目的に沿った観光地を取得
 async function getDestinationSpots(req, res) {
 
-  async function fetchCustomSearch() {
+  async function fetchNavitimeAPI() {
+    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
 
-    const BASE_URL = "https://www.googleapis.com/customsearch/v1";
-  
     const params = {
-      'key': GOOGLE_CUSTOM_SEARCH_API_KEY_DESTINATION, // APIキー
-      'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_DESTINATION, // 検索エンジンID
-      // 'c2coff': "1", // 中国語の検索を無効
-      // 'cr': "countryJP", // 検索結果を日本で作成されたドキュメントに限定
-      // 'exactTerms': "", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
-      // 'fileType': "json", // 結果を指定した拡張子のファイルに制限
-      // 'filter': "1", // 重複コンテンツ フィルタを有効
-      // 'gl': "jp", // エンドユーザーの位置情報
-      // 'hl': "ja", // ユーザー インターフェースの言語を設定
-      // 'hq': "", // 指定したクエリ語句を論理AND演算子で結合されているかのようにクエリに追加
-      'lr': "lang_ja", //検索対象を特定の言語に設定
-      'num': 5, // 返される検索結果の数
-      // 'orTerms': "", // ドキュメント内をチェックする追加の検索キーワードを指定
-      'q': "海水浴場 HP", // クエリ
+      'category': "0101012001",
+      'add': "detail",
+      'limit': 3
     };
-
-    console.log("fetchHotelSearch > params: \n", params);
 
     try {
       const queryString = querystring.stringify(params);
-  
-      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
-    
-      const response = await urlWithParams.json()
+
+      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
+
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+
+      const response = await urlWithParams.json();
 
       return response;
 
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
   try {
-    const result = await fetchCustomSearch();
-
-    console.log("getDestinationSearch.result > \n", result);
-
-    res.json({ results: result });  
-
+    const result = await fetchNavitimeAPI();
+    console.log("result>",result);
+    res.json({ results: result });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+  }
+  
+  function getBase64Signature(data, key) {
+    const hmac = crypto.createHmac('sha1', key);
+    hmac.update(data);
+    const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
+    console.log("signature>", signature);
+    return signature;
   }
 }
 
@@ -172,8 +166,8 @@ function viewSpot(req, res) {
 async function getSpotPlaceIds(req,res) {
   console.log('req.session:', req.session);
   const selectedPlaces = req.session.selectplaces;
-  const prefecture = selectedPlaces.prefecture;
-  const area = selectedPlaces.area;
+  const prefecture = selectedPlaces.prefectureName;
+  const area = selectedPlaces.areaName;
 
   try {
     const result = await fetchRestaurantViaV2TextSearch(prefecture, area);
@@ -268,7 +262,7 @@ async function getHotelDetails(req, res) {
       smallAreaId = areaParts[0];
       detailAreaId = areaParts[1];
     } else {
-      smallClassCode = areaId;
+      smallAreaId = areaId;
     }
 
     const params = {

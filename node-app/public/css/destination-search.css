@@ -76,21 +76,26 @@ th {
     width: 100px;
 }
 
+.select-block {
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+select, label {
+    height: 32px;
+    font-size: 14px;
+    width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .input-block .button {
     display: block;
     margin-left: auto;
     margin-bottom: 5px;
     margin-right: 5px;
     width: 50px;
-}
-
-.select-block {
-    margin-bottom: 16px;
-}
-
-select, label {
-    height: 32px;
-    font-size: 14px;
 }
 
 
@@ -112,7 +117,7 @@ select, label {
 }
 
 .maps .accordion-hokkaido {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -124,7 +129,7 @@ select, label {
 }
 
 .maps .accordion-tohoku {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -136,7 +141,7 @@ select, label {
 }
 
 .maps .accordion-kanto {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -148,7 +153,7 @@ select, label {
 }
 
 .maps .accordion-chubu {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -160,7 +165,7 @@ select, label {
 }
 
 .maps .accordion-kinki {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -172,7 +177,7 @@ select, label {
 }
 
 .maps .accordion-chushikoku {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -184,7 +189,7 @@ select, label {
 }
 
 .maps .accordion-kyushu {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -196,7 +201,7 @@ select, label {
 }
 
 .maps .accordion-okinawa {
-    height: 15px;
+    height: 10px;
     text-align: center;
     padding-top: 8px;
     padding-left: 5px;
@@ -207,67 +212,91 @@ select, label {
     background-color: #fdbf64;
 }
 
+.maps .button {
+    display: block;
+    margin-left: auto;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    margin-top: 10px;
+    width: 50px;
+}
+
+summary:hover {
+    color: #fbf9f0;
+	font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* モーダルウィンドウ */
-.layer {
-    background: #fbf9f0;
+.accordion summary {
+    font-size: 15px;
+}
+/* モーダルウィンドウ 北海道 */
+.js-modal-button-H {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-H {
+    background: rgba(251, 249, 240, 0.7);
     width: 100%;
     height: 100%;
     position: fixed;
     top: 0;
     left:0;
-/*
     z-index: -1; 
-    opacity: 0;
     visibility: hidden;
-*/
+    opacity: 1;
 }
 
-.layer .is-open {
-    z-index: 999;
-    opacity: 1;
+.layer-H.is-open {
+    z-index: 2147483647;
     visibility: visible;
 }
   
-.layer .is-open .modal{
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal {
+.modal-H {
     position: relative;
     margin-right: auto;
     margin-left: auto;
-    width: 80%;
-    min-width: 440px;
-/*
-    opacity: 0;
-    visibility: hidden;
-*/
-}
-
-.modal_inner {
     margin-top: 125px;
     margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 350px;
+    visibility: hidden;
+    opacity: 1;
+    background: #fff;
+}
+
+.layer-H.is-open .modal-H{
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal_inner-H {
     position: relative;
     margin-left: auto;
     margin-right: auto;
     background: #fddba7;
     box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
-    border-radius: 13px;
     display: block;
-    padding: 21px 8px 21px;
-    height: auto;
-}
-
-.modal__button-wrap {
-    position: absolute;
-    right: 10px;
-    top: -28px;
-    display: inline-flex;
+    padding: 55px 30px 21px;
+    height: 300px;
 }
   
-.close-button {
-    position: relative;
+.close-button-H {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     width: 39px;
     height: 39px;
     background: orange;
@@ -277,7 +306,7 @@ select, label {
     cursor: pointer;
 }
   
-.close-button span {
+.close-button-H span {
     width: 25px;
     height: 2px;
     background: #fff;
@@ -288,34 +317,946 @@ select, label {
     border-radius: 20px;
 }
   
-.close-button span:nth-child(1) {
+.close-button-H span:nth-child(1) {
     transform: rotate(45deg) translate(-1px, -1px);
 }
   
-.close-button span:nth-child(2) {
+.close-button-H span:nth-child(2) {
     transform: rotate(-45deg) translate(1px, -1px);
 }
-  
 
-.modal__content {
+.modal__contents-H {
     padding-top: 15px;
     padding-bottom: 23px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
-.maps .accordion-prefecture {
-    display: inline;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    background-color: #fddba7;
+.modal_contents-H .modal_content-H {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 50px;
 }
 
-.maps .button {
+.modal_contents-H .modal_content-H p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.modal__contents-H .modal_content-H p label {
+    font-size: 15px;
+    height: 20px;
+}
+
+
+/* モーダルウィンドウ 東北 */
+.js-modal-button-T {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
     display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-T {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    visibility: hidden;
+    opacity: 1;
+}
+
+.layer-T.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.modal-T {
+    position: relative;
+    margin-right: auto;
     margin-left: auto;
-    margin-bottom: 5px;
-    margin-right: 5px;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    visibility: hidden;
+    opacity: 1;
+    background: #fff;
+}
+
+.layer-T.is-open .modal-T {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal_inner-T {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.close-button-T {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+  
+.close-button-T span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-T span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-T span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-T {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-T .modal_content-T {
+    display: inline;
+}
+
+.modal_contents-T .modal_content-T summary {
+    position: relative;
+    text-align: left;
     margin-top: 10px;
-    width: 50px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-T .modal_content-T .accordion .accordion_contents{
+    text-align: left;
+}
+
+.modal_contents-T .modal_content-T p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal_contents-T .modal_content-T p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 関東 */
+.js-modal-button-K {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-K {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-K.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-K.is-open .modal-K {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-K {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    visibility: hidden;
+    background: #fff;
+}
+
+.modal_inner-K {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.close-button-K {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+
+.close-button-K span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-K span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-K span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-K {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-K .modal_content-K {
+    display: inline;
+}
+
+.modal_contents-K .modal_content-K summary {
+    position: relative;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-K .modal_content-K .accordion .accordion_contents {
+    text-align: left;
+}
+
+.modal_contents-K .modal_content-K p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal__contents-K .modal_content-K p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 中部 */
+.js-modal-button-C {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-C {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-C.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-C.is-open .modal-C {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-C {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    visibility: hidden;
+    background: #fff;
+}
+
+.modal_inner-C {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+  
+.close-button-C {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+  
+.close-button-C span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-C span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-C span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-C {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-C .modal_content-C {
+    display: inline;
+}
+
+.modal_contents-C .modal_content-C summary {
+    position: relative;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-C .modal_content-C .accordion .accordion_contents {
+    text-align: left;
+}
+
+.modal_contents-C .modal_content-C p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal__contents-C .modal_content-C p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 近畿 */
+.js-modal-button-KK {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-KK {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-KK.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-KK.is-open .modal-KK {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-KK {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    background: #fff;
+    visibility: hidden;
+}
+
+.modal-KK .modal_inner-KK {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+  
+.close-button-KK {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+  
+.close-button-KK span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-KK span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-KK span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-KK {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-KK .modal_content-KK {
+    display: inline;
+}
+
+.modal_contents-KK .modal_content-KK summary {
+    position: relative;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-KK .modal_content-KK .accordion .accordion_contents {
+    text-align: left;
+}
+
+.modal_contents-KK .modal_content-KK p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal__contents-KK .modal_content-KK p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 中四国 */
+.js-modal-button-CS {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-CS {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-CS.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-CS.is-open .modal-CS {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-CS {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    background: #fff;
+    visibility: hidden;
+}
+
+.modal_inner-CS {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+  
+.close-button-CS {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+  
+.close-button-CS span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-CS span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-CS span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-CS {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-CS .modal_content-CS {
+    display: inline;
+}
+
+.modal_contents-CS .modal_content-CS summary {
+    position: relative;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-CS .modal_content-CS .accordion .accordion_contents{
+    text-align: left;
+}
+
+.modal_contents-CS .modal_content-CS p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal__contents-CS .modal_content-CS p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 九州 */
+.js-modal-button-KS {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-KS {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-KS.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-KS.is-open .modal-KS {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-KS {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    background: #fff;
+    visibility: hidden;
+}
+
+.modal_inner-KS {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    height: 300px;
+    padding: 55px 30px 21px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+  
+.close-button-KS {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+}
+  
+.close-button-KS span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-KS span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-KS span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal_contents-KS {
+    position: relative;
+    padding-top: 55px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100% - 75px);
+}
+
+.modal_contents-KS .modal_content-KS {
+    display: inline;
+}
+
+.modal_contents-KS .modal_content-KS summary {
+    position: relative;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_contents-KS .modal_content-KS .accordion .accordion_contents{
+    text-align: left;
+}
+
+.modal_contents-KS .modal_content-KS p {
+    text-align: left;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50px;
+}
+
+.modal__contents-KS .modal_content-KS p label {
+    font-size: 15px;
+    height: 20px;
+    text-align: left;
+}
+
+/* モーダルウィンドウ 沖縄 */
+.js-modal-button-O {
+    background: orange;
+    border-radius: 5px;
+    border: 1px solid orange;
+    font-size: 16px;
+    line-height: 1.2;
+    display: block;
+    padding: 8px 5px;
+    color: #3d3d3d;
+    text-align: center;
+    margin: 0;
+}
+
+.layer-O {
+    background: rgba(251, 249, 240, 0.7);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left:0;
+    z-index: -1; 
+    opacity: 1;
+    visibility: hidden;
+}
+
+.layer-O.is-open {
+    z-index: 2147483647;
+    visibility: visible;
+}
+  
+.layer-O.is-open .modal-O {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-O {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 125px;
+    margin-bottom: 125px;
+    width: 600px;
+    min-width: 440px;
+    height: 300px;
+    opacity: 1;
+    background: #fff;
+    visibility: hidden;
+}
+
+.modal_inner-O {
+    margin-top: 125px;
+    margin-bottom: 125px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fddba7;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+    padding: 21px 30px 21px;
+    height: 250px;
+}
+  
+.close-button-O {
+    position: relative;
+    left: 260px;
+    width: 39px;
+    height: 39px;
+    background: orange;
+    border-radius: 50%;
+    padding: 0;
+    border: transparent;
+    cursor: pointer;
+    margin-bottom: 30px;
+}
+  
+.close-button-O span {
+    width: 25px;
+    height: 2px;
+    background: #fff;
+    display: inline-block;
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 50%;
+    border-radius: 20px;
+}
+  
+.close-button-O span:nth-child(1) {
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+  
+.close-button-O span:nth-child(2) {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.modal__contents-O {
+    padding-top: 15px;
+    padding-bottom: 23px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.modal_contents-O .modal_content-O {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 50px;
+}
+
+.modal_contents-O .modal_content-O p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.modal__contents-O .modal_content-O p label {
+    font-size: 15px;
+    height: 20px;
 }
 
 /* 検索 */
