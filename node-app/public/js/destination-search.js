@@ -18,64 +18,42 @@ function inqueryDestinationSpots() {
 
 // 結果の表示
 function viewSearchResult(results) {
-  console.log("results > ", results);/*
+  console.log("results > ", results.items);
+  const info = results.items;
   const target = document.querySelector(".search-result"); // 表示先
 
-  // 表示
-  const div = document.createElement("div");
-    div.classList.add("candidate-contents");
-    div.dataset.hotelNo = `${hotelInfo.hotelNo}`;
-  const img = document.createElement("img");
-    img.onload = () => {
-    };
-    img.onerror = () => {
-      img.src = "/images/noimage_hotel.jpg"
-    };
-    img.src = (hotelInfo.hotelImageUrl !== undefined) ? `${hotelInfo.hotelImageUrl}` : "/images/noimage_hotel.jpg";
-    img.alt = "ホテルの画像";
-  const h2 = document.createElement("h2");
-    h2.innerText = hotelInfo.hotelName;
-  const pPrice = document.createElement("p");
-    pPrice.innerHTML = (hotelInfo.hotelMinCharge !== undefined) ? `最低価格: ${hotelInfo.hotelMinCharge}円` : "最低価格：--";
+  // 各ホテル情報を取り出す
+  info.forEach((spotInfo) => {
   
-  const pAccess = document.createElement("p");
-    pAccess.innerHTML = (hotelInfo.access !== undefined) ? `アクセス: ${hotelInfo.access}` : "アクセス：--";
-  const pPhone = document.createElement("p");
-    pPhone.innerHTML = (hotelInfo.telephoneNo !== undefined) ? `電話番号: ${hotelInfo.telephoneNo}` : "電話番号：--";
-  const pReview = document.createElement("p");
-    pReview.innerHTML = (hotelInfo.reviewAverage !== undefined) ? `評価：${hotelInfo.reviewAverage}` : "評価：--"; 
-  const pHP = document.createElement("p");
-    pHP.innerHTML = (hotelInfo.hotelInformationUrl !== undefined) ? `HP: <a href="${hotelInfo.hotelInformationUrl}" target="_blank">${hotelInfo.hotelInformationUrl}</a>` : "HP: --";
-  const input = document.createElement("input");
-    input.setAttribute("type", "submit");
-    input.setAttribute("method", "post");
-    input.setAttribute("name", "add");
-    input.setAttribute("value", "追加");
-    input.classList.add("button");
-    input.dataset.hotelName = hotelInfo.hotelName;
-    input.dataset.hotelImageUrl = hotelInfo.hotelImageUrl;
-    input.dataset.hotelNo = hotelInfo.hotelNo;
-    input.addEventListener("click", (event) => addSelectSpotList(event));
-  div.appendChild(img);
-  div.appendChild(h2);
-  div.appendChild(pPrice);
-  div.appendChild(pAccess);
-  div.appendChild(pPhone);
-  div.appendChild(pReview);
-  div.appendChild(pHP);
-  div.appendChild(input);
-  target.appendChild(div);
-    
-}
+    // 表示
+    const div = document.createElement("div");
+      div.classList.add("result-contents");
 
+    const img = document.createElement("img");
+      img.src = (spotInfo.details[0].images[0].path !== undefined) ? `${spotInfo.details[0].images[0].path}` : "/images/noimage_spot.jpg";
+      img.alt = "スポットの画像";
+
+    const h2 = document.createElement("h2");
+      h2.innerText = spotInfo.name;
+
+    const p = document.createElement("p");
+      p.innerHTML = spotInfo.details[0].key_value_texts.紹介;
+
+    div.appendChild(img);
+    div.appendChild(h2);
+    div.appendChild(p);
+    target.appendChild(div);
+    
+  });
+}
+/*
 // 既存の表示内容を消去する関数
 function clearSearchResults(){
   const target = document.querySelector(".search-candidate");
   while (target.firstChild) {
     target.removeChild(target.firstChild);
-  }*/
-}
-
+  }
+}*/
 
 // プルダウン
 const prefectures = [

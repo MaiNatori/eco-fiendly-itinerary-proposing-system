@@ -1323,7 +1323,7 @@ summary:hover {
 
 section {
     position: absolute;
-    top: 190px;
+    top: 170px;
     left: 460px;
     width: 800px;
 }
@@ -1336,7 +1336,7 @@ section h2 {
 section .search-result {
     background-color: #fdbf64;
     position: absolute;
-    top: 65px;
+    top: 50px;
     height: 790px;
     width: 725px;
     padding-top: 10px;
@@ -1363,14 +1363,15 @@ section .search-result .result-contents img {
 section .search-result .result-contents h2 {
     position: absolute;
     margin: 0 0 0 0;
-    top: 10px;
+    font-size: 20px;
+    top: 5px;
     left: 160px;
 }
 
 section .search-result .result-contents p {
     position: absolute;
-    margin: 0 0 0 0;
-    top: 60px;
+    margin: 0 5px 0 0;
+    top: 35px;
     left: 160px;
 }
 
