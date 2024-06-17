@@ -5,6 +5,7 @@ const path = require('path');
 const { default: fetch, Headers } = require('node-fetch-cjs');
 const querystring = require('querystring');
 const crypto = require('crypto');
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
@@ -31,6 +32,7 @@ const app = express();
 
 // express session
 app.use(initSession());
+app.use(bodyParser.json());
 
 // ejs テンプレートエンジン
 app.set('views', path.join(__dirname, 'views'));
@@ -62,6 +64,7 @@ app.get('/interfacehotels', getHotelDetails);
 app.get('/get-hotels', sendSelectedHotels);
 
 // 選択したIDをPOST
+app.post('/userselectpurpose', doGetUserSelectPurpose);
 app.post('/userselectplaces', doGetUserSelectPlaces);
 app.post('/userselectspots', doGetUserSelectSpots);
 app.post('/userselecthotels', doGetUserSelectHotels);
@@ -85,26 +88,38 @@ function viewDestination(req, res) {
   }
 }
 
+
+// 選択した旅行目的
+async function doGetUserSelectPurpose(req, res) {
+  selectedPurpose = req.body; // 選択された目的
+
+  // const sess = new Session(req, res); // session利用準備
+  // sess.set("selectplaces", selectedPlaces); // sessionのselectspotsというキーにselectedPlacesを保管
+  req.session.selectpurpose = selectedPurpose;
+  req.session.save();
+  console.log("session.selectpurpose > ", req.session.selectpurpose);
+
+  res.json({ result: true });
+}
+
+
 // 目的から目的地を探すページ
 function viewDestinationSearch(req, res) {
   try {
-    res.render('destination-search.ejs');
+    const purposeValues = req.session.selectpurpose.map(purpose => purpose.value || purpose.word);
+    res.render('destination-search.ejs', { purposeValues: purposeValues });
   } catch (error) {
     console.log(error)
   }
 }
 
+
 // 目的に沿った観光地を取得
 async function getDestinationSpots(req, res) {
+  console.log('req.session.selectPurpose:', req.session.selectpurpose);
 
-  async function fetchNavitimeAPI() {
+  async function fetchNavitimeAPI(params) {
     const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
-
-    const params = {
-      'category': "0101012001",
-      'add': "detail",
-      'limit': 3
-    };
 
     try {
       const queryString = querystring.stringify(params);
@@ -123,9 +138,22 @@ async function getDestinationSpots(req, res) {
   }
 
   try {
-    const result = await fetchNavitimeAPI();
-    console.log("result>",result);
-    res.json({ results: result });
+    const allResults = await Promise.all(req.session.selectpurpose.map(purpose => {
+      const params = {
+        'add': "detail",
+        'limit': 100
+      };
+
+      if (purpose.id) {
+        params['category'] = purpose.id;
+      } else if (purpose.word) {
+        params['word'] = purpose.word;
+      }
+
+      return fetchNavitimeAPI(params);
+    }));
+    const mergedResults = [].concat(...allResults);
+    res.json({ results: mergedResults });
   } catch (error) {
     console.log(error);
   }
@@ -134,7 +162,6 @@ async function getDestinationSpots(req, res) {
     const hmac = crypto.createHmac('sha1', key);
     hmac.update(data);
     const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
-    console.log("signature>", signature);
     return signature;
   }
 }

@@ -1288,6 +1288,14 @@ section {
     margin-left: 10px;
 }
 
+h4 {
+    font-weight: bolder;
+}
+.wide-input {
+    width: 280px;
+    height: 25px;
+}
+
 .search-area .contents {
     background-color: #fddba7;
 }

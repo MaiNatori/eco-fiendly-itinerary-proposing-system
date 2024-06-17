@@ -735,3 +735,52 @@ function sendSelectPlacesMap(){
     }
   });
 }
+
+// 旅行の目的をサーバに送信して画面遷移
+function sendSelectPurpose(){
+  let bodyData = [];
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+  const checkboxCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
+  const searchWord = document.getElementById('searchForm').value.trim();
+  if (checkboxCount > 5) {
+    alert("5つまでに目的を絞ってください。");
+  } else if (checkboxCount === 0 && searchWord === "") {
+    alert("目的を選択してください。");
+  } else {
+    if (checkboxCount > 0) {
+      checkboxes.forEach((checkbox) => {
+        const checkboxData = {
+          id: checkbox.id,
+          value: checkbox.value,
+        };
+        bodyData.push(checkboxData);
+      });  
+    } else if (searchWord !== "") {
+      bodyData.push({ word: searchWord });
+    }
+  }
+  
+  console.log("bodyData> ",bodyData);
+
+  // 送信
+  fetch("/userselectpurpose", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("POST /userselectpurpose -> ", data);
+    // 送信成功なら /destination-search に遷移、失敗なら警告表示
+    if (data.result == true) {
+      window.location.href = "/destination-search";
+    } else {
+      alert("送信失敗！");
+    }
+  });
+}

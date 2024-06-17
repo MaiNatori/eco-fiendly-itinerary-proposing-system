@@ -18,42 +18,79 @@ function inqueryDestinationSpots() {
 
 // 結果の表示
 function viewSearchResult(results) {
-  console.log("results > ", results.items);
-  const info = results.items;
+  const allItems = results.flatMap(result => result.items);
   const target = document.querySelector(".search-result"); // 表示先
+  const pagination = document.querySelector(".pagination"); // ページネーション表示先
 
-  // 各ホテル情報を取り出す
-  info.forEach((spotInfo) => {
-  
-    // 表示
-    const div = document.createElement("div");
-      div.classList.add("result-contents");
+  const itemsPerPage = 30; // 1ページに表示するアイテム数
+  let currentPage = 1; // 現在のページ
 
-    const img = document.createElement("img");
-      img.src = (spotInfo.details[0].images[0].path !== undefined) ? `${spotInfo.details[0].images[0].path}` : "/images/noimage_spot.jpg";
-      img.alt = "スポットの画像";
+  function displayItems(items) {
+    clearSearchResults(); // 表示先をクリア
 
-    const h2 = document.createElement("h2");
-      h2.innerText = spotInfo.name;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
 
-    const p = document.createElement("p");
-      p.innerHTML = spotInfo.details[0].key_value_texts.紹介;
-
-    div.appendChild(img);
-    div.appendChild(h2);
-    div.appendChild(p);
-    target.appendChild(div);
+    // 各情報を取り出す
+    items.slice(startIndex, endIndex).forEach((spotInfo) => {
+      if (spotInfo.details && spotInfo.details[0].images && spotInfo.details[0].images.length > 0 && spotInfo.name && spotInfo.address_name && spotInfo.details[0].key_value_texts.紹介) {
     
-  });
+        // 表示
+        const div = document.createElement("div");
+          div.classList.add("result-contents");
+
+        const img = document.createElement("img");
+          img.src = `${spotInfo.details[0].images[0].path}`;
+          img.alt = "スポットの画像";
+
+        const h2 = document.createElement("h2");
+          h2.innerText = spotInfo.name;
+
+        const h3 = document.createElement("h3");
+          h3.innerText = spotInfo.address_name;
+
+        const p = document.createElement("p");
+          p.innerHTML = spotInfo.details[0].key_value_texts.紹介;
+
+        div.appendChild(img);
+        div.appendChild(h2);
+        div.appendChild(h3);
+        div.appendChild(p);
+        target.appendChild(div);
+      }
+    });
+
+    // ページネーションの表示
+    displayPagination(items.length);
+  }
+
+  function displayPagination(totalItems) {
+    pagination.innerHTML = ""; // ページネーションをクリア
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    for (let page = 1; page <= totalPages; page++) {
+      const pageButton = document.createElement("button");
+      pageButton.innerText = page;
+      pageButton.addEventListener("click", () => {
+        currentPage = page;
+        displayItems(allItems);
+      });
+      pagination.appendChild(pageButton);
+    }
+  }
+
+  // 最初に表示
+  displayItems(allItems);
 }
-/*
+
 // 既存の表示内容を消去する関数
 function clearSearchResults(){
-  const target = document.querySelector(".search-candidate");
+  const target = document.querySelector(".search-result");
   while (target.firstChild) {
     target.removeChild(target.firstChild);
   }
-}*/
+}
 
 // プルダウン
 const prefectures = [
@@ -785,6 +822,55 @@ function sendSelectPlacesMap(){
     // 送信成功なら /hotel に遷移、失敗なら警告表示
     if (data.result == true) {
       window.location.href = "/spot";
+    } else {
+      alert("送信失敗！");
+    }
+  });
+}
+
+// 旅行の目的をサーバに送信して画面遷移
+function sendSelectPurpose(){
+  let bodyData = [];
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+  const checkboxCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
+  const searchWord = document.getElementById('searchForm').value.trim();
+  if (checkboxCount > 5) {
+    alert("5つまでに目的を絞ってください。");
+  } else if (checkboxCount === 0 && searchWord === "") {
+    alert("目的を選択してください。");
+  } else {
+    if (checkboxCount > 0) {
+      checkboxes.forEach((checkbox) => {
+        const checkboxData = {
+          id: checkbox.id,
+          value: checkbox.value,
+        };
+        bodyData.push(checkboxData);
+      });  
+    } else if (searchWord !== "") {
+      bodyData.push({ word: searchWord });
+    }
+  }
+  
+  console.log("bodyData> ",bodyData);
+
+  // 送信
+  fetch("/userselectpurpose", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("POST /userselectpurpose -> ", data);
+    // 送信成功なら /destination-search に遷移、失敗なら警告表示
+    if (data.result == true) {
+      window.location.href = "/destination-search";
     } else {
       alert("送信失敗！");
     }

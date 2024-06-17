@@ -83,7 +83,7 @@ th {
 
 select, label {
     height: 32px;
-    font-size: 14px;
+    font-size: 10px;
     width: 160px;
     overflow: hidden;
     white-space: nowrap;
@@ -1295,7 +1295,6 @@ summary:hover {
 .search-area p {
     font-size: 10px;
     padding-left: 20px;
-    display: inline-block;
     margin-bottom: 5px;
     margin-top: 5px;
 }
@@ -1304,12 +1303,12 @@ summary:hover {
     margin-top: 5px;
 }
 
-.search-area input {
-    margin-left: 10px;
-}
-
 .search-area .contents {
     background-color: #fddba7
+}
+
+.wide-input {
+    margin-left: 3px;
 }
 
 .search-area .button {
@@ -1320,10 +1319,9 @@ summary:hover {
 
 
 /* 検索結果 */
-
 section {
     position: absolute;
-    top: 170px;
+    top: 160px;
     left: 460px;
     width: 800px;
 }
@@ -1331,12 +1329,14 @@ section {
 section h2 {
     margin-top: 0;
     margin-bottom: 0;
+    width: 800px;
+    font-size: 25px;
 }
 
 section .search-result {
     background-color: #fdbf64;
     position: absolute;
-    top: 50px;
+    top: 70px;
     height: 790px;
     width: 725px;
     padding-top: 10px;
@@ -1350,10 +1350,11 @@ section .search-result .result-contents {
     height: 150px;
     margin: 10px 0 10px 10px;
     padding: 5px 5px 5px 5px;
+    overflow: hidden;
 }
 
 section .search-result .result-contents img {
-    position: relative;
+    position: absolute;
     width: 140px;
     height: 140px;
     margin-top: 5px;
@@ -1368,12 +1369,49 @@ section .search-result .result-contents h2 {
     left: 160px;
 }
 
+section .search-result .result-contents h3 {
+    position: absolute;
+    margin: 0 0 0 0;
+    font-size: 15px;
+    top: 30px;
+    left: 160px;
+    text-decoration: none;
+}
+
 section .search-result .result-contents p {
     position: absolute;
     margin: 0 5px 0 0;
-    top: 35px;
+    top: 55px;
     left: 160px;
+    height: 95px;
+    overflow-y: scroll;    
 }
+
+section .search-result .result-contents p::-webkit-scrollbar {
+    display: none;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    text-decoration: none;
+    color: #007bff;
+    outline: none;
+}
+  
+.pagination-button:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 
 /* フッター */
 
