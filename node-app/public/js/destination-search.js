@@ -18,6 +18,11 @@ function inqueryDestinationSpots() {
 
 // 結果の表示
 function viewSearchResult(results) {
+  const loading = document.querySelector('.js-loading');
+  loading.classList.add('js-loaded');
+
+  clearSearchResults();
+
   const allItems = results.flatMap(result => result.items);
   const target = document.querySelector(".search-result"); // 表示先
   const pagination = document.querySelector(".pagination"); // ページネーション表示先
@@ -26,7 +31,6 @@ function viewSearchResult(results) {
   let currentPage = 1; // 現在のページ
 
   function displayItems(items) {
-    clearSearchResults(); // 表示先をクリア
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -86,6 +90,8 @@ function viewSearchResult(results) {
 
 // 既存の表示内容を消去する関数
 function clearSearchResults(){
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');      
   const target = document.querySelector(".search-result");
   while (target.firstChild) {
     target.removeChild(target.firstChild);

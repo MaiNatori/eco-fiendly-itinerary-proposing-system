@@ -33,11 +33,11 @@ function inqueryPlaceIds() {
       return response.json();
     })
     .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
-      console.log(data.places_id)
+      console.log(data.results)
       placeIdsArray(data.places_id)
     });
 }
-
+/*
 // place_id配列を1つずつ取り出す関数
 function placeIdsArray(place_id_array) {
   console.log("placeIdsArray: ", place_id_array)
@@ -108,7 +108,7 @@ function createMarker(place, doItCenter = false) {
       openingHoursElement.appendChild(dayElement);
     });
     content.appendChild(openingHoursElement);
-*/
+*//*
     const websiteElement = document.createElement("p");
     websiteElement.textContent = place.website;
     content.appendChild(websiteElement);
@@ -302,4 +302,4 @@ function returnPlacePage(){
       if (data.result == true) window.location.href = "/place"
       else alert("送信失敗！");
     });
-}
+}*/

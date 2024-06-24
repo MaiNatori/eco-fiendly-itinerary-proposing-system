@@ -59,7 +59,7 @@ app.get('/result', viewResult);
 
 // API
 app.get('/interfacedestination', getDestinationSpots);
-app.get('/interfacespots', getSpotPlaceIds);
+app.get('/interfacespots', getSpotLists);
 app.get('/interfacehotels', getHotelDetails);
 app.get('/get-hotels', sendSelectedHotels);
 
@@ -138,21 +138,33 @@ async function getDestinationSpots(req, res) {
   }
 
   try {
-    const allResults = await Promise.all(req.session.selectpurpose.map(purpose => {
-      const params = {
-        'add': "detail",
-        'limit': 100
-      };
+    const allResults = await Promise.all(
+      req.session.selectpurpose.flatMap(purpose => {
+        const fetchPromises = [];
 
-      if (purpose.id) {
-        params['category'] = purpose.id;
-      } else if (purpose.word) {
-        params['word'] = purpose.word;
-      }
+        if (purpose.id) {
+          const ids = purpose.id.split(',');
+          ids.forEach(id => {
+            const params = {
+              'category': id.trim(),
+              'add': "detail",
+              'limit': 100
+            };
+            fetchPromises.push(fetchNavitimeAPI(params));
+          });
+        } else if (purpose.word) {
+          const params = {
+            'word': purpose.word,
+            'add': "detail",
+            'limit': 100
+          };
+          fetchPromises.push(fetchNavitimeAPI(params));
+        }
 
-      return fetchNavitimeAPI(params);
-    }));
-    const mergedResults = [].concat(...allResults);
+        return fetchPromises;
+      })
+    );
+    const mergedResults = [].concat(...allResults.filter(result => result));
     res.json({ results: mergedResults });
   } catch (error) {
     console.log(error);
@@ -169,7 +181,6 @@ async function getDestinationSpots(req, res) {
 // 選択した目的地(都道府県名・エリア名)
 async function doGetUserSelectPlaces(req, res) {
   selectedPlaces = req.body; // 選択されたスポットのオブジェクト配列
-  console.log('received selected places:', selectedPlaces);
 
   // const sess = new Session(req, res); // session利用準備
   // sess.set("selectplaces", selectedPlaces); // sessionのselectspotsというキーにselectedPlacesを保管
@@ -190,57 +201,93 @@ function viewSpot(req, res) {
 }
 
 // スポット情報の取得
-async function getSpotPlaceIds(req,res) {
-  console.log('req.session:', req.session);
+async function getSpotLists(req,res) {
   const selectedPlaces = req.session.selectplaces;
-  const prefecture = selectedPlaces.prefectureName;
-  const area = selectedPlaces.areaName;
+  const prefectureName = selectedPlaces.prefectureName;
+  const areaNames = selectedPlaces.areaName.split('・');
+  const combinedNames = areaNames.map(area => `${prefectureName} ${area}`);
+  console.log('combinedNames: ', combinedNames);
+
+  const mandatoryCategoryNos = [
+    '0310005', '0707', '0705', '0703', '0702', '0706', '0710',
+    '0711', '0604001', '0606', '0709', '0211'
+  ];
+
+  const additionalCategoryNos = ['0205', '03', '01'];
+
+  // 住所コードを利用してスポットを検索する
+  async function fetchNavitimeSpotAPI(params) {
+    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
+
+    try {
+      const queryString = querystring.stringify(params);
+
+      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
+
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+
+      const response = await urlWithParams.json();
+
+      return response;
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   try {
-    const result = await fetchRestaurantViaV2TextSearch(prefecture, area);
+    let mergedResults = [];
 
-    console.log("getSpotPlaceIds.result > ", result);
+    for (const categoryNo of mandatoryCategoryNos) {
+      const allResults = await Promise.all(combinedNames.map(async combinedName => {
+        const params = {
+          'word': combinedName,
+          'category': categoryNo,
+          'add': "detail",
+          'limit': 100
+        };
+        console.log('categoryNo>', categoryNo);
+        console.log('combinedName>', combinedName);
 
-    const placeIds = result.places.map(places => places.id);
+        return fetchNavitimeSpotAPI(params);
+      }));
 
-    res.json({ places_id: placeIds });
+      mergedResults = mergedResults.concat(...allResults.filter(result => result && result.items && result.items.length > 0));
+    }
+
+    if (mergedResults.reduce((acc, result) => acc+ (result.items ? result.items.length : 0), 0) < 50) {
+      for (const categoryNo of additionalCategoryNos) {
+        const allResults = await Promise.all(combinedNames.map(async combinedName => {
+          const params = {
+            'word': combinedName,
+            'category': categoryNo,
+            'add': "detail",
+            'limit': 100
+          };
+
+          console.log('categoryNo>', categoryNo);
+          console.log('combinedName>', combinedName);  
+
+          return fetchNavitimeSpotAPI(params);
+        }));
+
+        mergedResults = mergedResults.concat(...allResults.filter(result => result && result.items && result.items.length > 0));
+      }
+    }
+    console.log("getSpotPlaces.result > ", mergedResults);
+    res.json({ results: mergedResults });
   } catch (error) {
     console.log(error)
   }
-}
 
-async function fetchRestaurantViaV2TextSearch(prefecture, area) {
-  const BASE_URL = "https://places.googleapis.com/v1/places:searchText";
-
-  const requestHeader = new Headers({
-      'Content-Type': 'application/json',
-      'X-Goog-FieldMask': 'places.id',
-      'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY
-  });
-
-  const requestBody = {
-      textQuery: `${prefecture} ${area} 観光スポット`,
-      languageCode: "ja",
-      maxResultCount: 5,
-      // includedType: "", 定義された指定タイプに一致する場所のみに結果を制限
-      // strictTypeFiltering: boolean,
-      // priceLevels: [], 価格帯 UNSPECIFIED/INEXPENSIVE/MODERATE/EXPENSIVE/VERY_EXPENSIVE
-  };
-  console.log("fetchRestaurantViaV2TextSearch > requestBody: \n", requestBody);
-
-  try {
-    const rawResponse = await fetch(`${BASE_URL}`, {
-        method: "POST",
-        headers: requestHeader,
-        body: JSON.stringify(requestBody)
-    })
-    const response = await rawResponse.json()
-    console.log("getSpotPlaceIds.result > ", response);
-    return response;
-  } catch (error) {
-      console.log(error)
+  function getBase64Signature(data, key) {
+    const hmac = crypto.createHmac('sha1', key);
+    hmac.update(data);
+    const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
+    return signature;
   }
 }
+
 
 // 選択したスポット
 function doGetUserSelectSpots(req, res) {
@@ -430,4 +477,4 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error/error.ejs');
-});
+})
