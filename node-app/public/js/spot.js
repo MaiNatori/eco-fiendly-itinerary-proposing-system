@@ -1,30 +1,29 @@
-// 機能作成
 let map;
-let service;
 let infowindow;
+let marker;
 
-// Google Map HTML 初期化 (Maps JavaScript APIをロードしたときに自動で最初に呼び出される)
-// default_center_lat, default_center_lngの位置を中心としたマップを表示する * 初期値は東京駅の座標
-function initMap(
-  default_center_lat = 35.6810603,    // 表示マップの初期位置 lat座標
-  default_center_lng = 139.76730746   // 表示マップの初期位置 lng座標
-) {
-  const defaultPlace = new google.maps.LatLng(default_center_lat, default_center_lng);
+async function initMap() {
+  const { Map } = await google.maps.importLibrary("maps");
 
-  console.log(defaultPlace)
+  const position = { lat: 35.6810603, lng: 139.76730746 };
 
-  infowindow = new google.maps.InfoWindow();
+  const map = new Map(document.getElementById('maps'), {
+    center: position,
+    zoom: 8,
+    mapId: "12b135f8e452a25b"
+  });
 
-  map = new google.maps.Map(document.getElementById('maps'), {center: defaultPlace, zoom: 15});  // 中心点を指定の位置にして描画
-
-  service = new google.maps.places.PlacesService(map);
-
-  inqueryPlaceIds();
-
+  try {
+    await inquerySpots(map);
+  } catch (error) {
+    console.error('Error fetching spots: ', error);
+  }
 }
 
+initMap();
+
 // index_get.jsにアクセスしてplace_idを取得する
-function inqueryPlaceIds() {
+function inquerySpots(map) {
   fetch("/interfacespots")
     .then(response => {
       if (!response.ok) {
@@ -32,100 +31,69 @@ function inqueryPlaceIds() {
       };
       return response.json();
     })
-    .then(data => { // 戻り値 Object { places_id: ["id1", "id2", ...] }
+    .then(data => { 
       console.log(data.results)
-      placeIdsArray(data.places_id)
+      createMarker(data.results, map)
     });
-}
-/*
-// place_id配列を1つずつ取り出す関数
-function placeIdsArray(place_id_array) {
-  console.log("placeIdsArray: ", place_id_array)
-  for (let i = 0; i < place_id_array.length; i++) {
-    const placeid = place_id_array[i];
-    getPlaceDetails(placeid, function (itsPlace) {
-      // コールバック; 詳細データを取得、結果は第1引数に渡す
-      createMarker(itsPlace, (i === 0)); // Mapにピンさし、0番目だけは中心に設定
-    });
-  }
-}
-
-// Place Details を PlaceID によって実行
-function getPlaceDetails (places_id, callback) {
-  const request = {
-    language: "ja",
-    placeId: places_id,
-    fields: ['types','photos', 'name', 'formatted_address', 'formatted_phone_number', 'business_status', 'opening_hours', 'website', 'geometry', 'place_id']  // 検索で取得するフィールド(情報)
-  }
-  
-  // リクエスト実行
-  service.getDetails(request, (place, status) => {
-    // 結果取得
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      console.log(place);
-      callback(place);
-    }
-  });
 }
 
 // Google Map にピンをさす
-function createMarker(place, doItCenter = false) {
+async function createMarker(results, map) {
+  const { InfoWindow } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-  if (!place.geometry || !place.geometry.location) return; // placeにlatおよびlngデータがあるか確認
+  const itemsArrays = results.map(result => result.items).flat();
+  console.log("spotsArray: ", itemsArrays);
 
-  const marker = new google.maps.Marker({
-    map,
-    position: place.geometry.location, // latおよびlngデータ取り出し
-  });
-
-  google.maps.event.addListener(marker, "click", () => {
-    const content = document.createElement("div");
-    content.style.width = "300px";
-    content.style.height = "100px";
-
-    const nameElement = document.createElement("h2");
-    nameElement.textContent = place.name;
-    nameElement.style.fontSize = "15px";
-    content.appendChild(nameElement);
-    
-
-    const typesElement = document.createElement("p");
-    typesElement.textContent = place.types;
-    content.appendChild(typesElement);
-
-    const placeAddressElement = document.createElement("p");
-    placeAddressElement.textContent = place.formatted_address;
-    content.appendChild(placeAddressElement);
-    
-    const phoneNumberElement = document.createElement("p");
-    phoneNumberElement.textContent = place.formatted_phone_number;
-    content.appendChild(phoneNumberElement);
-/*
-    const openingHoursElement = document.createElement("div");
-    place.opening_hours.weekday_text.forEach(day => {
-      const dayElement = document.createElement("p");
-      dayElement.textContent = day;
-      openingHoursElement.appendChild(dayElement);
+  itemsArrays.forEach(item => {
+    const position = { lat: item.coord.lat, lng: item.coord.lon };
+    const marker = new AdvancedMarkerElement({
+      map: map,
+      position: position, // latおよびlngデータ取り出し
     });
-    content.appendChild(openingHoursElement);
-*//*
-    const websiteElement = document.createElement("p");
-    websiteElement.textContent = place.website;
-    content.appendChild(websiteElement);
 
-    infowindow.setContent(content);
-    infowindow.open(map, marker);
+    const infowindow = new InfoWindow();
+/*
+    google.maps.event.addListener(marker, "click", () => {
+      const content = document.createElement("div");
+      content.style.width = "300px";
+      content.style.height = "100px";
 
-    viewSearchResult(place);
-  
+      const nameElement = document.createElement("h2");
+      nameElement.textContent = item.name;
+      nameElement.style.fontSize = "15px";
+      content.appendChild(nameElement);
+
+
+      const placeAddressElement = document.createElement("p");
+      placeAddressElement.textContent = item.address_name;
+      content.appendChild(placeAddressElement);
+
+      if (item.details && item.details.length > 0 && item.details[0].official_sites && item.details[0].official_sites[0].value) {
+        const websiteElement = document.createElement("p");
+        websiteElement.textContent = item.details[0].official_sites[0].value;
+        content.appendChild(websiteElement);
+      }
+
+      if (item.key_value_texts) {
+        for (const [key, value] of Object.entries(item.key_value_texts)) {
+          const detailElement = document.createElement("p");
+          detailElement.textContent = `${key}: ${value}`;
+          content.appendChild(detailElement);
+        }
+      }
+
+      infowindow.setContent(content);*/
+      infowindow.open(map, marker);
+/*
+      viewSearchResult(item);
+    
+    });*/
   });
-
-  if (doItCenter) map.setCenter(place.geometry.location); // Trueのとき、それを中心にセット
-
 }
 
 // 検索結果の表示
-function viewSearchResult(place) { // place = getDetails result object
+/*function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-result"); // 表示先
 
   // 表示先の子要素をすべて削除（表示中のものを削除）
