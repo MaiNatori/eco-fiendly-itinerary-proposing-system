@@ -1,5 +1,6 @@
 const { session, initSession } = require('./mods/session.js');
 const express = require('express');
+const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { default: fetch, Headers } = require('node-fetch-cjs');
@@ -215,6 +216,23 @@ async function getSpotLists(req,res) {
 
   const additionalCategoryNos = ['0205', '03', '01'];
 
+  // Geocoding API
+  async function getGeocode(location) {
+    const response = await axios.get (`https://maps.googleapis.com/maps/api/geocode/json`, {
+      params: {
+        address: location,
+        key: GOOGLE_PLACES_API_KEY
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      console.log('location: ', response.data.results[0].geometry.location);
+      return response.data.results[0].geometry.location;
+    } else {
+      throw new Error(`Geocode was not successful for the following reason: ${response.data.status}`);
+    }
+  }
+
   // 住所コードを利用してスポットを検索する
   async function fetchNavitimeSpotAPI(params) {
     const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
@@ -235,45 +253,68 @@ async function getSpotLists(req,res) {
     }
   }
 
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // 地球の半径(km)
+    const dLat = (lat2 - lat1)  * Math.PI / 180;
+    const dLon = (lon2 - lon1)  * Math.PI / 180;
+    const a = 
+      0.5 - Math.cos(dLat) / 2 + 
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      (1 - Math.cos(dLon)) / 2;
+    return R * 2 * Math.asin(Math.sqrt(a));
+  }
+
   try {
+    const geocodeLocation = await getGeocode(combinedNames[0]);
     let mergedResults = [];
 
     for (const categoryNo of mandatoryCategoryNos) {
-      const allResults = await Promise.all(combinedNames.map(async combinedName => {
+      const params = {
+        'category': categoryNo,
+        'add': "detail",
+        'limit': 100
+      };
+
+      const result = await fetchNavitimeSpotAPI(params);
+
+      if (result && result.items && result.items.length > 0) {
+        const filteredItems = result.items.filter(item => {
+          const distance = calculateDistance(
+            geocodeLocation.lat, geocodeLocation.lng,
+            item.coord.lat, item.coord.lon
+          );
+          return distance <= 20; // 半径20km以内
+        });
+
+        mergedResults = mergedResults.concat(filteredItems);
+      }
+
+    };
+
+    if (mergedResults.reduce((acc, result) => acc+ (result.items ? result.items.length : 0), 0) < 50) {
+      for (const categoryNo of additionalCategoryNos) {
         const params = {
-          'word': combinedName,
           'category': categoryNo,
           'add': "detail",
           'limit': 100
         };
-        console.log('categoryNo>', categoryNo);
-        console.log('combinedName>', combinedName);
 
-        return fetchNavitimeSpotAPI(params);
-      }));
+        const result = await fetchNavitimeSpotAPI(params);
 
-      mergedResults = mergedResults.concat(...allResults.filter(result => result && result.items && result.items.length > 0));
+        if (result && result.items && result.items.length > 0) {
+          const filteredItems = result.items.filter(item => {
+            const distance = calculateDistance(
+              geocodeLocation.lat, geocodeLocation.lng,
+              item.coord.lat, item.coord.lon
+            );
+            return distance <= 20; // 半径20km以内
+          });
+
+          mergedResults = mergedResults.concat(filteredItems);
+        }
+      };
     }
-
-    if (mergedResults.reduce((acc, result) => acc+ (result.items ? result.items.length : 0), 0) < 50) {
-      for (const categoryNo of additionalCategoryNos) {
-        const allResults = await Promise.all(combinedNames.map(async combinedName => {
-          const params = {
-            'word': combinedName,
-            'category': categoryNo,
-            'add': "detail",
-            'limit': 100
-          };
-
-          console.log('categoryNo>', categoryNo);
-          console.log('combinedName>', combinedName);  
-
-          return fetchNavitimeSpotAPI(params);
-        }));
-
-        mergedResults = mergedResults.concat(...allResults.filter(result => result && result.items && result.items.length > 0));
-      }
-    }
+    
     console.log("getSpotPlaces.result > ", mergedResults);
     res.json({ results: mergedResults });
   } catch (error) {

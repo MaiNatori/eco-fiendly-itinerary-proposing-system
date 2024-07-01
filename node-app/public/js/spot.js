@@ -1,40 +1,51 @@
 let map;
 let infowindow;
 let marker;
+let currentInfoWindow = null;
 
-async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
-
-  const position = { lat: 35.6810603, lng: 139.76730746 };
-
-  const map = new Map(document.getElementById('maps'), {
-    center: position,
-    zoom: 8,
-    mapId: "12b135f8e452a25b"
-  });
-
+// index_get.jsにアクセスしてplace_idを取得する
+async function inquerySpots() {
   try {
-    await inquerySpots(map);
+    const response = await fetch("/interfacespots");
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    };
+    const data = await response.json();
+    console.log(data.results)
+    return data.results;
   } catch (error) {
-    console.error('Error fetching spots: ', error);
+    console.error(error);
+    return [];
   }
 }
 
-initMap();
 
-// index_get.jsにアクセスしてplace_idを取得する
-function inquerySpots(map) {
-  fetch("/interfacespots")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      };
-      return response.json();
-    })
-    .then(data => { 
-      console.log(data.results)
-      createMarker(data.results, map)
-    });
+async function initMap() {
+  const loading = document.querySelector('.js-loading');
+  loading.classList.remove('js-loaded');
+
+  const { Map } = await google.maps.importLibrary("maps");
+
+  const spots = await inquerySpots();
+
+  if (spots.length === 0) {
+    alert('スポットが見つかりませんでした。');
+    return;
+  }
+
+  const firstSpot = spots[0];
+
+  const initialPosition = { lat: firstSpot.coord.lat, lng: firstSpot.coord.lon };
+
+  const map = new Map(document.getElementById('maps'), {
+    center: initialPosition,
+    zoom: 10,
+    mapId: "12b135f8e452a25b"
+  });
+
+  createMarker(spots, map);
+  loading.classList.add('js-loaded');
+
 }
 
 // Google Map にピンをさす
@@ -42,10 +53,9 @@ async function createMarker(results, map) {
   const { InfoWindow } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-  const itemsArrays = results.map(result => result.items).flat();
-  console.log("spotsArray: ", itemsArrays);
+  console.log("spotsArray: ", results);
 
-  itemsArrays.forEach(item => {
+  results.forEach(item => {
     const position = { lat: item.coord.lat, lng: item.coord.lon };
     const marker = new AdvancedMarkerElement({
       map: map,
@@ -53,8 +63,8 @@ async function createMarker(results, map) {
     });
 
     const infowindow = new InfoWindow();
-/*
-    google.maps.event.addListener(marker, "click", () => {
+
+    marker.addListener("gmp-click", () => {
       const content = document.createElement("div");
       content.style.width = "300px";
       content.style.height = "100px";
@@ -83,17 +93,24 @@ async function createMarker(results, map) {
         }
       }
 
-      infowindow.setContent(content);*/
+      infowindow.setContent(content);
+
+      if (currentInfoWindow) {
+        currentInfoWindow.close();
+      }
+
       infowindow.open(map, marker);
-/*
-      viewSearchResult(item);
+      currentInfoWindow = infowindow;
+
+      //viewSearchResult(item);
     
-    });*/
+    });
   });
 }
 
+/*
 // 検索結果の表示
-/*function viewSearchResult(place) { // place = getDetails result object
+function viewSearchResult(place) { // place = getDetails result object
   const target = document.querySelector(".search-result"); // 表示先
 
   // 表示先の子要素をすべて削除（表示中のものを削除）
@@ -271,3 +288,5 @@ function returnPlacePage(){
       else alert("送信失敗！");
     });
 }*/
+
+window.onload = initMap;
