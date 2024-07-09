@@ -202,6 +202,59 @@ function viewSpot(req, res) {
 }
 
 // スポット情報の取得
+// Geocoding API
+async function getGeocode(location) {
+  const response = await axios.get (`https://maps.googleapis.com/maps/api/geocode/json`, {
+    params: {
+      address: location,
+      key: GOOGLE_PLACES_API_KEY
+    }
+  });
+  if (response.data.status === 'OK') {
+    console.log('location: ', response.data.results[0].geometry.location);
+    return {
+      lat: response.data.results[0].geometry.location.lat,
+      lng: response.data.results[0].geometry.location.lng
+    };
+  } else {
+    throw new Error(`Geocode was not successful for the following reason: ${response.data.status}`);
+  }
+}
+
+// 住所コードを利用してスポットを検索する
+async function fetchNavitimeSpotAPI(params) {
+  const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
+
+  try {
+    const queryString = querystring.stringify(params);
+    const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
+    const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+    const response = await urlWithParams.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // 地球の半径(km)
+  const dLat = (lat2 - lat1)  * Math.PI / 180;
+  const dLon = (lon2 - lon1)  * Math.PI / 180;
+  const a = 
+    0.5 - Math.cos(dLat) / 2 + 
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    (1 - Math.cos(dLon)) / 2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+// Base64エンコードされた署名文字列を取得する関数
+function getBase64Signature(data, key) {
+  const hmac = crypto.createHmac('sha1', key);
+  hmac.update(data);
+  const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
+  return signature;
+}
+
 async function getSpotLists(req,res) {
   const selectedPlaces = req.session.selectplaces;
   const prefectureName = selectedPlaces.prefectureName;
@@ -209,126 +262,203 @@ async function getSpotLists(req,res) {
   const combinedNames = areaNames.map(area => `${prefectureName} ${area}`);
   console.log('combinedNames: ', combinedNames);
 
-  const mandatoryCategoryNos = [
-    '0310005', '0707', '0705', '0703', '0702', '0706', '0710',
-    '0711', '0604001', '0606', '0709', '0211'
-  ];
-
-  const additionalCategoryNos = ['0205', '03', '01'];
-
-  // Geocoding API
-  async function getGeocode(location) {
-    const response = await axios.get (`https://maps.googleapis.com/maps/api/geocode/json`, {
-      params: {
-        address: location,
-        key: GOOGLE_PLACES_API_KEY
-      }
-    });
-
-    if (response.data.status === 'OK') {
-      console.log('location: ', response.data.results[0].geometry.location);
-      return response.data.results[0].geometry.location;
-    } else {
-      throw new Error(`Geocode was not successful for the following reason: ${response.data.status}`);
-    }
-  }
-
-  // 住所コードを利用してスポットを検索する
-  async function fetchNavitimeSpotAPI(params) {
-    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
-
-    try {
-      const queryString = querystring.stringify(params);
-
-      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
-
-      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
-
-      const response = await urlWithParams.json();
-
-      return response;
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // 地球の半径(km)
-    const dLat = (lat2 - lat1)  * Math.PI / 180;
-    const dLon = (lon2 - lon1)  * Math.PI / 180;
-    const a = 
-      0.5 - Math.cos(dLat) / 2 + 
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      (1 - Math.cos(dLon)) / 2;
-    return R * 2 * Math.asin(Math.sqrt(a));
-  }
-
   try {
     const geocodeLocation = await getGeocode(combinedNames[0]);
+    let processedCodes = new Set();
+  
+    const categories = {
+      // 食べ物に関するカテゴリ
+      food: { nos: ['0310005'], target: [10, 30], additionalNos: ['03'], limit: 2000, results: [] },
+      // 遊びに関するカテゴリ
+      play: { nos: ['0707', '0705', '0703', '0604001', '0606', '0709', '0211'], target: [20, 40], additionalNos: ['01', '0205'], limit: 2000, results: [] },
+      // 自然に関するカテゴリ
+      nature: { nos: ['0702', '0706'], target: [5, 10], additionalNos: [], limit: 2000, results: [] }
+    }; 
+
+    // キャッシュを利用するためのデータ構造
+    const cache = {};
+
+    // 並列処理の実行
+    const searchPromises = Object.keys(categories).map(categoryName =>
+      searchWithOffset(categories[categoryName].nos, categories[categoryName].target, categories[categoryName].limit, categoryName)
+    );
+
+    await Promise.all(searchPromises);
+
+    const foodResultsMet = categories.food.results.length >= categories.food.target[0];
+    const playResultsMet = categories.play.results.length >= categories.play.target[0];
+    const natureResultsMet = categories.nature.results.length >= categories.nature.target[0];
+
+    if (!(foodResultsMet && playResultsMet && natureResultsMet)) {
+      await Promise.all(Object.keys(categories).map(categoryName =>
+        searchWithWords(categories[categoryName].nos, categories[categoryName].target, categories[categoryName].limit, combinedNames, categoryName)
+      ));
+    }
+
+    // 追加カテゴリの検索
+    if (!foodResultsMet) {
+      await Promise.all([
+        searchWithOffset(categories.food.additionalNos, categories.food.target, categories.food.limit, 'food'),
+        searchWithWords(categories.food.additionalNos, categories.food.target, categories.food.limit, combinedNames, 'food')
+      ]);
+    }
+    if (!playResultsMet) {
+      await Promise.all([
+        searchWithOffset(categories.play.additionalNos, categories.play.target, categories.play.limit, 'play'),
+        searchWithWords(categories.play.additionalNos, categories.play.target, categories.play.limit, combinedNames, 'play')
+      ]);
+    }
+
+    // 結果のマージと重複削除
     let mergedResults = [];
+    const allResults = [...categories.food.results, ...categories.play.results, ...categories.nature.results];
 
-    for (const categoryNo of mandatoryCategoryNos) {
-      const params = {
-        'category': categoryNo,
-        'add': "detail",
-        'limit': 100
-      };
+    // 重複削除
+    const uniqueResults = [...new Map(allResults.map(item => [item.code, item])).values()];
 
-      const result = await fetchNavitimeSpotAPI(params);
-
-      if (result && result.items && result.items.length > 0) {
-        const filteredItems = result.items.filter(item => {
-          const distance = calculateDistance(
-            geocodeLocation.lat, geocodeLocation.lng,
-            item.coord.lat, item.coord.lon
-          );
-          return distance <= 20; // 半径20km以内
-        });
-
-        mergedResults = mergedResults.concat(filteredItems);
-      }
-
-    };
-
-    if (mergedResults.reduce((acc, result) => acc+ (result.items ? result.items.length : 0), 0) < 50) {
-      for (const categoryNo of additionalCategoryNos) {
-        const params = {
-          'category': categoryNo,
-          'add': "detail",
-          'limit': 100
-        };
-
-        const result = await fetchNavitimeSpotAPI(params);
-
-        if (result && result.items && result.items.length > 0) {
-          const filteredItems = result.items.filter(item => {
-            const distance = calculateDistance(
-              geocodeLocation.lat, geocodeLocation.lng,
-              item.coord.lat, item.coord.lon
-            );
-            return distance <= 20; // 半径20km以内
-          });
-
-          mergedResults = mergedResults.concat(filteredItems);
+    // 各カテゴリコードの検索結果から前から順番に1つずつ抽出して20件の結果をmergedResultsに格納
+    while (mergedResults.length < 20 && uniqueResults.length > 0) {
+      for (const category of ['food', 'play', 'nature']) {
+        if (categories[category].results.length > 0) {
+          mergedResults.push(categories[category].results.shift());
         }
-      };
+        if (mergedResults.length >= 20) break;
+      }
     }
     
-    console.log("getSpotPlaces.result > ", mergedResults);
+    // 各カテゴリの目標件数に達していない場合、残りの不足分を他のカテゴリから補う
+    const foodResults = mergedResults.filter(result => result.category === 'food');
+    const playResults = mergedResults.filter(result => result.category === 'play');
+    const natureResults = mergedResults.filter(result => result.category === 'nature');
+
+    if (foodResults.length < 20) {
+      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'food').slice(0, 20 - foodResults.length));
+    }
+    if (playResults.length < 30) {
+      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'play').slice(0, 30 - playResults.length));
+    }
+    if (natureResults.length < 10) {
+      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'nature').slice(0, 10 - natureResults.length));
+    }
+
+    async function searchWithOffset(categoryNos, target, limit, categoryName) {
+      const promises = categoryNos.map(async (categoryNo) => {
+
+        let categoryResults = [];
+        let offset = 0;
+  
+        while (offset <= limit && categoryResults.length < target[1]) {
+          const params = {
+            'category': categoryNo,
+            'add': "detail",
+            'limit': 100,
+            'offset': offset
+          };
+
+          const cacheKey = `${params.category}-${params.offset}`;
+          let result = cache[cacheKey];
+
+          if(!result) {
+            result = await fetchNavitimeSpotAPI(params);
+            cache[cacheKey] = result;
+          }
+    
+          if (result && result.items && result.items.length > 0) {
+            const filteredItems = result.items.filter(item => {
+              const distance = calculateDistance(
+                geocodeLocation.lat, geocodeLocation.lng,
+                item.coord.lat, item.coord.lon
+              );
+              return distance <= 30 && !processedCodes.has(item.code); // 半径20km以内
+            });
+  
+            filteredItems.forEach(item => processedCodes.add(item.code));
+  
+            console.log(`categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
+            categoryResults = categoryResults.concat(filteredItems);
+          }
+  
+          if (categoryResults.length >= target[1]) {
+            break;
+          }
+  
+          offset += 100;
+        }
+
+        categoryResults.slice(0, target[1]).forEach(item => item.category = categoryName);
+        categories[categoryName].results = categories[categoryName].results.concat(categoryResults.slice(0, target[1]));
+  
+        // 目標件数に達したら終了
+        if (categories[categoryName].results.length >= target[0]) {
+          return;
+        }
+      });
+
+      await Promise.all(promises);
+    }
+  
+    async function searchWithWords(categoryNos, target, limit, combinedNames, categoryName) {
+      const promises = combinedNames.map(async (combinedName) => {
+        for (const categoryNo of categoryNos) {
+          let categoryResults = [];
+          let offset = 0;
+  
+          while (offset <= limit && categoryResults.length < target[1]) {
+            const params = {
+              'word': combinedName,
+              'category': categoryNo,
+              'add': "detail",
+              'limit': Math.ceil(target[1] / combinedNames.length), // combinedNamesの数で割った件数を取得する
+              'offset': offset
+            };
+
+            const cacheKey = `${params.word}-${params.category}-${params.offset}`;
+            let result = cache[cacheKey];
+
+            if(!result) {
+              result = await fetchNavitimeSpotAPI(params);
+              cache[cacheKey] = result;
+            }
+    
+            if (result && result.items && result.items.length > 0) {
+              const filteredItems = result.items.filter(item => {
+                const distance = calculateDistance(
+                  geocodeLocation.lat, geocodeLocation.lng,
+                  item.coord.lat, item.coord.lon
+                );
+                return distance <= 30 && !processedCodes.has(item.code); // 半径20km以内
+              });
+  
+              filteredItems.forEach(item => processedCodes.add(item.code));
+  
+              console.log(`word: ${combinedName}, categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
+              categoryResults = categoryResults.concat(filteredItems);
+            }
+  
+            offset += 100;
+          }
+  
+          categoryResults.slice(0, target[1]).forEach(item => item.category = categoryName);
+          categories[categoryName].results = categories[categoryName].results.concat(categoryResults.slice(0, target[1]));
+  
+          // 目標件数に達したら終了
+          if (categories[categoryName].results.length >= target[0]) {
+            break;
+          }
+        }
+      });
+
+      await Promise.all(promises);
+
+    }
+
+    //console.log("getSpotPlaces.result > ", mergedResults);
     res.json({ results: mergedResults });
+
   } catch (error) {
     console.log(error)
   }
-
-  function getBase64Signature(data, key) {
-    const hmac = crypto.createHmac('sha1', key);
-    hmac.update(data);
-    const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
-    return signature;
-  }
 }
-
 
 // 選択したスポット
 function doGetUserSelectSpots(req, res) {

@@ -120,33 +120,32 @@ main {
     width: 600px;
     height: 90px;
     position: relative;
-    padding: 5px 5px 5px 5px;
+    padding: 5px;
+    overflow: hidden;
 }
 
 .search-result img {
-    position: relative;
+    float: left;
     height: 90px;
     width: 90px;
+    margin-right: 10px;
 }
 
 .search-result h2 {
-    position: absolute;
-    margin: 0 0 0 0;
-    top: 5px;
-    left: 110px;
+    margin: 5px 0;
     font-size: 15px;
-    width: 480px;
+    width: calc(100% - 100px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .search-result p {
-    position: relative;
-    margin: 1px 0;
-    bottom: 75px;
-    left: 105px;
-    width: 500px;
+    margin: 0;
     font-size: 12px;
-    white-space: nowrap;
+    width: calc(100% - 100px);
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
