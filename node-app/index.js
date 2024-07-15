@@ -255,7 +255,7 @@ function getBase64Signature(data, key) {
   return signature;
 }
 
-async function getSpotLists(req,res) {
+async function getSpotLists(req, res) {
   const selectedPlaces = req.session.selectplaces;
   const prefectureName = selectedPlaces.prefectureName;
   const areaNames = selectedPlaces.areaName.split('・');
@@ -265,89 +265,68 @@ async function getSpotLists(req,res) {
   try {
     const geocodeLocation = await getGeocode(combinedNames[0]);
     let processedCodes = new Set();
-  
-    const categories = {
-      // 食べ物に関するカテゴリ
-      food: { nos: ['0310005'], target: [10, 30], additionalNos: ['03'], limit: 2000, results: [] },
-      // 遊びに関するカテゴリ
-      play: { nos: ['0707', '0705', '0703', '0604001', '0606', '0709', '0211'], target: [20, 40], additionalNos: ['01', '0205'], limit: 2000, results: [] },
-      // 自然に関するカテゴリ
-      nature: { nos: ['0702', '0706'], target: [5, 10], additionalNos: [], limit: 2000, results: [] }
-    }; 
 
-    // キャッシュを利用するためのデータ構造
+    const categories = {
+      food: { nos: ['0310005'], target: 20, additionalNos: ['03'], results: [] },
+      play: { nos: ['0707', '0705', '0703', '0604001', '0606', '0709', '0211'], target: 30, additionalNos: ['01', '0205'], results: [] },
+      nature: { nos: ['0702', '0706'], target: 10, results: [] }
+    };
+
     const cache = {};
 
-    // 並列処理の実行
-    const searchPromises = Object.keys(categories).map(categoryName =>
-      searchWithOffset(categories[categoryName].nos, categories[categoryName].target, categories[categoryName].limit, categoryName)
-    );
+    // すべてのリクエストを並行して実行
+    const searchPromises = [
+      ...Object.keys(categories).flatMap(categoryName => [
+        searchWithOffset(categories[categoryName].nos, categoryName),
+        searchWithWords(categories[categoryName].nos, combinedNames, categoryName),
+        ...(categories[categoryName].additionalNos ? [
+          searchWithOffset(categories[categoryName].additionalNos, categoryName, 'additional'),
+          searchWithWords(categories[categoryName].additionalNos, combinedNames, categoryName, 'additional')
+        ] : [])
+      ])
+    ];
 
     await Promise.all(searchPromises);
 
-    const foodResultsMet = categories.food.results.length >= categories.food.target[0];
-    const playResultsMet = categories.play.results.length >= categories.play.target[0];
-    const natureResultsMet = categories.nature.results.length >= categories.nature.target[0];
-
-    if (!(foodResultsMet && playResultsMet && natureResultsMet)) {
-      await Promise.all(Object.keys(categories).map(categoryName =>
-        searchWithWords(categories[categoryName].nos, categories[categoryName].target, categories[categoryName].limit, combinedNames, categoryName)
-      ));
-    }
-
-    // 追加カテゴリの検索
-    if (!foodResultsMet) {
-      await Promise.all([
-        searchWithOffset(categories.food.additionalNos, categories.food.target, categories.food.limit, 'food'),
-        searchWithWords(categories.food.additionalNos, categories.food.target, categories.food.limit, combinedNames, 'food')
-      ]);
-    }
-    if (!playResultsMet) {
-      await Promise.all([
-        searchWithOffset(categories.play.additionalNos, categories.play.target, categories.play.limit, 'play'),
-        searchWithWords(categories.play.additionalNos, categories.play.target, categories.play.limit, combinedNames, 'play')
-      ]);
-    }
-
-    // 結果のマージと重複削除
-    let mergedResults = [];
-    const allResults = [...categories.food.results, ...categories.play.results, ...categories.nature.results];
-
     // 重複削除
-    const uniqueResults = [...new Map(allResults.map(item => [item.code, item])).values()];
+    const allResults = [...new Map([...categories.food.results, ...categories.play.results, ...categories.nature.results].map(item => [item.code, item])).values()];
 
-    // 各カテゴリコードの検索結果から前から順番に1つずつ抽出して20件の結果をmergedResultsに格納
-    while (mergedResults.length < 20 && uniqueResults.length > 0) {
-      for (const category of ['food', 'play', 'nature']) {
-        if (categories[category].results.length > 0) {
-          mergedResults.push(categories[category].results.shift());
-        }
-        if (mergedResults.length >= 20) break;
+    // 各カテゴリの結果を目標件数まで取り出す
+    let mergedResults = [];
+    const categoryResults = {
+      food: [],
+      play: [],
+      nature: []
+    };
+
+    allResults.forEach(item => {
+      if (categories[item.category].target > categoryResults[item.category].length) {
+        categoryResults[item.category].push(item);
+        mergedResults.push(item);
       }
-    }
-    
-    // 各カテゴリの目標件数に達していない場合、残りの不足分を他のカテゴリから補う
-    const foodResults = mergedResults.filter(result => result.category === 'food');
-    const playResults = mergedResults.filter(result => result.category === 'play');
-    const natureResults = mergedResults.filter(result => result.category === 'nature');
+    });
 
-    if (foodResults.length < 20) {
-      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'food').slice(0, 20 - foodResults.length));
+    // 追加カテゴリのスポットを不足分だけ格納
+    const foodResults = categoryResults.food.length;
+    const playResults = categoryResults.play.length;
+
+    if (foodResults < categories.food.target) {
+      const additionalFoodResults = categories.food.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.food.target - foodResults);
+      additionalFoodResults.forEach(item => processedCodes.add(item.code));
+      mergedResults = mergedResults.concat(additionalFoodResults);
     }
-    if (playResults.length < 30) {
-      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'play').slice(0, 30 - playResults.length));
-    }
-    if (natureResults.length < 10) {
-      mergedResults = mergedResults.concat(uniqueResults.filter(result => result.category !== 'nature').slice(0, 10 - natureResults.length));
+    if (playResults < categories.play.target) {
+      const additionalPlayResults = categories.play.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.play.target - playResults);
+      additionalPlayResults.forEach(item => processedCodes.add(item.code));
+      mergedResults = mergedResults.concat(additionalPlayResults);
     }
 
-    async function searchWithOffset(categoryNos, target, limit, categoryName) {
+    async function searchWithOffset(categoryNos, categoryName, type = 'primary') {
       const promises = categoryNos.map(async (categoryNo) => {
-
         let categoryResults = [];
         let offset = 0;
-  
-        while (offset <= limit && categoryResults.length < target[1]) {
+
+        while (offset <= 2000) {
           const params = {
             'category': categoryNo,
             'add': "detail",
@@ -358,105 +337,97 @@ async function getSpotLists(req,res) {
           const cacheKey = `${params.category}-${params.offset}`;
           let result = cache[cacheKey];
 
-          if(!result) {
+          if (!result) {
             result = await fetchNavitimeSpotAPI(params);
             cache[cacheKey] = result;
           }
-    
+
           if (result && result.items && result.items.length > 0) {
             const filteredItems = result.items.filter(item => {
               const distance = calculateDistance(
                 geocodeLocation.lat, geocodeLocation.lng,
                 item.coord.lat, item.coord.lon
               );
-              return distance <= 30 && !processedCodes.has(item.code); // 半径20km以内
+              return distance <= 30 && !processedCodes.has(item.code); // 半径30km以内
             });
-  
-            filteredItems.forEach(item => processedCodes.add(item.code));
-  
+
+            filteredItems.forEach(item => {
+              processedCodes.add(item.code);
+              item.category = categoryName;
+              item.type = type; // primary または additional
+            });
+
             console.log(`categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
             categoryResults = categoryResults.concat(filteredItems);
           }
-  
-          if (categoryResults.length >= target[1]) {
-            break;
-          }
-  
+
           offset += 100;
         }
 
-        categoryResults.slice(0, target[1]).forEach(item => item.category = categoryName);
-        categories[categoryName].results = categories[categoryName].results.concat(categoryResults.slice(0, target[1]));
-  
-        // 目標件数に達したら終了
-        if (categories[categoryName].results.length >= target[0]) {
-          return;
-        }
+        categories[categoryName].results = categories[categoryName].results.concat(categoryResults);
       });
 
       await Promise.all(promises);
     }
-  
-    async function searchWithWords(categoryNos, target, limit, combinedNames, categoryName) {
+
+    async function searchWithWords(categoryNos, combinedNames, categoryName, type = 'primary') {
       const promises = combinedNames.map(async (combinedName) => {
         for (const categoryNo of categoryNos) {
           let categoryResults = [];
           let offset = 0;
-  
-          while (offset <= limit && categoryResults.length < target[1]) {
+
+          while (offset <= 2000) {
             const params = {
               'word': combinedName,
               'category': categoryNo,
               'add': "detail",
-              'limit': Math.ceil(target[1] / combinedNames.length), // combinedNamesの数で割った件数を取得する
+              'limit': 100,
               'offset': offset
             };
 
             const cacheKey = `${params.word}-${params.category}-${params.offset}`;
             let result = cache[cacheKey];
 
-            if(!result) {
+            if (!result) {
               result = await fetchNavitimeSpotAPI(params);
               cache[cacheKey] = result;
             }
-    
+
             if (result && result.items && result.items.length > 0) {
               const filteredItems = result.items.filter(item => {
                 const distance = calculateDistance(
                   geocodeLocation.lat, geocodeLocation.lng,
                   item.coord.lat, item.coord.lon
                 );
-                return distance <= 30 && !processedCodes.has(item.code); // 半径20km以内
+                return distance <= 30 && !processedCodes.has(item.code); // 半径30km以内
               });
-  
-              filteredItems.forEach(item => processedCodes.add(item.code));
-  
+
+              filteredItems.forEach(item => {
+                processedCodes.add(item.code);
+                item.category = categoryName;
+                item.type = type; // primary または additional
+              });
+
               console.log(`word: ${combinedName}, categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
               categoryResults = categoryResults.concat(filteredItems);
             }
-  
+
             offset += 100;
           }
-  
-          categoryResults.slice(0, target[1]).forEach(item => item.category = categoryName);
-          categories[categoryName].results = categories[categoryName].results.concat(categoryResults.slice(0, target[1]));
-  
-          // 目標件数に達したら終了
-          if (categories[categoryName].results.length >= target[0]) {
-            break;
-          }
+
+          categories[categoryName].results = categories[categoryName].results.concat(categoryResults);
         }
       });
 
       await Promise.all(promises);
-
     }
 
-    //console.log("getSpotPlaces.result > ", mergedResults);
+    console.log("getSpotPlaces.result > ", mergedResults);
     res.json({ results: mergedResults });
 
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 

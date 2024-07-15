@@ -132,19 +132,16 @@ function viewSearchResult(item) { // place = getDetails result object
     pAddress.innerHTML = (item.address_name !== undefined) ? `住所: ${item.address_name}` : "住所: --";
   const pPhone = document.createElement("p");
     pPhone.innerHTML = (item.phone !== undefined) ? `電話番号: ${item.phone}` : "電話番号: --";
+  const img = document.createElement("img");
+  const pWebsite = document.createElement("p");
   if (item.details && item.details.length > 0) {
     const detail = item.details[0];
     if (detail.images && detail.images.length > 0 && detail.images[0].path) {
-      const img = document.createElement("img");
       img.src = (detail.images[0].path !== undefined) ? item.details[0].images[0].path : "/images/noimage.png";
       img.alt = "お店の画像";
-      target.appendChild(img);
     }
-    target.appendChild(h2);
     if (detail.official_sites && detail.official_sites.length > 0 && detail.official_sites[0].value) {
-      const pWebsite = document.createElement("p");
       pWebsite.innerHTML = (detail.official_sites[0].value !== undefined) ? `HP: <a href="${detail.official_sites[0].value}" target="_blank">${detail.official_sites[0].value}</a>` : "HP: --";
-      target.appendChild(pWebsite);
     }
   }
 
@@ -156,8 +153,11 @@ function viewSearchResult(item) { // place = getDetails result object
   input.classList.add("button");
   input.setAttribute("onclick", `addSelectSpotList("${item.name}","${item.details[0].images[0].path}","${item.code}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
   
+  target.appendChild(img);
+  target.appendChild(h2);
   target.appendChild(pAddress);
   target.appendChild(pPhone);
+  target.appendChild(pWebsite);
   target.appendChild(input);
 
 }
