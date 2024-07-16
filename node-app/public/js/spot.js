@@ -134,16 +134,23 @@ function viewSearchResult(item) { // place = getDetails result object
     pPhone.innerHTML = (item.phone !== undefined) ? `電話番号: ${item.phone}` : "電話番号: --";
   const img = document.createElement("img");
   const pWebsite = document.createElement("p");
+  let imageUrl = "/images/noimage_spot.jpg";
+  let websiteUrl = "--";
   if (item.details && item.details.length > 0) {
     const detail = item.details[0];
     if (detail.images && detail.images.length > 0 && detail.images[0].path) {
-      img.src = (detail.images[0].path !== undefined) ? item.details[0].images[0].path : "/images/noimage.png";
-      img.alt = "お店の画像";
+      imageUrl = detail.images[0].path;
     }
     if (detail.official_sites && detail.official_sites.length > 0 && detail.official_sites[0].value) {
-      pWebsite.innerHTML = (detail.official_sites[0].value !== undefined) ? `HP: <a href="${detail.official_sites[0].value}" target="_blank">${detail.official_sites[0].value}</a>` : "HP: --";
+      websiteUrl = detail.official_sites[0].value;
+      pWebsite.innerHTML = `HP: <a href="${websiteUrl}" target="_blank">${websiteUrl}</a>`;
     }
+  } else {
+    pWebsite.innerHTML = "HP: --";
   }
+
+  img.src = imageUrl;
+  img.alt = "スポット画像";
 
   const input = document.createElement("input");
   input.setAttribute("type", "submit");
@@ -151,7 +158,7 @@ function viewSearchResult(item) { // place = getDetails result object
   input.setAttribute("name", "add");
   input.setAttribute("value", "追加");
   input.classList.add("button");
-  input.setAttribute("onclick", `addSelectSpotList("${item.name}","${item.details[0].images[0].path}","${item.code}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
+  input.setAttribute("onclick", `addSelectSpotList("${item.name}","${imageUrl}","${item.code}", "${item.coord.lat}", "${item.coord.lon}")`); // [追加] ボタンで addSelectSpotList を起動するように登録
   
   target.appendChild(img);
   target.appendChild(h2);
@@ -166,17 +173,17 @@ let arr = [];
 
 // 画面下部（追加）ボタンに登録
 // 画面左の選択済みスポットリストに、選択したショップを登録する（表示する）
-function addSelectSpotList(name, image, code) {
+function addSelectSpotList(name, image, code, lat, lon) {
 
   if (!arr.includes(code)) {
     arr.push(code);
-    appendIt(name, image, code);
+    appendIt(name, image, code, lat, lon);
   }
   else {
     alert('既に追加済みです');
   }
 
-  function appendIt (name, image, code) {
+  function appendIt (name, image, code, lat, lon) {
     const target = document.querySelector(".input-area"); // 表示先
 
     // 表示
@@ -193,6 +200,16 @@ function addSelectSpotList(name, image, code) {
       inputhidden.setAttribute("value", code);
       inputhidden.classList.add("this-place-id");
     
+    const inputLat = document.createElement("input");
+      inputLat.setAttribute("type", "hidden");
+      inputLat.setAttribute("value", lat);
+      inputLat.classList.add("this-place-lat");
+
+    const inputLon = document.createElement("input");
+      inputLon.setAttribute("type", "hidden");
+      inputLon.setAttribute("value", lon);
+      inputLon.classList.add("this-place-lon");
+    
     const input = document.createElement("input");
       input.setAttribute("type", "button");
       input.setAttribute("name", "delete");
@@ -204,6 +221,8 @@ function addSelectSpotList(name, image, code) {
     div.appendChild(img);
     div.appendChild(h2);
     div.appendChild(inputhidden);
+    div.appendChild(inputLat);
+    div.appendChild(inputLon);
     div.appendChild(input);
 
     target.prepend(div); // リストの先頭に追加
@@ -247,9 +266,10 @@ function sendSelectSpots(){
 
   const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
   for (const s of spots) {
-    const placeId = s.querySelector(".this-place-id").value;
+    const placeLat = s.querySelector(".this-place-lat").value;
+    const placeLon = s.querySelector(".this-place-lon").value;
     const placeName = s.querySelector("h2").innerText;
-    selectedSpots.push({ placeId, placeName }); // オブジェクトとして格納
+    selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
   }
 
   // 送信
@@ -278,9 +298,10 @@ function returnPlacePage(){
 
   const spots = document.querySelectorAll(".select-spot"); // 選択済みスポットリスト
   for (const s of spots) {
-    const placeId = s.querySelector(".this-place-id").value;
+    const placeLat = s.querySelector(".this-place-lat").value;
+    const placeLon = s.querySelector(".this-place-lon").value;
     const placeName = s.querySelector("h2").innerText;
-    selectedSpots.push({ placeId, placeName }); // オブジェクトとして格納
+    selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
   }
 
   // 送信

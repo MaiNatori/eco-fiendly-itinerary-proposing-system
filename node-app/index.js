@@ -268,35 +268,33 @@ async function getSpotLists(req, res) {
 
     const categories = {
       food: { nos: ['0310005'], target: 20, additionalNos: ['03'], results: [] },
-      play: { nos: ['0707', '0705', '0703', '0604001', '0606', '0709', '0211'], target: 30, additionalNos: ['01', '0205'], results: [] },
-      nature: { nos: ['0702', '0706'], target: 10, results: [] }
+      spot: { nos: ['07', '0604001', '0211'], target: 40, additionalNos: ['01'], results: [] }
     };
 
     const cache = {};
 
     // すべてのリクエストを並行して実行
-    const searchPromises = [
-      ...Object.keys(categories).flatMap(categoryName => [
+    const searchPromises = Object.keys(categories).flatMap(categoryName => {
+      return [
         searchWithOffset(categories[categoryName].nos, categoryName),
         searchWithWords(categories[categoryName].nos, combinedNames, categoryName),
         ...(categories[categoryName].additionalNos ? [
           searchWithOffset(categories[categoryName].additionalNos, categoryName, 'additional'),
           searchWithWords(categories[categoryName].additionalNos, combinedNames, categoryName, 'additional')
         ] : [])
-      ])
-    ];
+      ];
+    });
 
     await Promise.all(searchPromises);
 
     // 重複削除
-    const allResults = [...new Map([...categories.food.results, ...categories.play.results, ...categories.nature.results].map(item => [item.code, item])).values()];
+    const allResults = [...new Map([...categories.food.results, ...categories.spot.results].map(item => [item.code, item])).values()];
 
     // 各カテゴリの結果を目標件数まで取り出す
     let mergedResults = [];
     const categoryResults = {
       food: [],
-      play: [],
-      nature: []
+      spot: []
     };
 
     allResults.forEach(item => {
@@ -308,17 +306,17 @@ async function getSpotLists(req, res) {
 
     // 追加カテゴリのスポットを不足分だけ格納
     const foodResults = categoryResults.food.length;
-    const playResults = categoryResults.play.length;
+    const spotResults = categoryResults.spot.length;
 
     if (foodResults < categories.food.target) {
       const additionalFoodResults = categories.food.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.food.target - foodResults);
       additionalFoodResults.forEach(item => processedCodes.add(item.code));
       mergedResults = mergedResults.concat(additionalFoodResults);
     }
-    if (playResults < categories.play.target) {
-      const additionalPlayResults = categories.play.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.play.target - playResults);
-      additionalPlayResults.forEach(item => processedCodes.add(item.code));
-      mergedResults = mergedResults.concat(additionalPlayResults);
+    if (spotResults < categories.spot.target) {
+      const additionalSpotResults = categories.spot.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.spot.target - spotResults);
+      additionalSpotResults.forEach(item => processedCodes.add(item.code));
+      mergedResults = mergedResults.concat(additionalSpotResults);
     }
 
     async function searchWithOffset(categoryNos, categoryName, type = 'primary') {
@@ -422,7 +420,7 @@ async function getSpotLists(req, res) {
       await Promise.all(promises);
     }
 
-    console.log("getSpotPlaces.result > ", mergedResults);
+    // console.log("getSpotPlaces.result > ", mergedResults);
     res.json({ results: mergedResults });
 
   } catch (error) {
