@@ -35,7 +35,7 @@ const app = express();
 app.use(initSession());
 app.use(bodyParser.json());
 
-// ejs テンプレートエンジン
+// ejsテンプレートエンジン
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -49,8 +49,7 @@ app.listen(PORT, () => {
   console.log("サーバー起動中 #" + PORT, `http://localhost:${PORT}`);
 });
 
-// メソッド
-// HTML表示
+// ejs表示
 app.get('/destination', viewDestination);
 app.get('/destination-search', viewDestinationSearch);
 app.get('/spot', viewSpot);
@@ -63,23 +62,51 @@ app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacespots', getSpotLists);
 app.get('/interfacehotels', getHotelDetails);
 app.get('/get-hotels', sendSelectedHotels);
+app.get('/interfaceroute', getRoute);
 
-// 選択したIDをPOST
+// 選択内容をPOST
 app.post('/userselectpurpose', doGetUserSelectPurpose);
 app.post('/userselectplaces', doGetUserSelectPlaces);
 app.post('/userselectspots', doGetUserSelectSpots);
 app.post('/userselecthotels', doGetUserSelectHotels);
+app.post('/userselecttripdata', doGetUserSelectTripData);
 
-let dataFromScripts = {};
-let selectedSpots = [];
-let selectedHotels = [];
+let dataFromScripts = {}; // 選択内容の保存先
+let selectedSpots = []; // 選択したスポット
+let selectedHotels = []; // 選択したホテル
 
+// POSTリクエストの処理
 app.post('/data', (req, res) => {
   const { source, data } = req.body;
   dataFromScripts[source] = data;
   res.sendStatus(200);
 });
 
+// エラー
+app.use(function(err, req, res, next) {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.status(err.status || 500);
+  res.render('error/error.ejs');
+})
+
+// リクエスト間隔の設定
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// リクエスト数の管理
+let requestCount = 0;
+
+// NAVITIME APIに使用するBase64エンコードされた署名文字列を取得する関数
+function getBase64Signature(data, key) {
+  const hmac = crypto.createHmac('sha1', key);
+  hmac.update(data);
+  const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
+  return signature;
+}
+
+/* destinationページ */
 // 目的地ページの表示
 function viewDestination(req, res) {
   try {
@@ -88,7 +115,6 @@ function viewDestination(req, res) {
     console.log(error)
   }
 }
-
 
 // 選択した旅行目的
 async function doGetUserSelectPurpose(req, res) {
@@ -103,7 +129,6 @@ async function doGetUserSelectPurpose(req, res) {
   res.json({ result: true });
 }
 
-
 // 目的から目的地を探すページ
 function viewDestinationSearch(req, res) {
   try {
@@ -114,7 +139,6 @@ function viewDestinationSearch(req, res) {
   }
 }
 
-
 // 目的に沿った観光地を取得
 async function getDestinationSpots(req, res) {
   console.log('req.session.selectPurpose:', req.session.selectpurpose);
@@ -123,6 +147,10 @@ async function getDestinationSpots(req, res) {
     const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
 
     try {
+      if (requestCount >= 150) {
+        await delay(60000); // 60秒待機
+        requestCount = 0; // 分間リクエスト数をリセット
+      }
       const queryString = querystring.stringify(params);
 
       const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
@@ -130,6 +158,8 @@ async function getDestinationSpots(req, res) {
       const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
 
       const response = await urlWithParams.json();
+
+      requestCount++;  // リクエスト数をカウント
 
       return response;
 
@@ -139,59 +169,57 @@ async function getDestinationSpots(req, res) {
   }
 
   try {
-    const allResults = await Promise.all(
-      req.session.selectpurpose.flatMap(purpose => {
-        const fetchPromises = [];
+    const allResults = [];
+    for (const purpose of req.session.selectpurpose) {
+      if (purpose.id) {
+        const ids = purpose.id.split(',');
 
-        if (purpose.id) {
-          const ids = purpose.id.split(',');
-          ids.forEach(id => {
-            const params = {
-              'category': id.trim(),
-              'add': "detail",
-              'limit': 100
-            };
-            fetchPromises.push(fetchNavitimeAPI(params));
-          });
-        } else if (purpose.word) {
+        for (const id of ids) {
           const params = {
-            'word': purpose.word,
+            'category': id.trim(),
             'add': "detail",
             'limit': 100
           };
-          fetchPromises.push(fetchNavitimeAPI(params));
+          
+          const result = await fetchNavitimeAPI(params);
+          if (result) allResults.push(result);
         }
+      } else if (purpose.word) {
+        const params = {
+          'word': purpose.word,
+          'add': "detail",
+          'limit': 100
+        };
 
-        return fetchPromises;
-      })
-    );
+        const result = await fetchNavitimeAPI(params);
+        if (result) allResults.push(result);
+      }
+
+      // リクエストが150に達した場合、60秒待機
+      if (requestCount >= 150) {
+        await delay(60000);
+        requestCount = 0;
+      }
+    }
+
     const mergedResults = [].concat(...allResults.filter(result => result));
     res.json({ results: mergedResults });
+
   } catch (error) {
     console.log(error);
-  }
-  
-  function getBase64Signature(data, key) {
-    const hmac = crypto.createHmac('sha1', key);
-    hmac.update(data);
-    const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
-    return signature;
   }
 }
 
 // 選択した目的地(都道府県名・エリア名)
 async function doGetUserSelectPlaces(req, res) {
-  selectedPlaces = req.body; // 選択されたスポットのオブジェクト配列
-
-  // const sess = new Session(req, res); // session利用準備
-  // sess.set("selectplaces", selectedPlaces); // sessionのselectspotsというキーにselectedPlacesを保管
+  selectedPlaces = req.body;
   req.session.selectplaces = selectedPlaces;
   req.session.save();
   console.log("session.selectplaces > ", req.session.selectplaces);
-
   res.json({ result: true });
 }
 
+/* spotページ */
 // スポットページの表示
 function viewSpot(req, res) {
   try {
@@ -202,7 +230,7 @@ function viewSpot(req, res) {
 }
 
 // スポット情報の取得
-// Geocoding API
+// Geocoding APIで選択した地名の緯度経度を取得
 async function getGeocode(location) {
   const response = await axios.get (`https://maps.googleapis.com/maps/api/geocode/json`, {
     params: {
@@ -223,6 +251,7 @@ async function getGeocode(location) {
 
 // 住所コードを利用してスポットを検索する
 async function fetchNavitimeSpotAPI(params) {
+  
   const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot/list`;
 
   try {
@@ -236,6 +265,7 @@ async function fetchNavitimeSpotAPI(params) {
   }
 }
 
+// 2地点間の距離を計算する関数
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // 地球の半径(km)
   const dLat = (lat2 - lat1)  * Math.PI / 180;
@@ -247,14 +277,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.asin(Math.sqrt(a));
 }
 
-// Base64エンコードされた署名文字列を取得する関数
-function getBase64Signature(data, key) {
-  const hmac = crypto.createHmac('sha1', key);
-  hmac.update(data);
-  const signature = hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_'); //Base64エンコードされた署名文字列をURLセーフにする
-  return signature;
-}
-
+// スポット情報の取得
 async function getSpotLists(req, res) {
   const selectedPlaces = req.session.selectplaces;
   const prefectureName = selectedPlaces.prefectureName;
@@ -443,6 +466,7 @@ function doGetUserSelectSpots(req, res) {
   res.json({ result: true });
 }
 
+/* hotelページ */
 // ホテルページの表示
 function viewHotel(req, res) {
   // const sess = new Session(req, res); // session利用準備
@@ -479,95 +503,117 @@ async function getHotelDetails(req, res) {
       smallAreaId = areaId;
     }
 
-    const params = {
-      'format': "json",
-      'responseType': "large",
-      'elements': "hotelNo,hotelName,hotelInformationUrl,hotelMinCharge,telephoneNo,access,hotelImageUrl,reviewAverage,hotelClassCode",
-      'formatVersion': "2",
-      'largeClassCode': "japan",
-      'middleClassCode': prefectureId, //都道府県 destinationページで選択されたもの
-      'smallClassCode': smallAreaId, //市区町村 destinationページで選択されたもの
-      'detailClassCode': detailAreaId, //駅、詳細地域 destinationページで選択されたもの
-      'page': 1,
-      'hits': "10",
-      'applicationId': RAKUTEN_APP_ID
-    };
+    async function requestHotels(responseType) {
+      const params = {
+        'responseType': responseType,
+        'formatVersion': "2",
+        'datumType': "1",
+        'largeClassCode': "japan",
+        'middleClassCode': prefectureId, //都道府県 destinationページで選択されたもの
+        'smallClassCode': smallAreaId, //市区町村 destinationページで選択されたもの
+        'detailClassCode': detailAreaId, //駅、詳細地域 destinationページで選択されたもの
+        'applicationId': RAKUTEN_APP_ID
+      };
 
-    console.log("fetchHotelSearch > params: \n", params);
+      console.log("fetchHotelSearch > params: \n", params);
+
+      try {
+        await delay(1000); //APIのリクエスト制限による1秒の遅延
+        const queryString = querystring.stringify(params);
+        const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+        const response = await urlWithParams.json()
+        return response;
+      } catch (error) {
+        console.log(error);
+        return null;
+      }
+    }
 
     try {
-      const queryString = querystring.stringify(params);
-  
-      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
-    
-      const response = await urlWithParams.json()
-
+      // まずlargeでリクエスト
+      let response = await requestHotels("large");
+      // エラーが出たらmiddleで再度リクエスト
+      if (!response || !response.hotels) {
+        console.error(`No hotels found with responseType "large", retrying with "middle"`);
+        response = await requestHotels("middle");
+      }
       return response;
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
+
+    return null;
   }
 
   try {
     const result = await fetchHotelSearch();
-    const hotels = result.hotels;
-
-    async function fetchHotelSDGs(hotelName) {
-
-      console.log(hotelName);
-
-      const BASE_URL = "https://www.googleapis.com/customsearch/v1";
-    
-      const params = {
-        'key': GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL, // APIキー
-        'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL, // 検索エンジンID
-        'exactTerms': "SDGs OR 環境保全 OR 環境に優しい OR 地産地消 OR 環境に配慮 OR エコ OR エシカル OR 持続可能 OR オーガニック", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
-        'lr': "lang_ja", //検索対象を特定の言語に設定
-        'num': 5, // 返される検索結果の数
-        'q': `${hotelName} 公式`, // クエリ
-      };
-
-      try {
-        const queryString = querystring.stringify(params);
-      
-        const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
-      
-        const response = await urlWithParams.json()
-
-        return response;
-
-      } catch (error) {
-        console.log(error)
-      }
+    if (!result) {
+      return res.status(500).json({ error: 'Failed to fetch hotel data' });
     }
-
-    // ホテルごとにSDGsに関する情報を検索して抽出
+    const hotels = result.hotels;
+    if (!hotels || hotels.length === 0) {
+      return res.status(404).json({ error: 'No hotels found' });
+    }
+    
     const hotelPromises = hotels.map(async hotelGroup => {
       const hotelInfo = {
         hotelBasicInfo: hotelGroup[0].hotelBasicInfo,
-        hotelDetailInfo: hotelGroup[1].hotelDetailInfo
+        hotelDetailInfo: hotelGroup[1]?.hotelDetailInfo || null // hotelDetailInfoがない場合はnull
       };
+      await delay(1000);
       const sdgsInfo = await fetchHotelSDGs(hotelInfo.hotelBasicInfo.hotelName);
       if (sdgsInfo && sdgsInfo.items && sdgsInfo.items.length > 0) {
         return { hotelInfo, sdgsInfo };
       } else {
-        return null; // SDGs関連の情報が見つからない場合はnullを返す
+        return { hotelInfo, sdgsInfo: null }; // SDGs関連の情報が見つからない場合はnullを返す
       }
-    });
+
+    })
 
     // すべてのホテルのSDGsに関する情報を取得
     const hotelsWithSDGs = await Promise.all(hotelPromises);
 
-    // nullを除外し、hotel_Rakuten.jsに結果を送信
-    const filteredHotels = hotelsWithSDGs.filter(hotel => hotel !== null);
-    console.log(filteredHotels);
-    res.json({ results: filteredHotels });
+    // SDGsに関するサイトがあるホテルが5か所未満の場合はすべてのホテルを表示
+    const filteredHotels = hotelsWithSDGs.filter(hotel => hotel.sdgsInfo !== null);
+    if (filteredHotels.length >= 5) {
+      console.log("Displaying SDGs related hotels");
+      res.json({ results: filteredHotels });
+    } else {
+      console.log("Displaying all hotels as SDGs related hotels are less than 5");
+      res.json({ results: hotelsWithSDGs });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 
+  async function fetchHotelSDGs(hotelName) {
+    console.log(hotelName);
+
+    const BASE_URL = "https://www.googleapis.com/customsearch/v1";
+  
+    const params = {
+      'key': GOOGLE_CUSTOM_SEARCH_API_KEY_HOTEL, // APIキー
+      'cx': GOOGLE_CUSTOM_SEARCH_ENGINE_ID_HOTEL, // 検索エンジンID
+      'exactTerms': "SDGs OR 環境保全 OR 環境に優しい OR 地産地消 OR 環境に配慮 OR エコ OR エシカル OR 持続可能 OR オーガニック", // 検索結果内のすべてのドキュメントに含まれるフレーズを識別
+      'lr': "lang_ja", //検索対象を特定の言語に設定
+      'num': 5, // 返される検索結果の数
+      'q': `${hotelName} 公式`, // クエリ
+    };
+
+    try {
+      const queryString = querystring.stringify(params);
+    
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}`)
+    
+      const response = await urlWithParams.json()
+
+      return response;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }
 
 // 選択したホテル
@@ -584,6 +630,7 @@ function doGetUserSelectHotels(req, res) {
   res.json({ result: true });
 }
 
+/* placeページ */
 // 出発地・到着地入力ページ
 function viewPlace(req, res) {
   try {
@@ -598,7 +645,15 @@ function sendSelectedHotels(req, res) {
   res.json({ selectHotels: req.session.selecthotels });
 }
 
+//選択した各日程の出発地・到着地
+function doGetUserSelectTripData(req, res) {
+  const { tripDays, tripData } = req.body;
+  req.session.tripdata = { tripDays, tripData };
+  console.log('Received trip data:', req.session.tripdata);
+  res.json({ result: true });
+}
 
+/* resultページ */
 // 結果表示ページ
 function viewResult(req, res) {
   try {
@@ -608,13 +663,135 @@ function viewResult(req, res) {
   }
 }
 
-// Error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// ルート探索
+async function getRoute(req, res) {
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error/error.ejs');
-})
+  const selectSpots = req.session.selectspots;
+  const selectHotels = req.session.selecthotels;
+  const tripData = req.session.tripdata;
+  
+  console.log('selectSpots: ', selectSpots);
+  console.log('selectHotels: ', selectHotels);
+  console.log('tripData: ', tripData);
+
+  // ルート探索API
+  async function fetchRouteAPI(params) {
+
+    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/route`;
+
+    try {
+      const queryString = querystring.stringify(params);
+
+      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/route?${queryString}`, NAVITIME_SIGNATURE_KEY);
+
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+
+      const response = await urlWithParams.json();
+
+      return response;
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // 住所から緯度・経度を取得(初日出発地と最終日到着地)
+  async function getLatLonFromAddress(address) {
+
+    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/address/list`;
+
+    const params = {
+      'word': address
+    };
+
+    try {
+      const queryString = querystring.stringify(params);
+
+      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/address/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
+
+      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+
+      const response = await urlWithParams.json();
+
+      if (response.items && response.items.length > 0) {
+        const coord = response.items[0].coord;
+        console.log("getLatLonFromAddress: ", coord);
+        return { lat: coord.lat, lon: coord.lon };
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+
+  // 宿泊施設の緯度経度を取得
+  async function getHotelLatLon(hotelName) {
+    const hotel = selectHotels.find(h => h.hotelName === hotelName);
+    console.log("getHotelLatLon: ", `{ lat: ${hotel.hotelLat}, lon: ${hotel.hotelLon} }`);
+    return hotel ? { lat: hotel.hotelLat, lon: hotel.hotelLon } : null;
+  }
+
+  // 各日程のルートを探索
+  async function processTripData() {
+    let firstDepartureLatLon = null;
+    const routeResults = [];
+
+    for (const day of tripData.tripData) {
+      let start, goal;
+
+      if (day.dayNumber === 1) {
+        firstDepartureLatLon = await getLatLonFromAddress(day.departure);
+        start = firstDepartureLatLon;
+        goal = await getHotelLatLon(day.arrival);
+      } else if (day.dayNumber === tripData.tripDays) {
+        start = await getHotelLatLon(day.departure);
+        goal = firstDepartureLatLon;
+      } else {
+        start = await getHotelLatLon(day.departure);
+        goal = await getHotelLatLon(day.arrival);
+      }
+
+      if (start && goal) {
+        const params = {
+          'start': JSON.stringify({ lat: start.lat, lon: start.lon }),
+          'goal': JSON.stringify({ lat: goal.lat, lon: goal.lon }),
+          'goal-time': "2024-09-24T19:00"
+        };
+
+        console.log(`Day ${day.dayNumber}> start: ${start.lat}, ${start.lon}, goal: ${goal.lat}, ${goal.lon}`);
+        const routeResponse = await fetchRouteAPI(params);
+        console.log("Route API response: ", routeResponse);
+
+        // ルート結果を配列に追加
+        routeResults.push({
+          day: day.dayNumber,
+          start: { lat: start.lat, lon: start.lon },
+          goal: { lat: goal.lat, lon: goal.lon },
+          route: routeResponse
+        });
+      } else {
+        console.error(`Day ${day.dayNumber}: Could not find lat/lon for either start or goal.`);
+      }
+    }
+
+    return routeResults;
+  }
+
+  try {
+    const routeResults = await processTripData();
+    res.json({ routes: routeResults });
+  } catch (error) {
+    console.log(error);
+  }
+  /*
+  滞在時間どうしよう
+  */
+
+  /* 
+  各日程でどのスポットに行くかっていうのをどう選ぶ？
+  */
+
+  /*
+  ルート生成した後に調整するようにするには？
+  */
+}

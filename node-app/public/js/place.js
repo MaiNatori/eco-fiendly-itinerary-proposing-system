@@ -18,7 +18,7 @@ function fetchSelectedHotels() {
       .catch(error => {
         console.error("Error fetching data: ", error);
       });
-  }
+}
 
 //日程の追加
 function addNewDay() { 
@@ -181,4 +181,54 @@ function confirmDay(dayNumber) {
             nextDeparture.value = arrivalSelect.value;
         }
     }
+}
+
+function sendTripData() {
+    const tripData = [];
+    const days = document.querySelectorAll('.day');
+
+    // 1日目の出発地と到着地
+    const firstDeparture = document.getElementById('departure-1').value;
+    const firstArrival = document.getElementById('arrival-1').value;
+    tripData.push({ dayNumber: 1, departure: firstDeparture, arrival: firstArrival });
+
+    // 各日程の出発地と到着地
+    days.forEach((day, index) => {
+        const departureElement = document.getElementById(`departure-${index + 1}`);
+        const arrivalElement = document.getElementById(`arrival-${index + 1}`);
+
+        const departure = departureElement ? departureElement.textContent : null;
+        const arrival = arrivalElement ? arrivalElement.value : null;
+
+        if (departure && arrival) {
+            tripData.push({ dayNumber: index + 1, departure, arrival });
+        } else {
+            console.error("Departure or arrival element is null for day", index + 1);
+        }
+    });
+
+    // 最終日の出発地と到着地
+    const finalDeparture = document.getElementById('final-departure').textContent;
+    const finalArrival = document.getElementById('final-arrival').textContent;
+    tripData.push({ dayNumber: days.length, departure: finalDeparture, arrival: finalArrival });
+
+    const tripDays = tripData.length;
+
+    fetch('/userselecttripdata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripDays, tripData })
+    })
+    .then(response => {
+        if(!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("POST /userselecttripdata -> ", data);
+        // 送信成功なら /result に遷移、失敗なら警告表示
+        if (data.result == true) window.location.href = "/result"
+        else alert("送信失敗！");      
+    })
 }

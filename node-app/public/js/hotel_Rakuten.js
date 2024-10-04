@@ -77,6 +77,8 @@ function viewSearchResult(results) {
       input.dataset.hotelName = hotelInfo.hotelName;
       input.dataset.hotelImageUrl = hotelInfo.hotelImageUrl;
       input.dataset.hotelNo = hotelInfo.hotelNo;
+      input.dataset.latitude = hotelInfo.latitude;
+      input.dataset.longitude = hotelInfo.longitude;
       input.addEventListener("click", (event) => addSelectSpotList(event));
     div.appendChild(img);
     div.appendChild(h2);
@@ -103,16 +105,18 @@ function addSelectSpotList(event) {
   const hotelNo = clickedElement.dataset.hotelNo;
   const hotelName = clickedElement.dataset.hotelName;
   const hotelImageUrl = clickedElement.dataset.hotelImageUrl;
+  const hotelLatitude = clickedElement.dataset.latitude;
+  const hotelLongitude = clickedElement.dataset.longitude;
 
   if (!arr.includes(hotelNo)) {
     arr.push(hotelNo);
-    appendIt(hotelNo, hotelName, hotelImageUrl);
+    appendIt(hotelNo, hotelName, hotelImageUrl, hotelLatitude, hotelLongitude);
   }
   else {
     alert('既に追加済みです');
   }
 
-  function appendIt(hotelNo, hotelName, hotelImageUrl) {
+  function appendIt(hotelNo, hotelName, hotelImageUrl, hotelLatitude, hotelLongitude) {
     const target = document.querySelector(".input-area"); // 表示先
 
     // 表示
@@ -135,6 +139,16 @@ function addSelectSpotList(event) {
       inputhidden.setAttribute("value", hotelNo);
       inputhidden.classList.add("this-hotel-no");
     
+    const lathidden = document.createElement("input");
+      lathidden.setAttribute("type", "hidden");
+      lathidden.setAttribute("value", hotelLatitude);
+      lathidden.classList.add("hotel-latitude");
+    
+    const lnghidden = document.createElement("input");
+      lnghidden.setAttribute("type", "hidden");
+      lnghidden.setAttribute("value", hotelLongitude);
+      lnghidden.classList.add("hotel-longitude");
+    
     const input = document.createElement("input");
       input.setAttribute("type", "button");
       input.setAttribute("name", "delete");
@@ -146,6 +160,8 @@ function addSelectSpotList(event) {
     div.appendChild(img);
     div.appendChild(h2);
     div.appendChild(inputhidden);
+    div.appendChild(lathidden);
+    div.appendChild(lnghidden);
     div.appendChild(input);
 
     target.prepend(div); // リストの先頭に追加
@@ -459,7 +475,9 @@ function sendSelectHotels(){
   for (const s of hotels) {
     const hotelNumber = s.querySelector(".this-hotel-no").value;
     const hotelName = s.querySelector("h2").innerText;
-    selectedHotels.push({ hotelNumber, hotelName }); // オブジェクトとして格納
+    const hotelLat = s.querySelector(".hotel-latitude").value;
+    const hotelLon = s.querySelector(".hotel-longitude").value;
+    selectedHotels.push({ hotelNumber, hotelName, hotelLat, hotelLon }); // オブジェクトとして格納
   }
 
   // 送信
