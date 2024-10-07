@@ -10,23 +10,50 @@ function inqueryFacilityNumbers() {
     .then(data => {
       console.log(data.results);
       viewSearchResult(data.results);
+      updateCheckboxes(data.results);
     })
     .catch(error => {
       console.error("Error fetching data: ", error);
     });
 }
 
+// hotelDetailInfoがnullの場合、施設タイプでの絞り込みを不可に
+function updateCheckboxes(results) {
+  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
+  const facilityTypeCheckbox = document.querySelector('[name="facility-type"]');
+  let hasValidDetails = results.some(result => result.hotelInfo.hotelDetailInfo !== null);
+  facilityCheckboxes.forEach(checkbox => {
+    checkbox.disabled = !hasValidDetails;
+    facilityTypeCheckbox.disabled = !hasValidDetails;
+    const label = document.querySelector(`label[for="${checkbox.id}"]`);
+    const labelType = document.querySelector(`label[for="type"] p`);
+    if (checkbox.disabled && facilityTypeCheckbox.disabled) {
+      label.style.textDecoration = 'line-through';
+      label.style.color = '#999';
+      checkbox.style.backgroundColor = '#ccc';
+      labelType.style.textDecoration = 'line-through';
+      labelType.style.color = '#999';
+      facilityTypeCheckbox.style.backgroundColor = '#ccc';
+    } else {
+      label.style.textDecoration = 'none';
+      label.style.color = '';
+      checkbox.style.backgroundColor = '';
+      labelType.style.textDecoration = 'none';
+      labelType.style.color = '';
+      facilityTypeCheckbox.style.backgroundColor = '';
+      checkbox.addEventListener('change', handleTypeSelect);
+    }
+  });
+}
+
 // 結果の表示
 function viewSearchResult(results) {
   const loading = document.querySelector('.js-loading');
   loading.classList.add('js-loaded');
+
   document.getElementById('range-min').addEventListener('change', handleBudgetChange);
   document.getElementById('range-max').addEventListener('change', handleBudgetChange);
   document.getElementById('minutes').addEventListener('change', handleMinutesChange);
-  const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
-  facilityCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', handleTypeSelect);
-  });
 
   clearSearchResults();
 
@@ -219,7 +246,13 @@ function handleMinutesChange() {
 function handleTypeSelect() {
   const facilityCheckboxes = document.querySelectorAll('[name="facility"]');
   const selectedFacilityTypes = Array.from(facilityCheckboxes).filter(cb => cb.checked);
-  document.getElementById('facility-type').checked = selectedFacilityTypes.length > 0;
+  const facilityTypeCheckbox = document.getElementById('facility-type');
+  facilityTypeCheckbox.checked = selectedFacilityTypes.length > 0;
+  facilityTypeCheckbox.addEventListener('click', (e) => {
+    if (selectedFacilityTypes.length > 0) {
+      e.preventDefault();
+    }
+  });
 }
 
 // 絞り込み・並び替え
