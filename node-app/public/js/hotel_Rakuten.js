@@ -501,8 +501,7 @@ function reviewSort(filteredData){
 
 // 画面左の選択済みスポットリストをサーバに送信して、画面遷移
 function sendSelectHotels(){
-  // 選択されたスポットリストから、placeidのみをとりだして、配列を作る
-  let selectedHotels = []; // 選択されたplace_idの配列
+  let selectedHotels = [];
 
   const hotels = document.querySelectorAll(".select-hotel"); // 選択済みスポットリスト
   for (const s of hotels) {
@@ -511,6 +510,11 @@ function sendSelectHotels(){
     const hotelLat = s.querySelector(".hotel-latitude").value;
     const hotelLon = s.querySelector(".hotel-longitude").value;
     selectedHotels.push({ hotelNumber, hotelName, hotelLat, hotelLon }); // オブジェクトとして格納
+  }
+
+  if (selectedHotels.length === 0) {
+    alert("宿泊場所を選択してください");
+    return;
   }
 
   // 送信

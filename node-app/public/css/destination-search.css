@@ -1417,6 +1417,10 @@ section .search-result .result-contents h2 {
     left: 160px;
     width: 525px;
     height: 25px;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 section .search-result .result-contents h3 {

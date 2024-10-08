@@ -110,7 +110,7 @@ function getBase64Signature(data, key) {
 // 目的地ページの表示
 function viewDestination(req, res) {
   try {
-    res.render('destination-modal.ejs');
+    res.render('destination.ejs');
   } catch (error) {
     console.log(error)
   }
@@ -239,7 +239,6 @@ async function getGeocode(location) {
     }
   });
   if (response.data.status === 'OK') {
-    console.log('location: ', response.data.results[0].geometry.location);
     return {
       lat: response.data.results[0].geometry.location.lat,
       lng: response.data.results[0].geometry.location.lng
@@ -286,169 +285,89 @@ async function getSpotLists(req, res) {
   console.log('combinedNames: ', combinedNames);
 
   try {
-    const geocodeLocation = await getGeocode(combinedNames[0]);
-    let processedCodes = new Set();
+    const geocodeLocations = await Promise.all(combinedNames.map(name => getGeocode(name)));
+    console.log('Geocode locations: ', geocodeLocations);
 
     const categories = {
-      food: { nos: ['0310005'], target: 20, additionalNos: ['03'], results: [] },
-      spot: { nos: ['07', '0604001', '0211'], target: 40, additionalNos: ['01'], results: [] }
+      food: { nos: ['0310005'], additionalNos: ['03'], target: 20, results: [] },
+      spot: { nos: ['07', '0604001', '0211'], additionalNos: ['01'], target: 30, results: [] }
     };
 
-    const cache = {};
+    let processedCodes = new Set();
 
     // すべてのリクエストを並行して実行
-    const searchPromises = Object.keys(categories).flatMap(categoryName => {
+    const searchPromises = geocodeLocations.map(geocodeLocation => {
       return [
-        searchWithOffset(categories[categoryName].nos, categoryName),
-        searchWithWords(categories[categoryName].nos, combinedNames, categoryName),
-        ...(categories[categoryName].additionalNos ? [
-          searchWithOffset(categories[categoryName].additionalNos, categoryName, 'additional'),
-          searchWithWords(categories[categoryName].additionalNos, combinedNames, categoryName, 'additional')
-        ] : [])
+        searchFoodCategories(geocodeLocation, categories.food, processedCodes),
+        searchSpotCategories(geocodeLocation, categories.spot, processedCodes)
       ];
-    });
+    }).flat();
 
     await Promise.all(searchPromises);
 
     // 重複削除
     const allResults = [...new Map([...categories.food.results, ...categories.spot.results].map(item => [item.code, item])).values()];
-
-    // 各カテゴリの結果を目標件数まで取り出す
-    let mergedResults = [];
-    const categoryResults = {
-      food: [],
-      spot: []
-    };
-
-    allResults.forEach(item => {
-      if (categories[item.category].target > categoryResults[item.category].length) {
-        categoryResults[item.category].push(item);
-        mergedResults.push(item);
-      }
-    });
-
-    // 追加カテゴリのスポットを不足分だけ格納
-    const foodResults = categoryResults.food.length;
-    const spotResults = categoryResults.spot.length;
-
-    if (foodResults < categories.food.target) {
-      const additionalFoodResults = categories.food.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.food.target - foodResults);
-      additionalFoodResults.forEach(item => processedCodes.add(item.code));
-      mergedResults = mergedResults.concat(additionalFoodResults);
-    }
-    if (spotResults < categories.spot.target) {
-      const additionalSpotResults = categories.spot.results.filter(item => item.type === 'additional' && !processedCodes.has(item.code)).slice(0, categories.spot.target - spotResults);
-      additionalSpotResults.forEach(item => processedCodes.add(item.code));
-      mergedResults = mergedResults.concat(additionalSpotResults);
-    }
-
-    async function searchWithOffset(categoryNos, categoryName, type = 'primary') {
-      const promises = categoryNos.map(async (categoryNo) => {
-        let categoryResults = [];
-        let offset = 0;
-
-        while (offset <= 2000) {
-          const params = {
-            'category': categoryNo,
-            'add': "detail",
-            'limit': 100,
-            'offset': offset
-          };
-
-          const cacheKey = `${params.category}-${params.offset}`;
-          let result = cache[cacheKey];
-
-          if (!result) {
-            result = await fetchNavitimeSpotAPI(params);
-            cache[cacheKey] = result;
-          }
-
-          if (result && result.items && result.items.length > 0) {
-            const filteredItems = result.items.filter(item => {
-              const distance = calculateDistance(
-                geocodeLocation.lat, geocodeLocation.lng,
-                item.coord.lat, item.coord.lon
-              );
-              return distance <= 30 && !processedCodes.has(item.code); // 半径30km以内
-            });
-
-            filteredItems.forEach(item => {
-              processedCodes.add(item.code);
-              item.category = categoryName;
-              item.type = type; // primary または additional
-            });
-
-            console.log(`categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
-            categoryResults = categoryResults.concat(filteredItems);
-          }
-
-          offset += 100;
-        }
-
-        categories[categoryName].results = categories[categoryName].results.concat(categoryResults);
-      });
-
-      await Promise.all(promises);
-    }
-
-    async function searchWithWords(categoryNos, combinedNames, categoryName, type = 'primary') {
-      const promises = combinedNames.map(async (combinedName) => {
-        for (const categoryNo of categoryNos) {
-          let categoryResults = [];
-          let offset = 0;
-
-          while (offset <= 2000) {
-            const params = {
-              'word': combinedName,
-              'category': categoryNo,
-              'add': "detail",
-              'limit': 100,
-              'offset': offset
-            };
-
-            const cacheKey = `${params.word}-${params.category}-${params.offset}`;
-            let result = cache[cacheKey];
-
-            if (!result) {
-              result = await fetchNavitimeSpotAPI(params);
-              cache[cacheKey] = result;
-            }
-
-            if (result && result.items && result.items.length > 0) {
-              const filteredItems = result.items.filter(item => {
-                const distance = calculateDistance(
-                  geocodeLocation.lat, geocodeLocation.lng,
-                  item.coord.lat, item.coord.lon
-                );
-                return distance <= 30 && !processedCodes.has(item.code); // 半径30km以内
-              });
-
-              filteredItems.forEach(item => {
-                processedCodes.add(item.code);
-                item.category = categoryName;
-                item.type = type; // primary または additional
-              });
-
-              console.log(`word: ${combinedName}, categoryNo: ${categoryNo}, offset: ${offset}, filteredItems.length: `, filteredItems.length);
-              categoryResults = categoryResults.concat(filteredItems);
-            }
-
-            offset += 100;
-          }
-
-          categories[categoryName].results = categories[categoryName].results.concat(categoryResults);
-        }
-      });
-
-      await Promise.all(promises);
-    }
-
-    // console.log("getSpotPlaces.result > ", mergedResults);
-    res.json({ results: mergedResults });
-
+    res.json({ results: allResults });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+  // foodカテゴリ
+  async function searchFoodCategories(geocodeLocation, category, processedCodes) {
+    try {
+      await searchSpot(category.nos[0], geocodeLocation, category, 10000, processedCodes);
+      if (category.results.length < category.target) {
+        await searchSpot(category.additionalNos[0], geocodeLocation, category, 5000, processedCodes, category.target - category.results.length);
+      }
+    } catch (error){
+      console.error('Error fetching food spots:', error);
+    }
+  }
+
+  // spotカテゴリ
+  async function searchSpotCategories(geocodeLocation, category, processedCodes) {
+    try {
+      for (let i = 0; i < category.nos.length; i++) {
+        const radius = category.nos[i] === '07' ? 5000 : 10000;
+        await searchSpot(category.nos[i], geocodeLocation, category, radius, processedCodes, 10);
+        if (category.results.length >= category.target) break;
+      }
+
+      if (category.results.length < category.target) {
+        await searchSpot(category.additionalNos[0], geocodeLocation, category, 5000, processedCodes, category.target - category.results.length);
+      }
+    } catch (error) {
+      console.error('Error fetching spots:', error);
+    }
+  }
+
+  async function searchSpot(categoryNo, geocodeLocation, category, radius, processedCodes, limit) {
+
+    const params = {
+      'category': categoryNo,
+      'coord': `${geocodeLocation.lat},${geocodeLocation.lng}`,
+      'radius': radius,
+      'limit': limit,
+      'offset': 0    
+    };
+
+    const result = await fetchNavitimeSpotAPI(params);
+    if (result && result.items && result.items.length > 0) {
+      const filteredItems = result.items.filter(item => {
+        const distance = calculateDistance(geocodeLocation.lat, geocodeLocation.lng, item.coord.lat, item.coord.lon);
+        return distance <= radius / 1000 && !processedCodes.has(item.code);  
+      });
+
+      filteredItems.forEach(item => {
+        processedCodes.add(item.code);
+        item.category = categoryNo;
+
+        if (!category.results.some(existingItem => existingItem.code === item.code)) {
+          category.results.push(item);
+        }
+      });
+    }
   }
 }
 
