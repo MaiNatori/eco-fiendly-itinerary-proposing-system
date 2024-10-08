@@ -214,7 +214,7 @@ function sendTripData() {
 
     const tripDays = tripData.length;
 
-    if (!firstDeparture || !finalArrival) {
+    if (!firstDeparture || (finalArrival === "--")) {
         alert("1日目の出発地を入力し、適用ボタンを押してください");
         return;
     }

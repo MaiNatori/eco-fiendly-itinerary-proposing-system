@@ -286,7 +286,9 @@ async function getSpotLists(req, res) {
 
   try {
     const geocodeLocations = await Promise.all(combinedNames.map(name => getGeocode(name)));
-    console.log('Geocode locations: ', geocodeLocations);
+    const extendedLocations = geocodeLocations.flatMap(location => getExtendedCoordinates(location));
+    const allGeocodeLocations = [...geocodeLocations, ...extendedLocations];
+    console.log('All Geocode Locations: ',allGeocodeLocations)
 
     const categories = {
       food: { nos: ['0310005'], additionalNos: ['03'], target: 20, results: [] },
@@ -296,7 +298,7 @@ async function getSpotLists(req, res) {
     let processedCodes = new Set();
 
     // すべてのリクエストを並行して実行
-    const searchPromises = geocodeLocations.map(geocodeLocation => {
+    const searchPromises = allGeocodeLocations.map(geocodeLocation => {
       return [
         searchFoodCategories(geocodeLocation, categories.food, processedCodes),
         searchSpotCategories(geocodeLocation, categories.spot, processedCodes)
@@ -311,6 +313,23 @@ async function getSpotLists(req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+  // 東西南北に10km進んだ地点の緯度経度を計算
+  function getExtendedCoordinates(baseLocation) {
+    const lat = baseLocation.lat;
+    const lng = baseLocation.lng;
+
+    const deltaLat = 0.090133729745762; // 10km分の緯度
+    const deltaLng = 0.10966404715491394; // 10km分の経度
+
+    return [
+      { lat, lng },                               // 基準地点
+      { lat: lat + deltaLat, lng },               // 北
+      { lat: lat - deltaLat, lng },               // 南
+      { lat, lng: lng + deltaLng },               // 東
+      { lat, lng: lng - deltaLng }                // 西
+    ];
   }
 
   // foodカテゴリ

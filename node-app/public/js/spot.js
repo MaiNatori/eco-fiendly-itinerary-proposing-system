@@ -272,6 +272,11 @@ function sendSelectSpots(){
     selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
   }
 
+  if (selectedSpots.length === 0) {
+    alert("スポットを選択してください");
+    return;
+  }
+
   // 送信
  fetch("/userselectspots", {
     method: 'POST',
@@ -302,6 +307,11 @@ function returnPlacePage(){
     const placeLon = s.querySelector(".this-place-lon").value;
     const placeName = s.querySelector("h2").innerText;
     selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
+  }
+
+  if (selectedSpots.length === 0) {
+    alert("スポットを選択してください");
+    return;
   }
 
   // 送信
