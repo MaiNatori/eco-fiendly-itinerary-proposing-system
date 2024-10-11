@@ -291,8 +291,8 @@ async function getSpotLists(req, res) {
     console.log('All Geocode Locations: ',allGeocodeLocations)
 
     const categories = {
-      food: { nos: ['0310005'], additionalNos: ['03'], target: 20, results: [] },
-      spot: { nos: ['07', '0604001', '0211'], additionalNos: ['01'], target: 30, results: [] }
+      food: { nos: ['0310005'], additionalNos: ['03'], target: 10, results: [] },
+      spot: { nos: ['07', '0604001', '0211'], additionalNos: ['01'], target: 9, results: [] }
     };
 
     let processedCodes = new Set();
@@ -349,7 +349,7 @@ async function getSpotLists(req, res) {
     try {
       for (let i = 0; i < category.nos.length; i++) {
         const radius = category.nos[i] === '07' ? 5000 : 10000;
-        await searchSpot(category.nos[i], geocodeLocation, category, radius, processedCodes, 10);
+        await searchSpot(category.nos[i], geocodeLocation, category, radius, processedCodes, 3);
         if (category.results.length >= category.target) break;
       }
 
@@ -368,7 +368,8 @@ async function getSpotLists(req, res) {
       'coord': `${geocodeLocation.lat},${geocodeLocation.lng}`,
       'radius': radius,
       'limit': limit,
-      'offset': 0    
+      'offset': 0,
+      'add': "detail"
     };
 
     const result = await fetchNavitimeSpotAPI(params);

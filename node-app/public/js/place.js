@@ -158,6 +158,13 @@ function confirmDay(dayNumber) {
         return;
     }
 
+    const departure = document.getElementById('departure-1').value.trim();
+    const addressPattern = /^[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+[\s　]+[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+[\s　]+[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+[\s　]+[0-9０-９\-]+$/;
+    if (!addressPattern.test(departure)) {
+        alert("出発地は「都道府県 市区町村 町名 番地」の形式で入力してください（例: 東京都 新宿区 市谷田町 1-18）");
+        return;
+    }
+
     if (dayNumber === 1) {
         const finalArrival = document.getElementById("final-arrival");
         finalArrival.textContent = departureInput.value;
