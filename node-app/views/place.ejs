@@ -76,18 +76,25 @@
         <div class="confim-area">
             <h2>⑤確認</h2>
                 <div class="inputcheck-area">
-                    <h3>行きたい場所</h3>
-                    <ul>
-                        <% selectedSpots.forEach(spot => { %>
-                            <li><%= spot.placeName %></li>
-                        <% }); %>
-                    </ul>
-                    <h3>宿泊地</h3>
-                    <ul>
-                        <% selectedHotels.forEach(hotel => { %>
-                            <li><%= hotel.hotelName %></li>
-                        <% }); %>
-                    </ul>
+                    <div class="spot-list">
+                        <h3>行きたい場所</h3>
+                        <ul>
+                            <% selectedSpots.forEach(spot => { %>
+                                <li><%= spot.placeName %></li>
+                            <% }); %>
+                        </ul>
+                        <button class="add-button" onclick="changeSpot()">変更</button>
+                    </div>
+
+                    <div class="hotel-list">
+                        <h3>宿泊地</h3>
+                        <ul>
+                            <% selectedHotels.forEach(hotel => { %>
+                                <li><%= hotel.hotelName %></li>
+                            <% }); %>
+                        </ul>
+                        <button class="add-button" onclick="changeHotel()">変更</button>
+                    </div>
 
                     <input type="submit" method="post" name="create" value="作成" onclick="sendTripData()" class="button">
                 </div>

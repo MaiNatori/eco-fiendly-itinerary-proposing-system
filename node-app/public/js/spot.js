@@ -178,8 +178,7 @@ function addSelectSpotList(name, image, code, lat, lon) {
   if (!arr.includes(code)) {
     arr.push(code);
     appendIt(name, image, code, lat, lon);
-  }
-  else {
+  } else {
     alert('既に追加済みです');
   }
 
@@ -252,9 +251,9 @@ function nextPage() {
     console.log(document.referrer);
 
     // 遷移元URLによって遷移先URLを設定
-    if (ref.includes('/place')) {
+    if (ref.includes('/place') || ref.includes('/result')) {
       returnPlacePage();
-    } else if (ref.includes('/destination') || ref.includes('/destination-search')) {
+    } else {
       sendSelectSpots();
     };
 }

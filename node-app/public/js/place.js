@@ -1,10 +1,11 @@
 let tripDays = 2;  //現在の旅行日数
 let nextDayNumber = 2;  // 次に追加される日程の日数
-let selectedHotels = [];
+let tripSpots = [];
+let tripHotels = [];
 
 // index.jsにアクセスしてselectedHotelsを取得する
 function fetchSelectedHotels() {
-    fetch("/get-hotels")
+    fetch("/getelements")
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`)
@@ -12,8 +13,9 @@ function fetchSelectedHotels() {
       return response.json();
       })
       .then(data => {
-        selectedHotels = data.selectHotels;
-        console.log("selectedHotels: ", selectedHotels);
+        tripSpots = data.selectSpots;
+        tripHotels = data.selectHotels;
+        console.log("tripElements: ", tripSpots, tripHotels);
       })
       .catch(error => {
         console.error("Error fetching data: ", error);
@@ -29,7 +31,7 @@ function addNewDay() {
     const previousArrivalHotel = document.getElementById(`arrival-${nextDayNumber - 1}`).value;
 
     let optionsHtml = '';
-    selectedHotels.forEach(hotel => {
+    tripHotels.forEach(hotel => {
         optionsHtml += `<option value="${hotel.hotelName}">${hotel.hotelName}</option>`;
     });
 
@@ -188,6 +190,14 @@ function confirmDay(dayNumber) {
             nextDeparture.value = arrivalSelect.value;
         }
     }
+}
+
+function changeSpot() {
+    window.location.href = "/spot";
+}
+
+function changeHotel() {
+    window.location.href = "/hotel";
 }
 
 function sendTripData() {

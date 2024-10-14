@@ -61,7 +61,7 @@ app.get('/result', viewResult);
 app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacespots', getSpotLists);
 app.get('/interfacehotels', getHotelDetails);
-app.get('/get-hotels', sendSelectedHotels);
+app.get('/getelements', sendSelected);
 app.get('/interfaceroute', getRoute);
 
 // 選択内容をPOST
@@ -472,16 +472,17 @@ async function getHotelDetails(req, res) {
       // まずlargeでリクエスト
       let response = await requestHotels("large");
       // エラーが出たらmiddleで再度リクエスト
-      if (!response || !response.hotels) {
+      if (response && response.hotels) {
+        return response;
+      } else {
         console.error(`No hotels found with responseType "large", retrying with "middle"`);
         response = await requestHotels("middle");
+        return response;
       }
-      return response;
     } catch (error) {
       console.log(error);
+      return null;
     }
-
-    return null;
   }
 
   try {
@@ -497,7 +498,7 @@ async function getHotelDetails(req, res) {
     const hotelPromises = hotels.map(async hotelGroup => {
       const hotelInfo = {
         hotelBasicInfo: hotelGroup[0].hotelBasicInfo,
-        hotelDetailInfo: hotelGroup[1]?.hotelDetailInfo || null // hotelDetailInfoがない場合はnull
+        hotelDetailInfo: hotelGroup[2]?.hotelDetailInfo || null // hotelDetailInfoがない場合はnull
       };
       await delay(1000);
       const sdgsInfo = await fetchHotelSDGs(hotelInfo.hotelBasicInfo.hotelName);
@@ -579,9 +580,12 @@ function viewPlace(req, res) {
   }
 }
 
-function sendSelectedHotels(req, res) {
-  console.log("selecthotels: ",req.session.selecthotels);
-  res.json({ selectHotels: req.session.selecthotels });
+function sendSelected(req, res) {
+  const selectSpots = req.session.selectspots;
+  const selectHotels = req.session.selecthotels;
+  console.log("selectspots: ", selectSpots);
+  console.log("selecthotels: ", selectHotels);
+  res.json({ selectSpots, selectHotels });
 }
 
 //選択した各日程の出発地・到着地
