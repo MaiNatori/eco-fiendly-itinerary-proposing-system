@@ -83,7 +83,7 @@
                                 <li><%= spot.placeName %></li>
                             <% }); %>
                         </ul>
-                        <button class="add-button" onclick="changeSpot()">変更</button>
+                        <button class="change-button" onclick="changeSpot()">変更</button>
                     </div>
 
                     <div class="hotel-list">
@@ -93,7 +93,7 @@
                                 <li><%= hotel.hotelName %></li>
                             <% }); %>
                         </ul>
-                        <button class="add-button" onclick="changeHotel()">変更</button>
+                        <button class="change-button" onclick="changeHotel()">変更</button>
                     </div>
 
                     <input type="submit" method="post" name="create" value="作成" onclick="sendTripData()" class="button">

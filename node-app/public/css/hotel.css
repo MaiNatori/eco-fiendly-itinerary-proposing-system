@@ -247,7 +247,7 @@ main {
     text-overflow: ellipsis;
 }
 
-.search-result .search-candidate .candidate-contents .button {
+.search-result .search-candidate .candidate-contents .add-button {
     position: absolute;
     bottom: 10px;
     left: 600px;

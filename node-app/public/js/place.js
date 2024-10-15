@@ -113,7 +113,10 @@ function updateNextDeparture(dayNumber) {
       nextDeparture.textContent = arrivalSelect.value;
     }
     
-    updateFinalDeparture();
+    const days = document.querySelectorAll('.day');
+    if (dayNumber === days.length - 1) {
+        updateFinalDeparture();
+    }
 }
 
 // 最終日の出発地の変更
@@ -125,9 +128,6 @@ function updateFinalDeparture() {
         const lastArrivalSelect = days[days.length - 2].querySelector('select');
         if (lastArrivalSelect) {
             finalDeparture.textContent = lastArrivalSelect.value;
-            lastArrivalSelect.addEventListener('change', () => {
-                finalDeparture.textContent = lastArrivalSelect.value;
-            });
         }
     } else {
         finalDeparture.textContent = '--';
@@ -141,7 +141,7 @@ window.onload = function() {
     const initialArrival = document.getElementById('arrival-1');
     if (initialArrival) {
         initialArrival.addEventListener('change', () => updateNextDeparture(1));
-        initialArrival.addEventListener('change', updateFinalDeparture);
+        initialArrival.addEventListener('change', updateFinalDeparture());
     }
     // 初期値として最初の選択肢を最終日の出発地に設定
     const initialFinalDeparture = document.getElementById("final-departure");

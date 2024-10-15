@@ -178,6 +178,7 @@ function addSelectSpotList(name, image, code, lat, lon) {
   if (!arr.includes(code)) {
     arr.push(code);
     appendIt(name, image, code, lat, lon);
+    saveSelectedSpotsToSession();
   } else {
     alert('既に追加済みです');
   }
@@ -242,7 +243,29 @@ function clearSelectSpotList(code){
       if (index !== -1) {
         arr.splice(index, 1);
       }
+      saveSelectedSpotsToSession();
     }
+  });
+}
+
+function saveSelectedSpotsToSession() {
+  const selectedSpots = arr.map(code => {
+    const spotElement = document.querySelector(`.this-place-id[value="${code}"]`).parentElement;
+    return {
+      code: code,
+      name: spotElement.querySelector("h2").innerText,
+      image: spotElement.querySelector("img").src,
+      lat: spotElement.querySelector(".this-place-lat").value,
+      lon: spotElement.querySelector(".this-place-lon").value
+    };
+  });
+  sessionStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
+}
+
+function loadSelectedSpots() {
+  const selectedSpots = JSON.parse(sessionStorage.getItem('selectedSpots'));
+  selectedSpots.forEach(spot => {
+    addSelectSpotList(spot.name, spot.image, spot.code, spot.lat, spot.lon);
   });
 }
 
@@ -334,3 +357,4 @@ function returnPlacePage(){
 }
 
 window.onload = initMap;
+document.addEventListener('DOMContentLoaded', loadSelectedSpots);

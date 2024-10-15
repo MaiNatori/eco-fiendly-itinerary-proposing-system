@@ -100,7 +100,7 @@ function viewSearchResult(results) {
       input.setAttribute("method", "post");
       input.setAttribute("name", "add");
       input.setAttribute("value", "追加");
-      input.classList.add("button");
+      input.classList.add("add-button");
       input.dataset.hotelName = hotelInfo.hotelName;
       input.dataset.hotelImageUrl = hotelInfo.hotelImageUrl;
       input.dataset.hotelNo = hotelInfo.hotelNo;
@@ -125,19 +125,31 @@ let arr = [];
 
 // 画面下部（追加）ボタンに登録
 // 画面左の選択済みスポットリストに、選択したホテルを登録する（表示する）
-function addSelectSpotList(event) {
+function addSelectSpotList(eventOrData) {
 
-  // クリックされた要素のデータ属性を取得
-  const clickedElement = event.target.closest('.button');
-  const hotelNo = clickedElement.dataset.hotelNo;
-  const hotelName = clickedElement.dataset.hotelName;
-  const hotelImageUrl = clickedElement.dataset.hotelImageUrl;
-  const hotelLatitude = clickedElement.dataset.latitude;
-  const hotelLongitude = clickedElement.dataset.longitude;
+  let hotelNo, hotelName, hotelImageUrl, hotelLatitude, hotelLongitude;
+
+  if (eventOrData instanceof Event) {
+    // クリックイベントの場合
+    const clickedElement = eventOrData.target.closest('.add-button');
+    hotelNo = clickedElement.dataset.hotelNo;
+    hotelName = clickedElement.dataset.hotelName;
+    hotelImageUrl = clickedElement.dataset.hotelImageUrl;
+    hotelLatitude = clickedElement.dataset.latitude;
+    hotelLongitude = clickedElement.dataset.longitude;
+  } else {
+    // データオブジェクトが渡された場合（loadSelectedHotelsから呼ばれた場合）
+    hotelNo = eventOrData.hotelNo;
+    hotelName = eventOrData.hotelName;
+    hotelImageUrl = eventOrData.hotelImageUrl;
+    hotelLatitude = eventOrData.latitude;
+    hotelLongitude = eventOrData.longitude;
+  }
 
   if (!arr.includes(hotelNo)) {
     arr.push(hotelNo);
     appendIt(hotelNo, hotelName, hotelImageUrl, hotelLatitude, hotelLongitude);
+    saveSelectedHotelsToSession();
   }
   else {
     alert('既に追加済みです');
@@ -193,6 +205,8 @@ function addSelectSpotList(event) {
 
     target.prepend(div); // リストの先頭に追加
 
+    saveSelectedHotelsToSession();
+
   }
 }
 
@@ -209,6 +223,7 @@ function clearSelectHotelList(hotelNos){
       if (index !== -1) {
         arr.splice(index, 1);
       }
+      saveSelectedHotelsToSession();
     }
   });
 }
@@ -219,6 +234,27 @@ function clearSearchResults(){
   while (target.firstChild) {
     target.removeChild(target.firstChild);
   }
+}
+
+function saveSelectedHotelsToSession() {
+  const selectedHotels = arr.map(hotelNo => {
+    const hotelElement = document.querySelector(`.this-hotel-no[value="${hotelNo}"]`).parentElement;
+    return {
+      hotelNo: hotelNo,
+      hotelName: hotelElement.querySelector("h2").innerText,
+      hotelImageUrl: hotelElement.querySelector("img").src,
+      hotelLatitude: hotelElement.querySelector(".hotel-latitude").value,
+      hotelLongitude: hotelElement.querySelector(".hotel-longitude").value
+    };
+  });
+  sessionStorage.setItem('selectedHotels', JSON.stringify(selectedHotels));
+}
+
+function loadSelectedHotels() {
+  const selectedHotels = JSON.parse(sessionStorage.getItem('selectedHotels'));
+  selectedHotels.forEach(hotel => {
+    addSelectSpotList(hotel);
+  });
 }
 
 // 予算のプルダウンが変更されたときの処理
@@ -538,3 +574,4 @@ function sendSelectHotels(){
 }
 
 inqueryFacilityNumbers();
+document.addEventListener('DOMContentLoaded', loadSelectedHotels);
