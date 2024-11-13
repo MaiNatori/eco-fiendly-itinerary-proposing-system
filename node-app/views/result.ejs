@@ -48,16 +48,6 @@
                             </tr>
                             <tr>
                                 <th><label for="spot">スポット</label></th>
-                                <td><input  type="search" method="get" placeholder="スポット①"></td>
-                                <td><input  type="search" method="get" placeholder="スポット②"></td>
-                                <td><input  type="search" method="get" placeholder="スポット③"></td>
-                                <td><input  type="search" method="get" placeholder="スポット④"></td>
-                                <td><input  type="search" method="get" placeholder="スポット⑤"></td>
-                                <td><input  type="search" method="get" placeholder="スポット⑥"></td>
-                            </tr>
-                            <tr>
-                                <th><label for="hotel">宿泊場所</label></th>
-                                <td><input  type="search" method="get" placeholder="宿泊場所"></td>
                             </tr>
                         </table>
                     <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
@@ -65,69 +55,58 @@
                 <div class="transportation">
                     <h3>移動手段</h3>
                         <div class="public">
-                            <p><input type="checkbox" name="public" value="電車" id="train">
-                            <label for="train">電車</label></p>
-                            <p><input type="checkbox" name="public" value="特急電車" id="express-train">
-                            <label for="express-train">特急電車</label></p>
-                            <p><input type="checkbox" name="public" value="新幹線" id="bullet-train">
-                            <label for="bullet-train">新幹線</label></p>
-                            <p><input type="checkbox" name="public" value="バス" id="bus">
-                            <label for="bus">バス</label></p>
-                            <p><input type="checkbox" name="public" value="高速バス" id="express-bus">
-                            <label for="express-bus">高速バス</label></p>
-                            <p><input type="checkbox" name="public" value="船" id="ship">
-                            <label for="ship">船</label></p>
-                            <p><input type="checkbox" name="public" value="飛行機" id="airplane">
-                            <label for="airplane">飛行機</label></p>
-                            <p><input type="checkbox" name="public" value="自家用車" id="private-car">
-                            <label for="private-car">自家用車</label></p>
+                            <p><input type="checkbox" name="public" value="飛行機" id="domestic_flight">
+                            <label for="domestic_flight">飛行機</label></p>
+                            <p><input type="checkbox" name="public" value="新幹線" id="superexpress_train">
+                            <label for="superexpress_train">新幹線</label></p>
+                            <p><input type="checkbox" name="public" value="電車" id="sleeper_ultraexpress">
+                            <label for="sleeper_ultraexpress">寝台特急</label></p>
+                            <p><input type="checkbox" name="public" value="特急電車" id="ultraexpress_train">
+                            <label for="ultraexpress_train">特急電車</label></p>
+                            <p><input type="checkbox" name="public" value="急行電車" id="express_train">
+                            <label for="express_train">急行電車</label></p>
+                            <p><input type="checkbox" name="public" value="準急電車" id="semiexpress_train">
+                            <label for="semiexpress_train">準急電車</label></p>
+                            <p><input type="checkbox" name="public" value="自家用車" id="car_only">
+                            <label for="car_only">車(※こちらを選択した場合、車のみでのルートを提案します)</label></p>
                         </div>
                         <div class="walk">
                             <dt>
-                                <label for="walk">
-                                    <p><input type="checkbox" name="walk" value="徒歩" id="walk">徒歩</p>
+                                <label for="walkSpeed">
+                                    <p><input type="checkbox" name="walkSpeed" value="徒歩の速度" id="walkSpeed">徒歩の速度</p>
                                 </label>
                             </dt>
                             <dd>
-                                <p>
-                                <select name="minutes" id="minutes">
-                                    <option selected value="0">0</option>
-                                    <option value ="5">5</option>
-                                    <option value ="10">10</option>
-                                    <option value ="15">15</option>
-                                    <option value ="20">20</option>
-                                    <option value ="25">25</option>
-                                    <option value ="30">30</option>
-                                    <option value ="35">35</option>
-                                    <option value ="40">40</option>
-                                    <option value ="45">45</option>
-                                    <option value ="50">50</option>
-                                    <option value ="55">55</option>
-                                    <option value ="60">60~</option>
+                                <select name="walk-speed" id="walk-speed">
+                                    <option selected value="standard">普通</option>
+                                    <option value ="slow">遅い</option>
+                                    <option value ="fast">速い</option>
                                 </select>
-                                分間まで可能</p>
                             </dd>
+                            <dt>
+                                <label for="walkRoute">
+                                    <p><input type="checkbox" name="walkRoute" value="徒歩の速度" id="walkRoute">徒歩の利用ルート指定</p>
+                                </label>
+                            </dt>
+                            <dd>
+                                <select name="walk-route" id="walk-route">
+                                    <option selected value="avoid_step">階段回避</option>
+                                    <option value ="avoid_escalator">階段とエスカレーター回避</option>
+                                    <option value ="babycar">ベービーカー通行可</option>
+                                </select>
+                            </dd>
+
                         </div>
                         <div class="rental">
                             <div class="cycle">
-                                <dt>
                                     <label for="cycle">
                                         <p><input type="checkbox" name="cycle" value="レンタサイクル" id="cycle">レンタサイクル</p>
                                     </label>
-                                </dt>
-                                <dd>
-                                    <input  type="search" method="get" placeholder="レンタサイクル">
-                                </dd>
                             </div>
                             <div class="car">
-                                <dt>
                                     <label for="car">
                                         <p><input type="checkbox" name="car" value="レンタカー" id="car">レンタカー</p>
                                     </label>
-                                </dt>
-                                <dd>
-                                    <input  type="search" method="get" placeholder="レンタカー">
-                                </dd>
                             </div>
                         </div>
                     <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">

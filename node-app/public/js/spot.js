@@ -263,10 +263,17 @@ function saveSelectedSpotsToSession() {
 }
 
 function loadSelectedSpots() {
-  const selectedSpots = JSON.parse(sessionStorage.getItem('selectedSpots'));
-  selectedSpots.forEach(spot => {
-    addSelectSpotList(spot.name, spot.image, spot.code, spot.lat, spot.lon);
-  });
+  const ref = document.referrer;
+  // 遷移元URLによって遷移先URLを設定
+  if (ref.includes('/place') || ref.includes('/result')) {
+    window.onload = initMap;
+    const selectedSpots = JSON.parse(sessionStorage.getItem('selectedSpots'));
+    selectedSpots.forEach(spot => {
+      addSelectSpotList(spot.name, spot.image, spot.code, spot.lat, spot.lon);
+    });  
+  } else {
+    window.onload = initMap;
+  };
 }
 
 function nextPage() {
@@ -291,7 +298,8 @@ function sendSelectSpots(){
     const placeLat = s.querySelector(".this-place-lat").value;
     const placeLon = s.querySelector(".this-place-lon").value;
     const placeName = s.querySelector("h2").innerText;
-    selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
+    const placeCode = s.querySelector(".this-place-id").value;
+    selectedSpots.push({ placeLat, placeLon, placeName, placeCode }); // オブジェクトとして格納
   }
 
   if (selectedSpots.length === 0) {
@@ -328,7 +336,8 @@ function returnPlacePage(){
     const placeLat = s.querySelector(".this-place-lat").value;
     const placeLon = s.querySelector(".this-place-lon").value;
     const placeName = s.querySelector("h2").innerText;
-    selectedSpots.push({ placeLat, placeLon, placeName }); // オブジェクトとして格納
+    const placeCode = s.querySelector(".this-place-id").value;
+    selectedSpots.push({ placeLat, placeLon, placeName, placeCode }); // オブジェクトとして格納
   }
 
   if (selectedSpots.length === 0) {
@@ -356,5 +365,4 @@ function returnPlacePage(){
     });
 }
 
-window.onload = initMap;
 document.addEventListener('DOMContentLoaded', loadSelectedSpots);

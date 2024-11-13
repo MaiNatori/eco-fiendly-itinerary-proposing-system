@@ -251,10 +251,17 @@ function saveSelectedHotelsToSession() {
 }
 
 function loadSelectedHotels() {
-  const selectedHotels = JSON.parse(sessionStorage.getItem('selectedHotels'));
-  selectedHotels.forEach(hotel => {
-    addSelectSpotList(hotel);
-  });
+  const ref = document.referrer;
+  // 遷移元URLによって遷移先URLを設定
+  if (ref.includes('/place') || ref.includes('/result')) {
+    inqueryFacilityNumbers();
+    const selectedHotels = JSON.parse(sessionStorage.getItem('selectedHotels'));
+    selectedHotels.forEach(hotel => {
+      addSelectSpotList(hotel);
+    });  
+  } else {
+    inqueryFacilityNumbers();
+  };
 }
 
 // 予算のプルダウンが変更されたときの処理
@@ -573,5 +580,4 @@ function sendSelectHotels(){
     });
 }
 
-inqueryFacilityNumbers();
 document.addEventListener('DOMContentLoaded', loadSelectedHotels);

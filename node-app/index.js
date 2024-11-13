@@ -7,6 +7,7 @@ const { default: fetch, Headers } = require('node-fetch-cjs');
 const querystring = require('querystring');
 const crypto = require('crypto');
 const bodyParser = require('body-parser');
+const { totalmem } = require('os');
 
 require('dotenv').config();
 
@@ -62,7 +63,7 @@ app.get('/interfacedestination', getDestinationSpots);
 app.get('/interfacespots', getSpotLists);
 app.get('/interfacehotels', getHotelDetails);
 app.get('/getelements', sendSelected);
-app.get('/interfaceroute', getRoute);
+app.get('/interfaceroute', generateRoute);
 
 // 選択内容をPOST
 app.post('/userselectpurpose', doGetUserSelectPurpose);
@@ -408,8 +409,6 @@ function doGetUserSelectSpots(req, res) {
 /* hotelページ */
 // ホテルページの表示
 function viewHotel(req, res) {
-  // const sess = new Session(req, res); // session利用準備
-  // sess.check("selectspots"); // 念のためsession.selectspotsを確認
   console.log("session.selectspots > ", req.session.selectspots);
 
   try {
@@ -596,6 +595,7 @@ function doGetUserSelectTripData(req, res) {
   res.json({ result: true });
 }
 
+
 /* resultページ */
 // 結果表示ページ
 function viewResult(req, res) {
@@ -606,135 +606,364 @@ function viewResult(req, res) {
   }
 }
 
-// ルート探索
-async function getRoute(req, res) {
+// ルート生成
+async function generateRoute(req, res) {
 
   const selectSpots = req.session.selectspots;
   const selectHotels = req.session.selecthotels;
   const tripData = req.session.tripdata;
   
-  console.log('selectSpots: ', selectSpots);
-  console.log('selectHotels: ', selectHotels);
-  console.log('tripData: ', tripData);
-
-  // ルート探索API
-  async function fetchRouteAPI(params) {
-
-    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/route`;
-
-    try {
-      const queryString = querystring.stringify(params);
-
-      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/route?${queryString}`, NAVITIME_SIGNATURE_KEY);
-
-      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
-
-      const response = await urlWithParams.json();
-
-      return response;
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  // 住所から緯度・経度を取得(初日出発地と最終日到着地)
-  async function getLatLonFromAddress(address) {
-
-    const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/address/list`;
-
-    const params = {
-      'word': address
-    };
-
-    try {
-      const queryString = querystring.stringify(params);
-
-      const signature = getBase64Signature(`/v1/${NAVITIME_SID}/address/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
-
-      const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
-
-      const response = await urlWithParams.json();
-
-      if (response.items && response.items.length > 0) {
-        const coord = response.items[0].coord;
-        console.log("getLatLonFromAddress: ", coord);
-        return { lat: coord.lat, lon: coord.lon };
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-  }
-
-  // 宿泊施設の緯度経度を取得
-  async function getHotelLatLon(hotelName) {
-    const hotel = selectHotels.find(h => h.hotelName === hotelName);
-    console.log("getHotelLatLon: ", `{ lat: ${hotel.hotelLat}, lon: ${hotel.hotelLon} }`);
-    return hotel ? { lat: hotel.hotelLat, lon: hotel.hotelLon } : null;
-  }
-
-  // 各日程のルートを探索
-  async function processTripData() {
-    let firstDepartureLatLon = null;
+  try {
+    const tripDays = tripData.tripData;
     const routeResults = [];
 
-    for (const day of tripData.tripData) {
+    // 初日出発地の緯度経度を取得
+    const firstDepartureLatLon = await getLatLonFromAddress(tripDays[0].departure);
+
+    // スポットの振り分け
+    const start = firstDepartureLatLon;
+    const goal = await getHotelLatLon(selectHotels, tripDays[tripDays.length - 1].arrival);
+    const spotGroups = await assignSpotsToClosestsDays(selectSpots, tripDays, start, goal);
+    console.log("spotGroups: ", spotGroups);
+
+    for (const day of tripDays) {
       let start, goal;
 
+      // 各日程の出発地到着地の緯度経度を設定
       if (day.dayNumber === 1) {
-        firstDepartureLatLon = await getLatLonFromAddress(day.departure);
         start = firstDepartureLatLon;
-        goal = await getHotelLatLon(day.arrival);
+        goal = await getHotelLatLon(selectHotels, day.arrival);
       } else if (day.dayNumber === tripData.tripDays) {
-        start = await getHotelLatLon(day.departure);
+        start = await getHotelLatLon(selectHotels, day.departure);
         goal = firstDepartureLatLon;
       } else {
-        start = await getHotelLatLon(day.departure);
-        goal = await getHotelLatLon(day.arrival);
+        start = await getHotelLatLon(selectHotels, day.departure);
+        goal = await getHotelLatLon(selectHotels, day.arrival);
       }
 
-      if (start && goal) {
-        const params = {
-          'start': JSON.stringify({ lat: start.lat, lon: start.lon }),
-          'goal': JSON.stringify({ lat: goal.lat, lon: goal.lon }),
-          'goal-time': "2024-09-24T19:00"
-        };
+      const params = {
+        start: `${start.lat},${start.lon}`,
+        goal: `${goal.lat},${goal.lon}`,
+        'goal-time': "2024-11-24T19:00", // 検索時の日時と時間を取得
+        order: "walk_distance",
+        'move-priority': "gas",
+        'via-type': 1,
+        via: []
+      };
 
-        console.log(`Day ${day.dayNumber}> start: ${start.lat}, ${start.lon}, goal: ${goal.lat}, ${goal.lon}`);
-        const routeResponse = await fetchRouteAPI(params);
-        console.log("Route API response: ", routeResponse);
+      // グループ内のスポット・出発地・到着地間それぞれの移動時間と距離を計算
+      const spotRoutes = await calculateTravelTimesAndDistances(spotGroups[day.dayNumber - 1].spots, start, goal);
+      console.log(`Day ${day.dayNumber}spotRoutes: `, spotRoutes)
 
-        // ルート結果を配列に追加
-        routeResults.push({
-          day: day.dayNumber,
-          start: { lat: start.lat, lon: start.lon },
-          goal: { lat: goal.lat, lon: goal.lon },
-          route: routeResponse
-        });
-      } else {
-        console.error(`Day ${day.dayNumber}: Could not find lat/lon for either start or goal.`);
-      }
+      // 経由する順番を決める
+      const viaSpots = await determineViaSpots(spotGroups[day.dayNumber - 1], spotRoutes, start, spotGroups);
+      console.log(`Day ${day.dayNumber}viaSpots: `, viaSpots);
+
+      // 経由地パラメーターを設定
+      const viaArray = viaSpots.map(viaSpot => {
+        let maxStayTime;  // stayTimeの最大値を設定
+
+        if (typeof viaSpot.stayTime === 'string' && viaSpot.stayTime.includes('-')) {
+          const times = viaSpot.stayTime.split('-').map(t => parseInt(t, 10));
+          maxStayTime = Math.max(...times);  // 範囲の場合
+        } else if (typeof viaSpot.stayTime === 'number' || !isNaN(parseInt(viaSpot.stayTime, 10))) {
+          maxStayTime = parseInt(viaSpot.stayTime, 10);  // 単一の場合
+        } else {
+          maxStayTime = 90;
+        }
+
+        return { lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+      });
+
+      params.via = JSON.stringify(viaArray);
+
+      // ルート探索APIを実行
+      const routeResponse = await fetchRouteAPI(params);
+
+      // ルート結果を格納
+      routeResults.push({
+        day: day.dayNumber,
+        start: { lat: start.lat, lon: start.lon },
+        goal: { lat: goal.lat, lon: goal.lon },
+        route: routeResponse,
+      });
     }
 
-    return routeResults;
-  }
-
-  try {
-    const routeResults = await processTripData();
-    res.json({ routes: routeResults });
+    console.log("routeResults: ", routeResults);
+    for (const s of routeResults) {
+      console.log("route: ", s.route);
+    }
+    res.json({ tripData, routeResults });
   } catch (error) {
     console.log(error);
   }
-  /*
-  滞在時間どうしよう
-  */
+}
 
-  /* 
-  各日程でどのスポットに行くかっていうのをどう選ぶ？
-  */
+// 住所から緯度・経度を取得(初日出発地と最終日到着地)
+async function getLatLonFromAddress(address) {
+  const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/address/list`;
+  const params = {
+    'word': address
+  };
+  try {
+    const queryString = querystring.stringify(params);
+    const signature = getBase64Signature(`/v1/${NAVITIME_SID}/address/list?${queryString}`, NAVITIME_SIGNATURE_KEY);
+    const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+    const response = await urlWithParams.json();
+    if (response.items && response.items.length > 0) {
+      const coord = response.items[0].coord;
+      return { lat: coord.lat, lon: coord.lon };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-  /*
-  ルート生成した後に調整するようにするには？
-  */
+// 宿泊施設の緯度経度を取得
+async function getHotelLatLon(selectHotels, hotelName) {
+  const hotel = selectHotels.find(h => h.hotelName === hotelName);
+  return hotel ? { lat: hotel.hotelLat, lon: hotel.hotelLon } : null;
+}
+
+// スポットの情報を再取得して、スポットを各日程に振り分けグループ化
+async function assignSpotsToClosestsDays(selectSpots, tripDays, start, goal) {
+  const spotsInfo = await Promise.all(selectSpots.map(s => getSpotsInfo(s.placeCode)));
+  const tripDataWithSpots = tripDays.map(day => ({
+    ...day,
+    spots: []
+  }));
+
+  spotsInfo.forEach(spot => {
+    const spotItem = spot.items[0];
+    const spotDetails = {
+      spotName: spotItem.name,
+      lat: spotItem.coord.lat,
+      lon: spotItem.coord.lon,
+      stayTime: null,
+      businessHours: null,
+      category: spotItem.categories[0].code || null
+    };
+
+    if (spotItem.details && spotItem.details[0].texts) {
+      spotItem.details[0].texts.forEach(text => {
+        if (text.label === "滞在目安時間") {
+          spotDetails.stayTime = text.value;
+        }
+        if (text.label === "時間") {
+          spotDetails.businessHours = text.value;
+        }
+      });
+    }
+
+    let closestDay = tripDataWithSpots[0];  // そのスポットに行く日程
+    let minDistance = Infinity;  // 最短距離
+
+    tripDataWithSpots.forEach(day => {
+      const dayGoalLatLon = day.arrival === spotItem.name ? goal : null;
+      let distance;
+
+      if (dayGoalLatLon) {
+        distance = calculateDistance(spotDetails.lat, spotDetails.lon, dayGoalLatLon.lat, dayGoalLatLon.lon);
+      } else {
+        const dayDepartureLatLon = start;
+        distance = calculateDistance(spotDetails.lat, spotDetails.lon, dayDepartureLatLon.lat, dayDepartureLatLon.lon);
+      }
+
+      if((distance < minDistance) || (distance === minDistance && day.spots.length < closestDay.spots.length)) {
+        minDistance = distance;
+        closestDay = day;
+      }
+    });
+
+    closestDay.spots.push(spotDetails);
+
+  });
+
+  return tripDataWithSpots;
+
+}
+
+// スポット情報の再取得
+async function getSpotsInfo(code) {
+  const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/spot`;
+
+  const params = {
+    'code': code,
+    'add': "detail"
+  };
+
+  try {
+    const queryString = querystring.stringify(params);
+    const signature = getBase64Signature(`/v1/${NAVITIME_SID}/spot?${queryString}`, NAVITIME_SIGNATURE_KEY);
+    const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+    const response = await urlWithParams.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// グループ内のスポット・出発地・到着地、各地点間の移動時間と距離を計算
+async function calculateTravelTimesAndDistances(spots, start, goal) {
+  const spotRoutes = [];
+
+  for (const spot of spots) {    
+    const toSpotParams = {
+      start: JSON.stringify({ lat: start.lat, lon: start.lon }),
+      goal: JSON.stringify({ lat: spot.lat, lon: spot.lon }),
+    };
+    const fromSpotParams = {
+      start: JSON.stringify({ lat: spot.lat, lon: spot.lon }),
+      goal: JSON.stringify({ lat: goal.lat, lon: goal.lon }),
+    };
+    const toSpotRoute = await fetchRouteAPI(toSpotParams);
+    const fromSpotRoute = await fetchRouteAPI(fromSpotParams);  
+    spotRoutes.push({
+      routeType: "toSpot",
+      from: { lat: start.lat, lon: start.lon, name: "start" },
+      to: { lat: spot.lat, lon: spot.lon, name: spot.spotName },
+      routeData: toSpotRoute,
+    });
+    spotRoutes.push({
+      routeType: "fromSpot",
+      from: { lat: spot.lat, lon: spot.lon, name: spot.spotName },
+      to: { lat: goal.lat, lon: goal.lon, name: "goal" },
+      routeData: fromSpotRoute,
+    });  
+
+    for (let i = 0; i < spots.length; i++) {
+      for (let j = i + 1; j < spots.length; j++) {
+        const startSpot = spots[i];
+        const endSpot = spots[j];
+        const spotToSpotParams1 = {
+          start: JSON.stringify({ lat: startSpot.lat, lon: startSpot.lon }),
+          goal: JSON.stringify({ lat: endSpot.lat, lon: endSpot.lon }),
+        };
+        const spotToSpotRoute1 = await fetchRouteAPI(spotToSpotParams1);
+        spotRoutes.push({
+          routeType: "spotToSpot",
+          from: { lat: startSpot.lat, lon: startSpot.lon, name: startSpot.spotName },
+          to: { lat: endSpot.lat, lon: endSpot.lon, name: endSpot.spotName },
+          routeData: spotToSpotRoute1,
+        });
+        const spotToSpotParams2 = {
+          start: JSON.stringify({ lat: endSpot.lat, lon: endSpot.lon }),
+          goal: JSON.stringify({ lat: startSpot.lat, lon: startSpot.lon }),
+        };
+        const spotToSpotRoute2 = await fetchRouteAPI(spotToSpotParams2);
+        spotRoutes.push({
+          routeType: "spotToSpot",
+          from: { lat: endSpot.lat, lon: endSpot.lon, name: endSpot.spotName },
+          to: { lat: startSpot.lat, lon: startSpot.lon, name: startSpot.spotName },
+          routeData: spotToSpotRoute2,
+        });
+
+      }
+    }
+  }
+
+  return spotRoutes;
+
+}
+
+// ルート探索API
+async function fetchRouteAPI(params) {
+  const BASE_URL = `http://dp.navitime.biz/v1/${NAVITIME_SID}/route`;
+  try {
+    const queryString = querystring.stringify(params);
+    const signature = getBase64Signature(`/v1/${NAVITIME_SID}/route?${queryString}`, NAVITIME_SIGNATURE_KEY);
+    const urlWithParams = await fetch(`${BASE_URL}?${queryString}&signature=${signature}`);
+    const response = await urlWithParams.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// 経由地の順番を決定
+async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroups) {
+  const viaSpots = [];
+  const startHour = 10;  // 仮出発時間
+  const endHour = 19;  // 仮到着時間
+  let currentHour = startHour;  // 現在の時間
+  let currentLocation = start;
+
+  // スポットを近い順に並び替え
+  let remainingSpots = [...(spotGroups.spots || [])].sort((a, b) => {
+    const aRoute = spotRoutes.find(route => 
+      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === a.lat && route.to.lon === a.lon
+    );
+
+    const bRoute = spotRoutes.find(route =>
+      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === b.lat && route.to.lon === b.lon
+    );
+
+    const aTime = aRoute ? aRoute.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
+    const bTime = bRoute ? bRoute.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
+    return aTime - bTime;
+  });
+  
+  const unvisitedSpots = [];  // 入りきらなかったスポットを格納するリスト
+
+  // 全てのスポットを巡る
+  while (remainingSpots.length > 0) {
+    let nextSpot;
+
+    // 昼食時間帯のスポット選択
+    if (currentHour >= 11 && currentHour <= 13) {
+      nextSpot = remainingSpots.find(spot => spot.category?.startsWith("03"));
+    }
+
+    // 最も近いスポットを選択
+    if (!nextSpot) {
+      nextSpot = remainingSpots.reduce((closestSpot, spot) => {
+        const route = spotRoutes.find(r =>
+          r.from.lat === currentLocation.lat && r.from.lon === currentLocation.lon && r.to.lat === spot.lat && r.to.lon === spot.lon
+        );
+        const travelTime = route ? route.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
+        return (!closestSpot || travelTime < closestSpot.travelTime) ? { spot, travelTime } : closestSpot;
+      }, null)?.spot;
+    }
+
+    // 次のスポットへのルート取得
+    const routeToNextSpot = spotRoutes.find(route => 
+      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === nextSpot.lat && route.to.lon === nextSpot.lon
+    );
+
+    // 移動時間と滞在時間の計算
+    const travelTime = routeToNextSpot.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) / 60;
+    const stayTime = nextSpot.stayTime ?? (nextSpot.category?.startsWith("03") ? 90 : 120);
+    const totalVisitTime = travelTime + stayTime / 60;
+
+    // 到着時間が終了時間を超えたらループ終了
+    if (currentHour + totalVisitTime > endHour) {
+      unvisitedSpots.push(nextSpot);
+      remainingSpots = remainingSpots.filter(spot => spot !== nextSpot);
+      continue;
+    }
+
+    // 経由地に追加
+    viaSpots.push({
+      lat: nextSpot.lat,
+      lon: nextSpot.lon,
+      stayTime: stayTime
+    });
+
+    // 時間と現在位置を更新
+    currentHour += totalVisitTime;
+    currentLocation = nextSpot;
+
+    // 訪問済みスポットをremainingSpotsから削除
+    remainingSpots = remainingSpots.filter(spot => spot !== nextSpot);
+  }
+
+  // 入りきらなかったスポットは最も少ないスポット数の日程に追加
+  if (unvisitedSpots.length > 0) {
+    const dayWithFewestSpots = allDaysSpotGroups.reduce((fewestDay, currentDay) =>
+      (currentDay.spots.length < fewestDay.spots.length ? currentDay : fewestDay)
+    );
+    dayWithFewestSpots.spots.push(...unvisitedSpots);
+  }
+
+  return viaSpots;
 }
