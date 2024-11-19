@@ -857,7 +857,6 @@ async function calculateTravelTimesAndDistances(spots, start, goal) {
           to: { lat: startSpot.lat, lon: startSpot.lon, name: startSpot.spotName },
           routeData: spotToSpotRoute2,
         });
-
       }
     }
   }
@@ -886,25 +885,29 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
   const startHour = 10;  // 仮出発時間
   const endHour = 19;  // 仮到着時間
   let currentHour = startHour;  // 現在の時間
-  let currentLocation = start;
-
-  // スポットを近い順に並び替え
-  let remainingSpots = [...(spotGroups.spots || [])].sort((a, b) => {
-    const aRoute = spotRoutes.find(route => 
-      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === a.lat && route.to.lon === a.lon
-    );
-
-    const bRoute = spotRoutes.find(route =>
-      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === b.lat && route.to.lon === b.lon
-    );
-
-    const aTime = aRoute ? aRoute.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
-    const bTime = bRoute ? bRoute.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
-    return aTime - bTime;
-  });
-  
+  let currentLocation = start;  // 現在地点
   const unvisitedSpots = [];  // 入りきらなかったスポットを格納するリスト
 
+  // 指定された地点間のルート情報を取得
+  const findRoute = (from, to) =>
+    spotRoutes.find(route =>
+      route.from.lat === from.lat &&
+      route.from.lon === from.lon &&
+      route.to.lat === to.lat &&
+      route.to.lon === to.lon
+    );
+  
+  // ルートの移動時間を計算
+  const calculateTravelTime = (route) =>
+    route?.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) / 60 || Infinity;
+
+  // スポットを現在地点から近い順に並び替え
+  let remainingSpots = [...(spotGroups.spots || [])].sort((a, b) => {
+    const aRoute = findRoute(currentLocation, a);
+    const bRoute = findRoute(currentLocation, b);
+    return calculateTravelTime(aRoute) - calculateTravelTime(bRoute);
+  });
+  
   // 全てのスポットを巡る
   while (remainingSpots.length > 0) {
     let nextSpot;
@@ -917,21 +920,15 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
     // 最も近いスポットを選択
     if (!nextSpot) {
       nextSpot = remainingSpots.reduce((closestSpot, spot) => {
-        const route = spotRoutes.find(r =>
-          r.from.lat === currentLocation.lat && r.from.lon === currentLocation.lon && r.to.lat === spot.lat && r.to.lon === spot.lon
-        );
-        const travelTime = route ? route.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) : Infinity;
+        const route = findRoute(currentLocation, spot);
+        const travelTime = calculateTravelTime(route);
         return (!closestSpot || travelTime < closestSpot.travelTime) ? { spot, travelTime } : closestSpot;
       }, null)?.spot;
     }
 
-    // 次のスポットへのルート取得
-    const routeToNextSpot = spotRoutes.find(route => 
-      route.from.lat === currentLocation.lat && route.from.lon === currentLocation.lon && route.to.lat === nextSpot.lat && route.to.lon === nextSpot.lon
-    );
-
-    // 移動時間と滞在時間の計算
-    const travelTime = routeToNextSpot.routeData.items.reduce((sum, item) => sum + item.summary.move.time, 0) / 60;
+    // 次のスポットへのルート取得と移動時間の計算
+    const routeToNextSpot = findRoute(currentLocation, nextSpot);
+    const travelTime = calculateTravelTime(routeToNextSpot);
     const stayTime = nextSpot.stayTime ?? (nextSpot.category?.startsWith("03") ? 90 : 120);
     const totalVisitTime = travelTime + stayTime / 60;
 
@@ -957,7 +954,7 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
     remainingSpots = remainingSpots.filter(spot => spot !== nextSpot);
   }
 
-  // 入りきらなかったスポットは最も少ないスポット数の日程に追加
+  // 入りきらなかったスポットはスポット数が最も少ない日程に追加
   if (unvisitedSpots.length > 0) {
     const dayWithFewestSpots = allDaysSpotGroups.reduce((fewestDay, currentDay) =>
       (currentDay.spots.length < fewestDay.spots.length ? currentDay : fewestDay)

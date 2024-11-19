@@ -55,6 +55,51 @@ main {
 }
 
 /* ルート結果表示 */
+.loading-content {
+	transition: all ease-in-out 1s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明の背景 */
+    z-index: 9999; /* 最前面に配置 */
+    cursor: wait;
+}
+
+.loading-content.js-loaded {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.loading-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fbf9f0;
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    animation: loadingAnimation 1s infinite;
+}
+
+.loading-content.js-loaded .loading-text {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes loadingAnimation {
+	0% {
+	    transform: translate(-50%, -50%) translateY(0);
+	}
+	50% {
+	    transform: translate(-50%, -50%) translateY(-20px);
+	}
+	100% {
+	    transform: translate(-50%, -50%) translateY(0);
+	}
+}
 
 .route-tab {
     display: flex;
@@ -124,23 +169,6 @@ main {
     margin: 5px;
 }
 
-.search-option table {
-    height: 220px;
-    border-spacing: 10px 5px;
-}
-
-.search-option th {
-    vertical-align: top;
-}
-
-.search-option td {
-    display: flex;
-}
-
-.search-option td input {
-    width: 200px;
-}
-
 .search-option .button {
     position: absolute;
     bottom: 5px;
@@ -175,28 +203,13 @@ main {
 }
 
 .transportation .walk {
-    display: flex;
-    flex-wrap: nowrap;
-    margin-left: 7px;
-    margin-top: 5px;
-}
-
-.transportation .rental .cycle {
-    display: flex;
-    flex-wrap: nowrap;
-    margin-left: 7px;
-    margin-top: 5px;
-}
-
-.transportation .rental .car {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
     margin-left: 7px;
     margin-top: 5px;
 }
 
 .transportation dd {
-    margin-left: 10px;
+    margin-left: 20px;
 }
 
 .transportation dd input {
