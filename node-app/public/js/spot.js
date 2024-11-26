@@ -64,7 +64,7 @@ async function createMarker(results, map) {
 
     const infowindow = new InfoWindow();
 
-    marker.addListener("gmp-click", () => {
+    marker.addListener("click", () => {
       const content = document.createElement("div");
       content.style.width = "300px";
       content.style.height = "auto";

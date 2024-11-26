@@ -1,7 +1,4 @@
 let map;
-let infowindow;
-let directionsService;
-let directionsRenderer;
 
 // index.jsにアクセスしてselectedHotelsを取得する
 function fetchRoutes() {
@@ -19,17 +16,35 @@ function fetchRoutes() {
         })
         .then(data => {
             const tripData = data.tripData;
+            const selectSpots = data.selectSpots;
             const routeResults = data.routeResults;
             console.log("tripData: ", tripData);
+            console.log("selectSpots: ", selectSpots);
             console.log("routeResults: ", routeResults);
             
             const selectedRoutes = selectOptimalRoutes(routeResults);
-            generateTabs(tripData, selectedRoutes);
+            generateTabs(tripData, selectedRoutes, selectSpots);
         })
         .catch(error => {
             console.error("Error fetching data: ", error);
         });
 }
+
+// 1kmあたりの炭素排出量(kg)
+const carbonEmissionsPerKm = {
+    domestic_flight: 0.124,
+    superexpress_train: 0.012,
+    sleeper_ultraexpress: 0.025,
+    ultraexpress_train: 0.025,
+    express_train: 0.025,
+    semiexpress_train: 0.025,
+    local_train: 0.025,
+    shuttle_bus: 0.09,
+    highway_bus: 0.09,
+    local_bus: 0.09,
+    car: 0.132,
+    walk: 0,
+};
 
 // 各日程で最も炭素排出量が少ないルートを選択
 function selectOptimalRoutes(routeResults){
@@ -60,18 +75,6 @@ function selectOptimalRoutes(routeResults){
 function calculateRouteCarbonEmission(route) {
     let totalEmission = 0;
 
-    // 1kmあたりの炭素排出量(kg)
-    const carbonEmissionsPerKm = {
-        domestic_flight: 0.124,
-        superexpress_train: 0.012,
-        sleeper_ultraexpress: 0.025,
-        ultraexpress_train: 0.025,
-        express_train: 0.025,
-        semiexpress_train: 0.025,
-        car: 0.132,
-        walk: 0
-    };
-
     route.sections.forEach((section) => {
         if (section.type === 'move' && section.move in carbonEmissionsPerKm) {
             const emissionPerKm = carbonEmissionsPerKm[section.move];
@@ -80,7 +83,6 @@ function calculateRouteCarbonEmission(route) {
         }
     });
 
-    console.log("totalEmission: ", totalEmission);
     return totalEmission;
 }
 
@@ -109,7 +111,7 @@ async function initMap(startLatLng, endLatLng, mapElementId) {
 }
 
 // タブを生成、ルートを表示
-function generateTabs(tripData, selectedRoutes) {
+function generateTabs(tripData, selectedRoutes, selectSpots) {
   const routeTabContainer = document.querySelector('.route-tab');
   routeTabContainer.innerHTML = '';
 
@@ -203,83 +205,224 @@ function generateTabs(tripData, selectedRoutes) {
     map = initMap(startLatLng, endLatLng, `map-${index}`);
 
     // Google Maps APIを使用してルートを表示
-    dispalayRouteOnMap(map, selectedRoutes[index], startLatLng, endLatLng, `map-${index}`);
+    dispalayRouteOnMap(map, selectedRoutes[index], startLatLng, `map-${index}`, selectSpots, dayInfo);
   });
 }
 
 // ルート表示
-async function dispalayRouteOnMap(map, route, startLatLng, endLatLng, mapContainerId) {
+async function dispalayRouteOnMap(map, route, startLatLng, mapContainerId, selectSpots, dayInfo) {
     // Google Maps API読み込み
     const { Map, Polyline, InfoWindow } = await google.maps.importLibrary("maps");
-    const { LatLng, LatLngBounds } = await google.maps.importLibrary("core");
+    const { LatLngBounds } = await google.maps.importLibrary("core");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-    // Directions Serviceの初期化
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        suppressMarkers: true,
-        map: null,
-    });
+    const bounds = new LatLngBounds();
+    let currentLatLng;
+    let waypointCounter = 1;
+    const infowindow = new InfoWindow();
+    let prevLatLng = null;
+    const usedLatLngs = {};
 
     // マップの初期化
     map = new Map(document.getElementById(mapContainerId), {
         center: startLatLng,
         zoom: 10,
-        mapId: "12b135f8e452a25b", // 必要に応じてカスタムマップIDを設定
+        mapId: "12b135f8e452a25b",
     });
 
-    const bounds = new LatLngBounds();
-    infowindow = new InfoWindow();
-
-    // ポリラインデータを構築
-    const polylinePath = [];
-    let lastpoint = null;
-
-    route.route.sections.forEach((section, index) => {
+    // ピンとポリラインの描画
+    route.route.sections.forEach((section, i) => {
         if (section.type === "point") {
-            if (lastpoint) {
-                polylinePath.push(
-                    { lat: lastpoint.lat, lng: lastpoint.lon },
-                );
-                polylinePath.push(
-                    { lat: section.coord.lat, lng: section.coord.lon },
-                );
+            let baseLatLng = { lat: section.coord.lat, lng: section.coord.lon};
+
+            // 同地点に複数ピンを生成する場合
+            const latLngKey = `${baseLatLng.lat},${baseLatLng.lng}`;
+            currentLatLng = { ...baseLatLng };
+            if (usedLatLngs[latLngKey]) {
+                const offsetCount = usedLatLngs[latLngKey]++;
+                const offset = 0.0001 * offsetCount;
+                currentLatLng.lat += offset;
+                currentLatLng.lng += offset;
+            } else {
+                usedLatLngs[latLngKey] = 1;
             }
 
-            bounds.extend(new LatLng(section.coord.lat, section.coord.lon));
+            bounds.extend(currentLatLng);
+
+            // ピン生成
+            const pinOptions = getPinOptions(section, waypointCounter);
+            const pinElement = new PinElement(pinOptions);
 
             const marker = new AdvancedMarkerElement({
-                position: { lat: section.coord.lat, lng: section.coord.lon },
-                map: map,
-                title: section.name,
+                map,
+                position: currentLatLng,
+                content: pinElement.element,
+                gmpClickable: true,
             });
 
-            // マーカークリックで詳細を表示
-            marker.addListener("click", () => {
-                const content = `<div>
-                    <h4>${section.name}</h4>
-                    ${section.stay_time ? `<p>滞在時間: ${section.stay_time}分</p>` : ""}
-                </div>`;
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                let content = "";
+                const { target } = domEvent;
+                if (section.name === "start") {
+                    content = `
+                        <div>
+                            <p>出発地: ${dayInfo.departure}</p>
+                        </div>
+                    `;
+                } else if (section.name === "goal") {
+                    const prevMove = i > 0 ? route.route.sections[i - 1] : null;
+                    let emission = 0;
+                    if(prevMove?.type === "move") {
+                        emission = calculateEmission(prevMove.distance, prevMove.move);
+                    }
+                    content = `
+                        <div>
+                            <p>到着地: ${dayInfo.arrival}</p>
+                            <p>炭素排出量: ${emission.toFixed(5)} kg</p>
+                        </div>
+                    `;
+                } else if (section.name === "経由地") {
+                    const matchedSpot = selectSpots.find(
+                        (spot) =>
+                            parseFloat(spot.placeLat) === parseFloat(section.coord.lat) ||
+                            parseFloat(spot.placeLon) === parseFloat(section.coord.lon)
+                    );
+                    const prevMove = i > 0 ? route.route.sections[i - 1] : null;
+                    let emission = 0;
+                    if(prevMove?.type === "move") {
+                        emission = calculateEmission(prevMove.distance, prevMove.move);
+                        content = `
+                            <div>
+                                <strong>${matchedSpot?.placeName || "--"}</strong><br>
+                                <p>滞在時間: ${section.stay_time} 分</p>
+                                <p>炭素排出量: ${emission.toFixed(5)} kg</p>
+                            </div>
+                        `;
+                    }
+                } else if (Array.isArray(section.node_types)) {
+                    const nextMove = i < route.route.sections.length - 1 ? route.route.sections[i + 1] : null;
+                    const prevMove = i > 0 ? route.route.sections[i - 1] : null;
+                    let emission = 0;
+                    if (prevMove?.type === "move") {
+                        emission = calculateEmission(prevMove.distance, prevMove.move);
+                        if (section.node_types.includes("station")) {
+                            content =`
+                                <div>
+                                    <p>${section.name || "--"} 駅</p>
+                                    <p>${nextMove?.line_name || "--"} に乗り換え</p>
+                                    <p>炭素排出量: ${emission.toFixed(5)} kg</p>
+                                </div>
+                            `;
+                        } else {
+                            content =`
+                                <div>
+                                    <p>${section.name}</p>
+                                    <p>${nextMove?.line_name || "--"} に乗り換え</p>
+                                    <p>炭素排出量: ${emission.toFixed(5)} kg</p>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                infowindow.close();
                 infowindow.setContent(content);
-                infowindow.open(map, marker);
+                infowindow.open(marker.map, marker);
             });
 
-            lastpoint = section.coord;
+            if (section.name === "経由地") waypointCounter++;
+
+            // ポリラインの生成
+            if (prevLatLng) {
+                const polylineOptions = getPolylineOptions(route.route.sections[i - 1], prevLatLng, currentLatLng);
+                new Polyline(polylineOptions);
+            }
         }
+        
+        prevLatLng = { ...currentLatLng };
+
     });
 
-    // ポリラインを描画
-    const polyline = new Polyline({
-        path: polylinePath,
-        geodesic: true,
-        strokeColor: "#FF0000",
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
-        map: map,
-    });
-
-    polyline.setMap(map);
     map.fitBounds(bounds);
+
+    // スタート・ゴール・経由地の設定
+    function getPinOptions(section, waypointCounter) {
+        let pinOptions = {
+            scale: 0.8,
+            background: "#FFFFFF",
+            borderColor: "#000000",
+            glyphColor: "#FFFFFF",
+        };
+
+        if (section.name === "start") {
+            pinOptions = {
+                scale: 1.5,
+                background: "#0000FF",
+                borderColor: "#0000FF",
+                glyph: "S",
+                glyphColor: "#FFFFFF",
+            };     
+        } else if (section.name === "goal") {
+            pinOptions = {
+                scale: 1.5,
+                background: "#FF0000",
+                borderColor: "#FF0000",
+                glyph: "G",
+                glyphColor: "#FFFFFF",
+            };
+        } else if (section.name === "経由地") {
+            pinOptions = {
+                scale: 1.5,
+                glyph: waypointCounter.toString(),
+                background: "#008000",
+                borderColor: "#008000",
+                glyphColor: "#FFFFFF",
+            };
+        }
+
+        return pinOptions;
+    }
+
+    function getPolylineOptions(section, start, end) {
+        const moveType = section.type === "move" ? section.move : null;
+        const colorMap = {
+            walk: "#5383C3",  // 青
+            domestic_flight: "#CC1237",  // 赤
+            superexpress_train: "#186618",
+            sleeper_ultraexpress: "#186618",
+            ultraexpress_train: "#186618",
+            express_train: "#186618",
+            semiexpress_train: "#186618",
+            local_train: "#186618", // 緑
+            shuttle_bus: "#e59c27",
+            highway_bus: "#e59c27",
+            local_bus: "#e59c27",  // 橙
+            car: "#8C228C",  // 紫
+        };
+
+        return {
+            path: [start, end],
+            scale: 4,
+            strokeColor: colorMap[moveType] || "#5383C3",
+            strokeOpacity: 1.0,
+            strokeWeight: 5,
+            map,
+            icons: [
+                {
+                    icon: {
+                        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                        scale: 4,
+                        strokeColor: colorMap[moveType] || "#5383C3",
+                    },
+                    offset: "100%",
+                },
+            ],
+        };
+    }
+
+    function calculateEmission(distance, mode) {
+        return distance / 1000 * (carbonEmissionsPerKm[mode] || 0);
+    }
 }
 
 // 選択されたタブの内容を表示する関数
