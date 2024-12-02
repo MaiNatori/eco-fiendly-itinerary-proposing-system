@@ -71,6 +71,7 @@ app.post('/userselectplaces', doGetUserSelectPlaces);
 app.post('/userselectspots', doGetUserSelectSpots);
 app.post('/userselecthotels', doGetUserSelectHotels);
 app.post('/userselecttripdata', doGetUserSelectTripData);
+app.post('/update-via', regenerateViaRoute);
 
 let dataFromScripts = {}; // 選択内容の保存先
 let selectedSpots = []; // 選択したスポット
@@ -642,7 +643,7 @@ async function generateRoute(req, res) {
       const params = {
         start: `${start.lat},${start.lon}`,
         goal: `${goal.lat},${goal.lon}`,
-        'goal-time': "2024-11-24T19:00", // 検索時の日時と時間を取得
+        'goal-time': "2024-11-24T19:00",
         order: "walk_distance",
         'move-priority': "gas",
         'via-type': 1,
@@ -670,7 +671,7 @@ async function generateRoute(req, res) {
           maxStayTime = 90;
         }
 
-        return { lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+        return { name: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
       });
 
       params.via = JSON.stringify(viaArray);
@@ -691,7 +692,7 @@ async function generateRoute(req, res) {
     for (const s of routeResults) {
       console.log("route: ", s.route);
     }
-    res.json({ tripData, selectSpots, routeResults });
+    res.json({ tripData, selectSpots, routeResults, spotGroups });
   } catch (error) {
     console.log(error);
   }
@@ -946,6 +947,7 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
 
     // 経由地に追加
     viaSpots.push({
+      placeName: nextSpot.spotName,
       lat: nextSpot.lat,
       lon: nextSpot.lon,
       stayTime: stayTime
@@ -973,4 +975,81 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
     }
   }
   return viaSpots;
+}
+
+// ユーザー指定via
+async function regenerateViaRoute(req, res) {
+  const spotGroupsDay = req.body.spotGroupsDay;
+  const usersViaArray = req.body.viaArray;
+  console.log("spotGroupsDay: ", spotGroupsDay);
+  console.log("usersViaArray: ", usersViaArray);
+  
+  const selectSpots = req.session.selectspots;
+  const selectHotels = req.session.selecthotels;
+  const tripData = req.session.tripdata;
+  
+  try {
+    const routeResults = [];
+
+    // 初日出発地の緯度経度を取得
+    const firstDepartureLatLon = await getLatLonFromAddress(spotGroupsDay.departure);
+
+    let start, goal;
+
+    // 各日程の出発地到着地の緯度経度を設定
+    if (spotGroupsDay.dayNumber === 1) {
+      start = firstDepartureLatLon;
+      goal = await getHotelLatLon(selectHotels, spotGroupsDay.arrival);
+    } else if (spotGroupsDay.dayNumber === tripData.tripDays) {
+      start = await getHotelLatLon(selectHotels, spotGroupsDay.departure);
+      goal = firstDepartureLatLon;
+    } else {
+      start = await getHotelLatLon(selectHotels, spotGroupsDay.departure);
+      goal = await getHotelLatLon(selectHotels, spotGroupsDay.arrival);
+    }
+
+    const params = {
+      start: `${start.lat},${start.lon}`,
+      goal: `${goal.lat},${goal.lon}`,
+      'goal-time': "2024-11-24T19:00",
+      order: "walk_distance",
+      'move-priority': "gas",
+      'via-type': 1,
+      via: []
+    };
+
+    // 経由地パラメーターを設定
+    const viaArray = usersViaArray.map(viaSpot => {
+      let maxStayTime;  // stayTimeの最大値を設定
+      if (typeof viaSpot.stayTime === 'string' && viaSpot.stayTime.includes('-')) {
+        const times = viaSpot.stayTime.split('-').map(t => parseInt(t, 10));
+        maxStayTime = Math.max(...times);  // 範囲の場合
+      } else if (typeof viaSpot.stayTime === 'number' || !isNaN(parseInt(viaSpot.stayTime, 10))) {
+        maxStayTime = parseInt(viaSpot.stayTime, 10);  // 単一の場合
+      } else {
+        maxStayTime = 90;
+      }
+      return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+    });
+
+    params.via = JSON.stringify(viaArray);
+
+    // ルート探索APIを実行
+    const routeResponse = await fetchRouteAPI(params);
+
+    // ルート結果を格納
+    routeResults.push({
+      day: spotGroupsDay.dayNumber,
+      start: { lat: start.lat, lon: start.lon },
+      goal: { lat: goal.lat, lon: goal.lon },
+      route: routeResponse,
+    });
+
+    console.log("routeResults: ", routeResults);
+
+    res.json({ tripData, selectSpots, routeResults, spotGroupsDay });
+
+  } catch (error) {
+    console.log(error);
+  }
 }

@@ -169,6 +169,18 @@ main {
     margin: 5px;
 }
 
+.search-option p {
+    margin: 5px;
+}
+
+.order-number {
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: large;
+    color: #f8500a;
+    cursor: pointer;
+}
+
 .search-option .button {
     position: absolute;
     bottom: 5px;
