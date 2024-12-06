@@ -151,14 +151,14 @@ main {
 .route-map {
     background-color: #fbf9f0;
     width: 600px;
-    height: 565px;
+    height: 570px;
     padding: 10px 10px 5px 10px;
 }
 
 .search-option {
     position: absolute;
     background-color: #fbf9f0;
-    width: 300px;
+    width: 310px;
     height: 290px;
     top: 320px;
     left: 800px;
@@ -173,12 +173,15 @@ main {
     margin: 5px;
 }
 
+.search-option li {
+    cursor: pointer;
+}
+
 .order-number {
     text-decoration: underline;
     font-weight: bold;
     font-size: large;
     color: #f8500a;
-    cursor: pointer;
 }
 
 .search-option .button {
@@ -194,30 +197,36 @@ main {
     height: 270px;
     top: 630px;
     left: 800px;
+    padding: 5px;
 }
 
 .transportation h3 {
-    margin-bottom: 5px;
+    margin: 5px;
+}
+
+.transportation p {
+    margin: 5px;
 }
 
 .transportation .public{
     display: flex;
     flex-wrap: wrap;
-    padding-top: 5px;
     gap: 0 10px;
     margin-right: 2px;
     margin-left: 2px;
-    padding-left: 5px;
 }
 
-.transportation p {
-    margin: 0 0 0 0;
+.transportation .public p {
+    margin: 0px;
 }
 
 .transportation .walk {
     display: grid;
     margin-left: 7px;
-    margin-top: 5px;
+}
+
+.transportation .walk p {
+    margin: 0px;
 }
 
 .transportation dd {

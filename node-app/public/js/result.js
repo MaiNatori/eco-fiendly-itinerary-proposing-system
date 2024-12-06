@@ -87,13 +87,6 @@ function calculateRouteCarbonEmission(route) {
 
     return totalEmission;
 }
-/*
-// 各タブの状態を保持
-const tabsState = tripData.tripData.map((dayInfo, index) => ({
-    dayInfo: dayInfo,
-    route: selectedRoutes[index],
-    modified: false,
-}));*/
 
 // マップの初期化
 async function initMap(startLatLng, endLatLng, mapElementId) {  
@@ -152,7 +145,7 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
             <h3>経由順の変更</h3>
             <p>経由したい順番でクリックしてください</p>
             <ul id="${viaListId}" class="via"></ul>
-            <input id="applyChanges-${dayIndex}" type="submit" method="post" name="application" value="変更を適用" onclick="applyChanges(${dayIndex})" class="button">
+            <input id="applyViaChanges-${dayIndex}" type="submit" method="post" name="application" value="変更を適用" onclick="applyAllChanges(${dayIndex})" class="button">
         `;
 
         // 移動手段
@@ -160,8 +153,8 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
         transportation.className = 'transportation';
         transportation.innerHTML = `
             <h3>移動手段</h3>
-                <div class="public">
-                    <p>利用しない公共交通手段</p>
+                <p>利用しない公共交通手段</p>
+                <div id="public" class="public">
                     <p><input type="checkbox" name="public" value="飛行機" id="domestic_flight">
                     <label for="domestic_flight">飛行機</label></p>
                     <p><input type="checkbox" name="public" value="新幹線" id="superexpress_train">
@@ -175,8 +168,8 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
                     <p><input type="checkbox" name="public" value="準急電車" id="semiexpress_train">
                     <label for="semiexpress_train">準急電車</label></p>
                 </div>
-                <div class="walk">
-                    <p>徒歩の設定</p>
+                <p>徒歩の設定</p>
+                <div id="walk" class="walk">
                     <dt>
                         <label for="walkSpeed">
                             <p><input type="checkbox" name="walkSpeed" value="徒歩の速度" id="walkSpeed">徒歩の速度</p>
@@ -202,7 +195,7 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
                         </select>
                     </dd>
                 </div>
-            <input type="submit" method="post" name="application" value="変更を適用" onclick="location.href='result.html'" class="button">
+            <input id="applyChanges" type="submit" method="post" name="application" value="変更を適用" onclick="applyAllChanges()" class="button">
         `;
 
         routeTabContainer.appendChild(label);
@@ -227,6 +220,20 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
             viaList.appendChild(listItem);
 
             listItem.addEventListener("click", () => toggleSpotSelection(dayIndex, spotIndex));
+        });
+
+        transportation.querySelector(`#walk-speed`).addEventListener("focus", () => {
+            const walkSpeedCheckbox = transportation.querySelector(`#walkSpeed`);
+            if (!walkSpeedCheckbox.checked) {
+                walkSpeedCheckbox.checked = true;
+            }
+        });
+
+        transportation.querySelector(`#walk-route`).addEventListener("focus", () => {
+            const walkSpeedCheckbox = transportation.querySelector(`#walkRoute`);
+            if (!walkSpeedCheckbox.checked) {
+                walkSpeedCheckbox.checked = true;
+            }
         });
 
         const route = selectedRoutes[dayIndex];
@@ -486,6 +493,7 @@ function toggleSpotSelection(tabIndex, spotIndex) {
     updateOrderNumbers(tabIndex);
 }
 
+// 選択した順を表記
 async function updateOrderNumbers(tabIndex) {
     const spotItems = document.querySelectorAll(`.via-item[data-tab="${tabIndex}"]`);
     spotItems.forEach((item) => {
@@ -507,59 +515,156 @@ async function updateOrderNumbers(tabIndex) {
     });
 }
 
+// 条件により実行する関数を変える
+async function applyChanges({ viaChanges = false, transportationChanges = false, dayIndex }) {
+    const loading = document.querySelector('.js-loading');
+    loading.classList.remove('js-loaded');
 
-// 経由順の変更を適用
-function applyChanges(dayIndex) {
-    let viaArray = [];
-    let spotGroupsDay;
+    let requestData = {};
+
     try {
-        viaArray = selectedVias[dayIndex].map((spotIndex) => {
-            spotGroupsDay = spotGroups[dayIndex];
-            const spot = spotGroupsDay.spots[spotIndex];
-            return {
-                name: spot.spotName,
-                lat: spot.lat,
-                lon: spot.lon,
-                stayTime: spot.stayTime,    
-            };
-        });
-
-        console.log("spotGroupsDay: ", spotGroupsDay);
-        console.log("viaArray: ", viaArray);
-
-        // index.jsに送信
-        const response = fetch("/update-via", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ spotGroupsDay, viaArray }),
-        });
-
-        console.log("Received response: ", response);
-
-        if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`)
+        if (viaChanges && transportationChanges) { // 経由順と移動手段両方の変更
+            await handleViaAndTransportationChanges({ dayIndex, requestData });
+        } else if (viaChanges) {  // 経由順のみ変更
+            await handleViaChanges({ dayIndex, requestData });
+        } else if (transportationChanges) {  // 移動手段のみ変更
+            await handleTransportationChanges({ requestData });
         }
-        
-        const data = response.json();
-        console.log("update-via: ", data);
 
-        selectSpots = data.selectSpots;
-        routeResults = data.routeResults;
-        spotGroupsDay = data.spotGroupsDay;
-        selectedRoutes = selectOptimalRoutes(routeResults);
         console.log("selectedRoutes: ", selectedRoutes);
         generateTabs(selectedRoutes, selectSpots, spotGroups);
     } catch (error) {
         console.error("ルート再生成エラー: ", error);
     }
 }
-/*
-const ref = document.referrer;
-// 遷移元URLによって遷移先URLを設定
-if (ref.includes('/place') || ref.includes('/result')) {
-  returnPlacePage();
-} else {
-  sendSelectSpots();
-};*/
+
+// 経由順と移動手段両方の変更
+async function handleViaAndTransportationChanges({ dayIndex, requestData }) {
+    const viaArray = getViaArrayForDay(dayIndex);
+    const transportationSelected = getSelectedTransportations();
+    const walkSelected = getSelectedWalkOptions();
+    const spotGroupsDay = spotGroups[dayIndex];
+    const spotGroupsOtherDays = spotGroups.filter((_, index) => index !== dayIndex);
+
+    requestData = { transportationSelected, walkSelected, viaArray, spotGroupsDay, spotGroupsOtherDays };
+    console.log("usersViaArray: ", viaArray);
+    console.log("spotGroupsDay: ", spotGroupsDay);
+    console.log("spotGroupsOtherDays: ", spotGroupsOtherDays);
+    console.log("transportationSelected: ", transportationSelected);
+    console.log("walkSelected: ", walkSelected);
+
+    const response = await fetch("/update-route", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+    });
+
+    const data = await response.json();
+    handleResponseData(data);
+}
+
+
+// 経由順のみ変更
+async function handleViaChanges({ dayIndex, requestData }) {
+    const viaArray = getViaArrayForDay(dayIndex);
+    const spotGroupsDay = spotGroups[dayIndex];
+    const otherDaysSelectedRoutes = selectedRoutes.filter((_, index) => index !== dayIndex);
+    
+    requestData = { viaArray, spotGroupsDay };
+    console.log("spotGroupsDay: ", spotGroupsDay);
+    console.log("otherDaysSelectedRoutes: ", otherDaysSelectedRoutes);
+    console.log("usersViaArray: ", viaArray);
+
+    const response = await fetch("/update-via", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+    });
+
+    const data = await response.json();
+    handleResponseData(data, otherDaysSelectedRoutes, dayIndex);
+}
+
+// 移動手段のみ変更
+async function handleTransportationChanges({ requestData }) {
+    const transportationSelected = getSelectedTransportations();
+    const walkSelected = getSelectedWalkOptions();
+
+    requestData = { spotGroups, transportationSelected, walkSelected };
+    console.log("spotGroups: ", spotGroups);
+    console.log("transportationSelected: ", transportationSelected);
+    console.log("walkSelected: ", walkSelected);
+
+    const response = await fetch("/update-transportation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+    });
+
+    const data = await response.json();
+    handleResponseData(data);
+}
+
+function getViaArrayForDay(dayIndex) {
+    let viaArray = [];
+    const spotGroupsDay = spotGroups[dayIndex];
+    viaArray = selectedVias[dayIndex].map((spotIndex) => {
+        const spot = spotGroupsDay.spots[spotIndex];
+        return { name: spot.spotName, lat: spot.lat, lon: spot.lon, stayTime: spot.stayTime };
+    });
+    return viaArray;
+}
+
+function getSelectedTransportations() {
+    const transportationCheckboxes = document.querySelectorAll('.public input[type="checkbox"]:checked');
+    return Array.from(transportationCheckboxes).map(checkbox => checkbox.id);
+}
+
+function getSelectedWalkOptions() {
+    const walkDiv = document.querySelector('#walk');
+    let walkSelected = [];
+    walkDiv.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
+        const selectId = checkbox.id.replace('Speed', '-speed').replace('Route', '-route');
+        const select = document.querySelector(`#${selectId}`);
+        if (select) {
+            walkSelected.push({ id: selectId, value: select.value });
+        }
+    });
+    return walkSelected;
+}
+
+// 返ってきたデータの処理
+function handleResponseData(data, otherDaysSelectedRoutes, dayIndex) {
+    tripData = data.tripData;
+    selectSpots = data.selectSpots;
+    routeResults = data.routeResults;
+    spotGroups = data.spotGroups;
+    console.log("REspotGroups: ", spotGroups);
+    if (otherDaysSelectedRoutes) {
+        const optimalRoutes = selectOptimalRoutes(routeResults);
+        selectedRoutes[dayIndex] = {
+            day: dayIndex + 1,
+            start: optimalRoutes[0]?.start,
+            goal: optimalRoutes[0]?.goal,
+            route: optimalRoutes[0]?.route,
+        };
+    } else {
+        selectedRoutes = selectOptimalRoutes(routeResults);
+    }
+}
+
+// 変更を適用ボタンを押したときに実行される
+async function applyAllChanges(dayIndex) {
+    const transportationCheckboxes = document.querySelectorAll('.public input[type="checkbox"]');
+    const transportationSelected = Array.from(transportationCheckboxes).filter(checkbox => checkbox.checked);
+
+    if (selectedVias.length > 0 && transportationSelected.length > 0) {
+        await applyChanges({ viaChanges: true, transportationChanges: true, dayIndex });
+    } else if (selectedVias.length > 0) {
+        await applyChanges({ viaChanges: true, dayIndex});
+    } else if (transportationSelected.length > 0) {
+        await applyChanges({ transportationChanges: true });
+    }
+}
 
 fetchRoutes();
