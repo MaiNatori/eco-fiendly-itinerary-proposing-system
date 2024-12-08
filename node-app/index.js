@@ -739,11 +739,8 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
 
   console.log("spots: ",spots);
 
-  // 割り振り済スポットリスト
-  const assignedSpots = tripDays.map(() => []);
-
   // 未割り振りスポットリスト
-  const unassignedSpots = [];
+  let unassignedSpots;
 
   // 食事系スポット
   const mealSpots = spots.filter(s => s.category?.startsWith("03"));
@@ -751,7 +748,10 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
 
   // 最大スポット数
   const maxMealSpots = Math.ceil(mealSpots.length / tripDays.length);  // Math.ceil: 切り上げ計算
-  console.log("maxMealSpots: ", maxMealSpots);
+
+  // 最小スポット数
+  const minMealSpots = Math.floor(mealSpots.length / tripDays.length);
+  console.log(`maxMealSpots: ${maxMealSpots}, minMealSpots: ${minMealSpots}`);
 
   // 観光系スポット
   const touristSpots = spots.filter(s => !s.category?.startsWith("03"));
@@ -759,10 +759,19 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
 
   // 最大スポット数
   const maxTouristSpots = Math.ceil((touristSpots.length / tripDays.length) + maxMealSpots);  // Math.ceil: 切り上げ計算
-  console.log("maxTouristSpots: ", maxTouristSpots);
   
+  // 最小スポット数
+  const minTouristSpots = Math.floor(touristSpots.length / tripDays.length);
+  console.log(`maxTouristSpots: ${maxTouristSpots}, minTouristSpots: ${minTouristSpots}`);
+  
+  // それぞれの結果を統合
+  const spotGroups = tripDays.map(day => ({
+    ...day,
+    spots: [],
+  }));
+
   // スポットの割り振り
-  const distributeSpots = async (spotsList, maxSpots) => {
+  async function distributeSpotsWithMinMax (spotsList, maxSpots, minSpots) {
     const distances = [];
 
     // 全スポットと全ホテルの距離を計算
@@ -780,105 +789,57 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
     // 距離が短い順に並び替え
     distances.sort((a, b) => a.distance - b.distance);
 
-    distances.forEach((spot, hotel, index) => {
-      // 宿泊施設が出発地に設定されている日程
-      const departureDayIndex = tripDays.findIndex(day => day.departure === hotel.hotelName);
+    unassignedSpots = distances;
+    console.log("unassignedSpots: ", unassignedSpots);
 
-      /*
-      ・宿泊施設が出発地に設定されている日が複数ある場合に対処
-      ・departureDayIndex = -1になってるのを解決する
-      */
+    // minSpotsで割り振り
+    const minDistributeSpots = distributeSpots(unassignedSpots, minSpots);
+    console.log("mineDistributeSpots: ",minDistributeSpots);
 
-      console.log("departureIndex: ", departureDayIndex);
+    // maxSpotsで再割り振り
+    if (unassignedSpots.length > 0) {
+      const maxDistributeSpots = distributeSpots(unassignedSpots, maxSpots);
+      console.log("maxDistributeSpots: ", maxDistributeSpots);
+    }
 
-      // 最終日
-      const finalDayIndex = tripDays.length - 1;
+    return spotGroups;
 
-      // 初日にスポットを割り振る
-      if (tripDays[0].arrival === hotel.hotelName) {
-        if (assignedSpots[0].length < maxSpots) {
-          assignedSpots[0].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を1日目に割り振りました`);
-        } else if (assignedSpots[1].length < maxSpots) {
-          assignedSpots[1].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を2日目に割り振りました`);
-        }
-      } else if (tripDays[finalDayIndex].arrival === hotel.hotelName) {  // 最終日に割り振る
-        if (assignedSpots[finalDayIndex].length < maxSpots) {
-          assignedSpots[finalDayIndex].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を${tripDays.length}に割り振りました`);
-        } else if (assignedSpots[finalDayIndex - 1].length < maxSpots) {
-          assignedSpots[finalDayIndex - 1].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を${finalDayIndex - 1}に割り振りました`);
-        }
-      } else if (unassignedSpots.includes(spot)) {  // 空いてる日程に割り振る
-        if (assignedSpots[departureDayIndex].length < maxSpots) {
-          assignedSpots[departureDayIndex].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を${departureDayIndex + 1}日目に割り振りました`);
-        } else if (assignedSpots[departureDayIndex + 1].length < maxSpots) {
-          assignedSpots[departureDayIndex + 1].push(spot);
-          unassignedSpots.splice(index, 1);
-          console.log(`${spot.spotName}を${departureDayIndex + 2}日目に割り振りました`);
-        } else {
-          const availableDayIndex = assignedSpots
-            .map((daySpots, i) => ({ dayIndex: i, spotCount: daySpots.length }))
-            .filter(day => day.spotCount < maxSpots)
-            .sort((a, b) => a.spotCount - b.spotCount)[0]?.dayIndex;
-          
-          if (availableDayIndex !== undefined) {
-            assignedSpots[availableDayIndex].push(spot);
-            unassignedSpots.splice(index, 1);
-            console.log(`${spot.spotName}を${availableDayIndex + 1}日目に割り振りました`);
+    function distributeSpots(unassignedSpots, maxSpots) {
+      return unassignedSpots.filter((distance) => {
+        // そのスポットに最も近い宿泊施設の日程を探す
+        const dayIndex = spotGroups.findIndex(day => day.departure === distance.hotel.hotelName);
+
+        if (dayIndex !== -1) {
+          if (spotGroups[dayIndex].spots.length < maxSpots) {
+            spotGroups[dayIndex].spots.push(distance.spot);
+            console.log(`${distance.spot.spotName}を${dayIndex + 1}日目に割り振りました（スポット数: ${spotGroups[dayIndex].spots.length}/${maxSpots}）`);
+            return false;
+          } else if ((dayIndex - 1) >= 0 && spotGroups[dayIndex - 1].spots.length < maxSpots) {
+            spotGroups[dayIndex - 1].spots.push(distance.spot);
+            console.log(`${distance.spot.spotName}を${dayIndex}日目に割り振りました（スポット数: ${spotGroups[dayIndex].spots.length}/${maxSpots}）`);
+            return false;
           }
         }
-      }
-    });
-
-    unassignedSpots.forEach((spot) => {
-      const fallbackDayIndex = tripDays.findIndex((_, index) => {
-        const assigned = assignedSpots[index];
-        return !assigned || assigned.length < maxSpots;
-      });
-
-      if (fallbackDayIndex !== -1) {
-        if (!assignedSpots[fallbackDayIndex]) {
-          assignedSpots[fallbackDayIndex] = [];
+        
+        const availableGroup = spotGroups.find(group => group.spots.length < maxSpots);
+        if (availableGroup) {
+          availableGroup.spots.push(distance.spot);
+          console.log(`${distance.spot.spotName}を${availableGroup.dayNumber}日目に割り振りました（スポット数: ${availableGroup.spots.length}/${maxSpots}）`);
+          return false;
         }
-        assignedSpots[fallbackDayIndex].push(spot);
-        console.log(`${spot.spotName}を${fallbackDayIndex + 1}日目に再振り分け`);
-      }
-    });
-
-    return assignedSpots;
+        return true;
+      });
+    }
   }
 
   // 食事系スポットを格納
-  const mealSpotsGroups = await distributeSpots(mealSpots, maxMealSpots);
+  const mealSpotsGroups = await distributeSpotsWithMinMax(mealSpots, maxMealSpots, minMealSpots);
   console.log("mealSpotsGroups: ", mealSpotsGroups);
 
   // 観光系スポットを格納
-  const touristSpotsGroups = await distributeSpots(touristSpots, maxTouristSpots);
+  const touristSpotsGroups = await distributeSpotsWithMinMax(touristSpots, maxTouristSpots, minTouristSpots);
   console.log("touristSpotsGroups: ", touristSpotsGroups);
   
-  // それぞれの結果を統合
-  const spotGroups = tripDays.map(day => ({
-    ...day,
-    spots: [mealSpotsGroups[day.dayNumber - 1], touristSpotsGroups[day.dayNumber - 1]],
-  }));
-
-  /*
-  ・spotGroupsのspotsを見ると[],[スポットA],[スポットA],[] という形でそれぞれの日程格納されている
-  ・食事系スポットが割り振られていない
-  ・観光系スポットが1ヶ所×2ずつしか格納されていない
-  */
-
-  console.log("spotGroups: ", spotGroups);
-
   return spotGroups;
 }
 
@@ -1083,19 +1044,6 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
     }
   }
 
-  // 入りきらなかったスポットはスポット数が最も少ない日程に追加
-  if (unvisitedSpots.length > 0 && Array.isArray(allDaysSpotGroups)) {
-    const dayWithFewestSpots = allDaysSpotGroups.reduce((fewestDay, currentDay) => {
-      if (!fewestDay || currentDay.spots.length < fewestDay.spots.length) {
-        return currentDay;
-      }
-      return fewestDay;
-    }, null);
-    
-    if (dayWithFewestSpots) {
-      dayWithFewestSpots.spots.push(...unvisitedSpots);
-    }
-  }
   return viaSpots;
 }
 
@@ -1226,12 +1174,9 @@ async function regenerateViaRoute(req, res) {
   try {
     const spotGroupsDay = req.body.spotGroupsDay;
     const usersViaArray = req.body.viaArray;
-    const spotGroupsOtherDays = req.body.spotGroupsOtherDays;
     console.log("spotGroupsDay: ", spotGroupsDay);
-    console.log("spotGroupsOtherDays: ", spotGroupsOtherDays);
     console.log("usersViaArray: ", usersViaArray);
     
-    const selectSpots = req.session.selectspots;
     const selectHotels = req.session.selecthotels;
     const tripData = req.session.tripdata;
   
@@ -1288,11 +1233,9 @@ async function regenerateViaRoute(req, res) {
       route: routeResponse,
     });
 
-    spotGroups = [...spotGroupsDay, spotGroupsOtherDays];
-
     console.log("routeResults: ", routeResults);
 
-    res.json({ tripData, selectSpots, routeResults, spotGroups });
+    res.json({ routeResults });
 
   } catch (error) {
     console.log(error);
@@ -1391,7 +1334,7 @@ async function regenerateTransportationRoute(req, res) {
 
     console.log("routeResults: ", routeResults);
 
-    res.json({ tripData, selectSpots, routeResults, spotGroups });
+    res.json({ routeResults });
 
   } catch (error) {
     console.log(error);
