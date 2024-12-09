@@ -806,8 +806,19 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
 
     function distributeSpots(unassignedSpots, maxSpots) {
       return unassignedSpots.filter((distance) => {
+
+        const isAlreadyAssigned = spotGroups.some(day =>
+          day.spots.some(spot => spot.spotName === distance.spot.spotName)
+        );
+
+        if (isAlreadyAssigned) {
+          console.log(`${distance.spot.spotName}は割り振り済です`);
+          return false;
+        }
+
         // そのスポットに最も近い宿泊施設の日程を探す
         const dayIndex = spotGroups.findIndex(day => day.departure === distance.hotel.hotelName);
+        const availableGroup = spotGroups.find(group => group.spots.length < maxSpots);
 
         if (dayIndex !== -1) {
           if (spotGroups[dayIndex].spots.length < maxSpots) {
@@ -818,15 +829,13 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
             spotGroups[dayIndex - 1].spots.push(distance.spot);
             console.log(`${distance.spot.spotName}を${dayIndex}日目に割り振りました（スポット数: ${spotGroups[dayIndex].spots.length}/${maxSpots}）`);
             return false;
+          } else if (availableGroup) {
+            availableGroup.spots.push(distance.spot);
+            console.log(`${distance.spot.spotName}を${availableGroup.dayNumber}日目に割り振りました（スポット数: ${availableGroup.spots.length}/${maxSpots}）`);
+            return false;
           }
         }
-        
-        const availableGroup = spotGroups.find(group => group.spots.length < maxSpots);
-        if (availableGroup) {
-          availableGroup.spots.push(distance.spot);
-          console.log(`${distance.spot.spotName}を${availableGroup.dayNumber}日目に割り振りました（スポット数: ${availableGroup.spots.length}/${maxSpots}）`);
-          return false;
-        }
+
         return true;
       });
     }
@@ -1047,7 +1056,7 @@ async function determineViaSpots(spotGroups, spotRoutes, start, allDaysSpotGroup
   return viaSpots;
 }
 
-// ユーザー指定via&transportation
+// ユーザー指定via&transportation  /* ちゃんと機能するように直す */
 async function regenerateRoute(req, res) {
   try {
     const usersViaArray = req.body.viaArray;
@@ -1094,6 +1103,16 @@ async function regenerateRoute(req, res) {
         via: []
       };
 
+      if (transportationSelected.length > 0) {
+        params.unuse = transportationSelected.join('.');
+      }
+
+      if (walkSelected.length > 0) {
+        walkSelected.forEach(({ id, value }) => {
+          params[id] = value;
+        });
+      }
+
       // 経由地パラメーターを設定
       if (day === spotGroupsDay.dayNumber) {
         const viaArray = usersViaArray.map(viaSpot => {
@@ -1108,6 +1127,7 @@ async function regenerateRoute(req, res) {
           }
           return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
         });  
+        console.log("viaArray: ", viaArray);
 
         params.via = JSON.stringify(viaArray);
   
@@ -1134,18 +1154,9 @@ async function regenerateRoute(req, res) {
           return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
         });
 
+        console.log('viaArray: ', viaArray);
         params.via = JSON.stringify(viaArray);
 
-      }
-
-      if (transportationSelected.length > 0) {
-        params.unuse = transportationSelected.join('.');
-      }
-
-      if (walkSelected.length > 0) {
-        walkSelected.forEach(({ id, value }) => {
-          params[id] = value;
-        });
       }
 
       // ルート探索APIを実行

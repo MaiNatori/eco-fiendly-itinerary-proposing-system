@@ -195,7 +195,7 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
                         </select>
                     </dd>
                 </div>
-            <input id="applyChanges" type="submit" method="post" name="application" value="変更を適用" onclick="applyAllChanges()" class="button">
+            <input id="applyChanges" type="submit" method="post" name="application" value="変更を適用" onclick="applyAllChanges(${dayIndex})" class="button">
         `;
 
         routeTabContainer.appendChild(label);
@@ -610,6 +610,7 @@ async function handleTransportationChanges({ requestData }) {
 function getViaArrayForDay(dayIndex) {
     let viaArray = [];
     const spotGroupsDay = spotGroups[dayIndex];
+    console.log("selectedVias: ", selectedVias[dayIndex]);
     viaArray = selectedVias[dayIndex].map((spotIndex) => {
         const spot = spotGroupsDay.spots[spotIndex];
         return { name: spot.spotName, lat: spot.lat, lon: spot.lon, stayTime: spot.stayTime };
