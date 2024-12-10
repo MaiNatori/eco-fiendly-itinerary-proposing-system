@@ -560,7 +560,7 @@ async function handleViaAndTransportationChanges({ dayIndex, requestData }) {
     });
 
     const data = await response.json();
-    handleResponseData(data);
+    selectedRoutes = selectOptimalRoutes(data.routeResults);
 }
 
 

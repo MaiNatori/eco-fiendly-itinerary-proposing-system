@@ -1114,7 +1114,7 @@ async function regenerateRoute(req, res) {
       }
 
       // 経由地パラメーターを設定
-      if (day === spotGroupsDay.dayNumber) {
+      if (day.dayNumber === spotGroupsDay.dayNumber) {
         const viaArray = usersViaArray.map(viaSpot => {
           let maxStayTime;  // stayTimeの最大値を設定
           if (typeof viaSpot.stayTime === 'string' && viaSpot.stayTime.includes('-')) {
@@ -1125,18 +1125,46 @@ async function regenerateRoute(req, res) {
           } else {
             maxStayTime = 90;
           }
-          return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+          return { placeName: viaSpot.name, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
         });  
-        console.log("viaArray: ", viaArray);
+        console.log(`Day ${day.dayNumber}viaSpots: `, viaArray);
 
         params.via = JSON.stringify(viaArray);
   
-      } else {
-        const spotRoutes = await calculateTravelTimesAndDistances(spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber].spots, day.start, day.goal);
+      } else if (day.dayNumber < spotGroupsDay.dayNumber) {
+        console.log("spotGroupsOtherDays[day.dayNumber - 1]: ", day.dayNumber, spotGroupsDay.dayNumber, spotGroupsOtherDays[day.dayNumber - 1]);
+        const spotRoutes = await calculateTravelTimesAndDistances(spotGroupsOtherDays[day.dayNumber - 1].spots, day.start, day.goal);
         //console.log(`Day ${day.dayNumber}spotRoutes: `, spotRoutes)
   
         // 経由する順番を決める
-        const viaSpots = await determineViaSpots(spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber], spotRoutes, day.start, spotGroupsOtherDays);
+        const viaSpots = await determineViaSpots(spotGroupsOtherDays[day.dayNumber - 1], spotRoutes, day.start, spotGroupsOtherDays);
+        console.log(`Day ${day.dayNumber}viaSpots: `, viaSpots);
+    
+        const viaArray = viaSpots.map(viaSpot => {
+          let maxStayTime;  // stayTimeの最大値を設定
+
+          if (typeof viaSpot.stayTime === 'string' && viaSpot.stayTime.includes('-')) {
+            const times = viaSpot.stayTime.split('-').map(t => parseInt(t, 10));
+            maxStayTime = Math.max(...times);  // 範囲の場合
+          } else if (typeof viaSpot.stayTime === 'number' || !isNaN(parseInt(viaSpot.stayTime, 10))) {
+            maxStayTime = parseInt(viaSpot.stayTime, 10);  // 単一の場合
+          } else {
+            maxStayTime = 90;
+          }
+
+          return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+        });
+
+        console.log('viaArray: ', viaArray);
+        params.via = JSON.stringify(viaArray);
+
+      } else {
+        console.log("spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber - 1]: ", day.dayNumber, spotGroupsDay.dayNumber, spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber - 1]);
+        const spotRoutes = await calculateTravelTimesAndDistances(spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber - 1].spots, day.start, day.goal);
+        //console.log(`Day ${day.dayNumber}spotRoutes: `, spotRoutes)
+  
+        // 経由する順番を決める
+        const viaSpots = await determineViaSpots(spotGroupsOtherDays[day.dayNumber - spotGroupsDay.dayNumber - 1], spotRoutes, day.start, spotGroupsOtherDays);
         console.log(`Day ${day.dayNumber}viaSpots: `, viaSpots);
     
         const viaArray = viaSpots.map(viaSpot => {
@@ -1172,6 +1200,10 @@ async function regenerateRoute(req, res) {
     }
 
     console.log("routeResults: ", routeResults);
+
+    let spotGroups = [];
+    spotGroups.push(spotGroupsDay);
+    spotGroups.push(spotGroupsOtherDays);
 
     res.json({ tripData, selectSpots, routeResults, spotGroups });
 
@@ -1228,7 +1260,7 @@ async function regenerateViaRoute(req, res) {
       } else {
         maxStayTime = 90;
       }
-      return { placeName: viaSpot.placeName, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
+      return { placeName: viaSpot.name, lat: viaSpot.lat, lon: viaSpot.lon, 'stay-time': maxStayTime };
     });
 
     params.via = JSON.stringify(viaArray);
