@@ -31,6 +31,7 @@ function viewSearchResult(results) {
   let currentPage = 1; // 現在のページ
 
   function displayItems(items) {
+    clearSearchResults();
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -90,8 +91,6 @@ function viewSearchResult(results) {
 
 // 既存の表示内容を消去する関数
 function clearSearchResults(){
-  const loading = document.querySelector('.js-loading');
-  loading.classList.remove('js-loaded');      
   const target = document.querySelector(".search-result");
   while (target.firstChild) {
     target.removeChild(target.firstChild);
