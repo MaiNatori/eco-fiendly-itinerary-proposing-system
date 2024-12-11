@@ -44,13 +44,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //8080番ポートでサーバー待ち
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
   console.log("サーバー起動中 #" + PORT, `http://localhost:${PORT}`);
 });
 
 // ejs表示
+app.get('/', (req, res) => res.redirect('/destination'));
 app.get('/destination', viewDestination);
 app.get('/destination-search', viewDestinationSearch);
 app.get('/spot', viewSpot);
