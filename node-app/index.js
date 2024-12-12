@@ -762,7 +762,7 @@ async function assignSpotsToClosestsDays(selectSpots, tripDays, selectHotels) {
   const maxTouristSpots = Math.ceil((touristSpots.length / tripDays.length) + maxMealSpots);  // Math.ceil: 切り上げ計算
   
   // 最小スポット数
-  const minTouristSpots = Math.floor(touristSpots.length / tripDays.length);
+  const minTouristSpots = Math.floor((touristSpots.length / tripDays.length) + minMealSpots);
   console.log(`maxTouristSpots: ${maxTouristSpots}, minTouristSpots: ${minTouristSpots}`);
   
   // それぞれの結果を統合
