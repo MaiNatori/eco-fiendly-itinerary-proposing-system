@@ -5,6 +5,7 @@ let selectSpots;  // 選択したスポット一覧
 let routeResults;  // 各日程のルート候補
 let spotGroups;  // dayNumber, arrival, departure, spots[]
 let selectedRoutes;  // 選ばれたルート
+let carVer;
 
 function fetchRoutes() {
     fetch("/interfaceroute")
@@ -55,6 +56,7 @@ function selectOptimalRoutes(routeResults){
         const routes = dayRoutes.route?.items;
         let minEmission = Infinity;
         let optimalRoute = null;
+        let carVer;
 
         routes.forEach((route) => {
             const emission = calculateRouteCarbonEmission(route);
@@ -68,7 +70,8 @@ function selectOptimalRoutes(routeResults){
             day: dayRoutes.day,
             start: dayRoutes.start,
             goal: dayRoutes.goal,
-            route: optimalRoute
+            route: optimalRoute,
+            min: minEmission,
         };
     });
 }
@@ -135,8 +138,8 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
         tabContent.style.display = dayIndex === 0 ? 'block' : 'none';
         tabContent.innerHTML = `
             <div id="map-${dayIndex}" class="route-map"></div>
-        `;
-
+        `;  
+        
         // 経由順
         const viaListId = `via-list-${dayIndex}`;
         const searchoption = document.createElement('div');
@@ -198,11 +201,22 @@ function generateTabs(selectedRoutes, selectSpots, spotGroups) {
             <input id="applyChanges" type="submit" method="post" name="application" value="変更を適用" onclick="applyAllChanges(${dayIndex})" class="button">
         `;
 
+        // 炭素排出量の表示
+        let carEmission = 0;
+        carEmission = 0.128 * ((selectedRoutes[dayIndex].route.summary.move.distance - selectedRoutes[dayIndex].route.summary.move.walk_distance) / 1000);
+
+        const carbonInfo = document.createElement('div');
+        carbonInfo.classList.add('carbon-info');
+        const h3Element = document.createElement("h4");
+        h3Element.textContent = `総炭素排出量: ${selectedRoutes[dayIndex].min}kg, 車の場合: ${carEmission}kg`;
+        carbonInfo.appendChild(h3Element);
+        
         routeTabContainer.appendChild(label);
         routeTabContainer.appendChild(tabContent);
         const tabContentUnique = document.getElementById(`tab-${dayIndex}`);
         tabContentUnique.appendChild(searchoption);
         tabContentUnique.appendChild(transportation);
+        tabContentUnique.appendChild(carbonInfo);
 
         const viaList = document.querySelector(`#via-list-${dayIndex}`);
         const viaSpots = spotGroups[dayIndex].spots;

@@ -27,6 +27,14 @@ h3 {
     margin-left: 10px;
 }
 
+h4 {
+    color: #575757;
+    font-size: 15px;
+    font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
 p {
     color: #575757;
     font-family: "Meiryo", "Hiragino Kaku Gothic Pro", sans-serif;
@@ -145,7 +153,7 @@ main {
 }
 
 .tab-contents {
-    height: 580px;
+    height: 590px;
 }
 
 .route-map {
@@ -241,6 +249,15 @@ main {
     position: absolute;
     left: 220px;
     bottom: 5px;
+}
+
+.sustainable h2 {
+    margin-top: 50px;
+    margin-bottom: 5px;
+}
+
+.sustainable p {
+    margin: 0;
 }
 
 /* フッター */
